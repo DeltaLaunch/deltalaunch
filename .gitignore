@@ -1,0 +1,9 @@
+build/*
+0100000000001000/*
+*.elf
+*.nro
+*.pfs0
+*.nso
+*.nacp
+*.nsp
+*.npdm
