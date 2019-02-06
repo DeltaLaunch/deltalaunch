@@ -1,5 +1,5 @@
 /*
-* Qlaunch
+* ΔLaunch
 * Copyright (C) 2018  Reisyukaku
 *
 * This program is free software: you can redistribute it and/or modify
@@ -32,32 +32,30 @@ void Canvas::Init() {
     SDL_SetRenderDrawColor(mRender._renderer, 255, 255, 255, 255);
     
     //Read config file
-    INIReader cfg("/Theme/theme.cfg");
     baseThemeDir = "/Theme/";
-    std::string font = cfg.Get("Config", "font", "UNK");
-    BackgroundPath = cfg.Get("Config", "background", "UNK");
+	INIReader cfg(baseThemeDir + "theme.cfg");
+    
+    //Setup bgs
+    bgLay0 = cfg.Get("Background", "layer0", "None");
+	bgLay1 = cfg.Get("Background", "layer1", "None");
+	bgLay2 = cfg.Get("Background", "layer2", "None");
     
     //Setup fonts
-    fntLarge = TTF_OpenFont((baseThemeDir + font).c_str(), 25);
-    fntMedium = TTF_OpenFont((baseThemeDir + font).c_str(), 20);
-    fntSmall = TTF_OpenFont((baseThemeDir + font).c_str(), 14);
-}
-
-void Canvas::SetTheme() {
-    SDL_Surface *bgs = IMG_Load((baseThemeDir + BackgroundPath).c_str());
-    if (bgs){
-        Uint32 colorkey = SDL_MapRGB(bgs->format, 0, 0, 0);
-        SDL_SetColorKey(bgs, SDL_TRUE, colorkey);
-    }
-    SDL_Texture *bgt = SDL_CreateTextureFromSurface(mRender._renderer, bgs);
-    SDL_Rect position;
-    position.x = 0;
-    position.y = 0;
-    position.w = bgs->w;
-    position.h = bgs->h;
-    SDL_RenderCopy(mRender._renderer, bgt, NULL, &position);
-    SDL_DestroyTexture(bgt);
-    SDL_FreeSurface(bgs);
+    std::string font = cfg.Get("Config", "font", "");
+    fntLarge = TTF_OpenFont((baseThemeDir + font).c_str(), cfg.GetInteger("Config", "bigFont", 25));
+    fntMedium = TTF_OpenFont((baseThemeDir + font).c_str(), cfg.GetInteger("Config", "medFont", 20));
+    fntSmall = TTF_OpenFont((baseThemeDir + font).c_str(), cfg.GetInteger("Config", "smallFont", 14));
+    
+    dash = Dashboard();
+    
+    //Create buttons to add to dash
+    //dash.AddButton(Button(200, 700, 50, 50, nullptr));
+    //dash.AddButton(Button(baseThemeDir + cfg.Get("NewsButton", "sprite", ""), cfg.GetInteger("NewsButton", "x", 200), cfg.GetInteger("NewsButton", "y", 700), nullptr));
+    //dash.AddButton(Button(baseThemeDir + cfg.Get("ShopButton", "sprite", ""), cfg.GetInteger("ShopButton", "x", 350), cfg.GetInteger("ShopButton", "y", 700), nullptr));
+    //dash.AddButton(Button(baseThemeDir + cfg.Get("AlbumButton", "sprite", ""), cfg.GetInteger("AlbumButton", "x", 500), cfg.GetInteger("AlbumButton", "y", 700), nullptr));
+    
+    //Get list of games to add to dash
+    //App::GetList();
 }
 
 void Canvas::Free() {
@@ -69,4 +67,25 @@ void Canvas::Free() {
     SDL_Quit();
     romfsExit();
     fsdevUnmountAll();
+}
+
+void Canvas::Render() {
+    SDL_RenderPresent(mRender._renderer);
+}
+
+void Canvas::Clear() {
+    SDL_RenderClear(mRender._renderer);
+}
+
+void Canvas::Update() {
+	Hid::Check();
+
+    // 1) Draw wallpaper
+    dash.DrawWallpaper(bgLay0, bgLay1, bgLay2, baseThemeDir, mRender);
+    
+    // 2) Draw overlay
+    dash.DrawButtons(mRender);
+    Draw::Texture("/Theme/Graphics/Icons/News.png", 1280, 720, mRender);
+    //Random debug text
+    Draw::Text(fntSmall, mRender, 0, 0, "DeltaLaunch alpha!");
 }

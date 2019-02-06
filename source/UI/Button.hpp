@@ -18,17 +18,28 @@
 
 #pragma once
 #include <SDL2/SDL.h>
-#include <SDL2/SDL2_gfxPrimitives.h> 
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_ttf.h>
-#include <switch.h>
+#include <functional>
 #include <string>
-#include "Renderer.hpp"
+#include <switch.h>
 
-class Draw
+class Button
 {
     public:
-        static void Rectangle(int x, int y, int w, int h, SDL_Color scolor, Renderer rend);
-        static void Text(TTF_Font *font, Renderer rend, int x, int y, std::string str);
-		static void Texture(std::string tex, uint8_t x, uint8_t y, Renderer rend);
+        Button(std::string name, uint32_t x, uint32_t y, std::function<void()> callback);
+        Button(uint32_t x, uint32_t y, uint32_t w, uint32_t h, std::function<void()> callback);
+		~Button();
+		void Run();
+        void SetText(std::string txt);
+        void SetColor(SDL_Color col);
+		
+		//vars
+        uint32_t X;
+		uint32_t Y;
+        uint32_t H;
+		uint32_t W;
+        std::string Sprite;
+	private:
+        std::string Text;
+        SDL_Color Color;
+		std::function<void()> Callback;
 };

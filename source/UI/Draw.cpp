@@ -1,5 +1,5 @@
 /*
-* Qlaunch
+* ΔLaunch
 * Copyright (C) 2018  Reisyukaku
 *
 * This program is free software: you can redistribute it and/or modify
@@ -18,17 +18,23 @@
 
 #include "Draw.hpp"
 
-void Draw::Rectangle(int x, int y, int w, int h, SDL_Color scolor, Render rend) {
-    SDL_Rect rect;
-    rect.x = x;
-    rect.y = y;
-    rect.w = w;
-    rect.h = h;
+void Draw::Rectangle(int x, int y, int w, int h, SDL_Color scolor, Renderer rend) {
+    SDL_Rect rect = {x, y, w, h};
     SDL_SetRenderDrawColor(rend._renderer, scolor.r, scolor.g, scolor.b, scolor.a);
     SDL_RenderFillRect(rend._renderer, &rect);
 }
 
-void Draw::Text(TTF_Font *font, Render rend, int x, int y, std::string str) {
+void Draw::Texture(std::string tex, uint8_t x, uint8_t y, Renderer rend) {
+	SDL_Surface *bgs = IMG_Load(tex.c_str());
+    SDL_Texture *bgt = SDL_CreateTextureFromSurface(rend._renderer, bgs);
+    SDL_Rect position = {x, y, bgs->w, bgs->h};
+    SDL_FreeSurface(bgs);
+    
+    SDL_RenderCopy(rend._renderer, bgt, NULL, &position);
+    SDL_DestroyTexture(bgt);
+}
+
+void Draw::Text(TTF_Font *font, Renderer rend, int x, int y, std::string str) {
     SDL_Color scolor = {0xFF, 0xFF, 0xFF, 0xFF};
     SDL_Surface *surface = TTF_RenderUTF8_Blended_Wrapped(font, str.c_str(), scolor, 1280);
 

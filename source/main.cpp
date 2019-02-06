@@ -1,5 +1,5 @@
 /*
-* Qlaunch
+* ΔLaunch
 * Copyright (C) 2018  Reisyukaku
 *
 * This program is free software: you can redistribute it and/or modify
@@ -19,16 +19,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include <switch.h>
 
-#include "UI/Render.hpp"
 #include "UI/Canvas.hpp"
-#include "Hid.hpp"
-#include "UI/Draw.hpp"
 
 u32 __nx_applet_type = AppletType_SystemApplet;
-
-Canvas canvas;
 
 #define INNER_HEAP_SIZE 0x1000000
 size_t nx_inner_heap_size = INNER_HEAP_SIZE;
@@ -75,6 +72,10 @@ void __attribute__((weak)) __appInit(void)
     if (R_FAILED(rc)) 
         fatalSimple(MAKERESULT(Module_Libnx, LibnxError_InitFail_FS));
     
+    rc = nsInitialize();
+	if (R_FAILED(rc)) 
+        fatalSimple(MAKERESULT(Module_Libnx, LibnxError_NotInitialized));
+    
     fsdevMountSdmc();
 }
 
@@ -83,6 +84,7 @@ void __attribute__((weak)) __appExit(void)
     // Cleanup default services.
     timeExit();
     hidExit();
+    nsExit();
     appletExit();
     nvExit();
     smExit();
@@ -91,25 +93,16 @@ void __attribute__((weak)) __appExit(void)
 }
 
 void qlaunchLoop() {
-    
+    Canvas canvas;
     canvas.Init();
-    
-    while (1)
+
+	//Render loop
+    while (true)
     {
-        Hid::Check();
-
-        //Draw::Rectangle(100, 100, 100, 100, {0xFF, 0, 0, 0xFF}, canvas.mRender);
-        SDL_RenderClear(canvas.mRender._renderer);
-        canvas.SetTheme();
-        Draw::Text(canvas.fntSmall, canvas.mRender, 0, 0, "Qlaunch test demo!");
-        
-        SDL_RenderPresent(canvas.mRender._renderer);
-        
-        /*AppletHolder h;
-        appletCreateLibraryApplet(&h, AppletId_shop, LibAppletMode_AllForeground);
-        appletHolderStart(&h);*/
+        canvas.Clear();
+        canvas.Update();
+        canvas.Render();
     }
-
     canvas.Free();
 }
 

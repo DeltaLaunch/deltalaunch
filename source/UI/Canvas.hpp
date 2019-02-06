@@ -1,5 +1,5 @@
 /*
-* Qlaunch
+* ΔLaunch
 * Copyright (C) 2018  Reisyukaku
 *
 * This program is free software: you can redistribute it and/or modify
@@ -21,22 +21,32 @@
 #include <SDL2/SDL2_gfxPrimitives.h> 
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
-#include <switch.h>
 #include <string>
-#include "Render.hpp"
+#include <algorithm>
+#include <switch.h>
+
+#include "Renderer.hpp"
+#include "Draw.hpp"
 #include "INI.hpp"
+#include "Dashboard.hpp"
+#include "Button.hpp"
+#include "../Hid.hpp"
+#include "../App.hpp"
 
 class Canvas
 {
     public:
         void Init();
         void Free();
-        void SetTheme();
-        Render mRender;
+        void Render();
+        void Clear();
+		void Update();
+        Renderer mRender;
+        Dashboard dash;
         TTF_Font *fntMedium;
         TTF_Font *fntLarge;
         TTF_Font *fntSmall;
     private:
         std::string baseThemeDir;
-        std::string BackgroundPath;
+        std::string bgLay0, bgLay1, bgLay2;
 };

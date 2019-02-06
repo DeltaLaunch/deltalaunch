@@ -17,18 +17,15 @@
 */
 
 #pragma once
-#include <SDL2/SDL.h>
-#include <SDL2/SDL2_gfxPrimitives.h> 
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_ttf.h>
-#include <switch.h>
 #include <string>
-#include "Renderer.hpp"
+#include <switch.h>
+#include "INI.hpp"
 
-class Draw
+class Menu
 {
     public:
-        static void Rectangle(int x, int y, int w, int h, SDL_Color scolor, Renderer rend);
-        static void Text(TTF_Font *font, Renderer rend, int x, int y, std::string str);
-		static void Texture(std::string tex, uint8_t x, uint8_t y, Renderer rend);
+        Menu(INIReader config, std::string menuCfg);
+		~Menu();
+	private:
+		std::string name;
 };

@@ -1,5 +1,5 @@
 /*
-* Qlaunch
+* ΔLaunch
 * Copyright (C) 2018  Reisyukaku
 *
 * This program is free software: you can redistribute it and/or modify

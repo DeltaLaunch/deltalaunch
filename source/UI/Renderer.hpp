@@ -17,18 +17,20 @@
 */
 
 #pragma once
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL2_gfxPrimitives.h> 
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
-#include <switch.h>
-#include <string>
-#include "Renderer.hpp"
 
-class Draw
-{
+class Renderer{
     public:
-        static void Rectangle(int x, int y, int w, int h, SDL_Color scolor, Renderer rend);
-        static void Text(TTF_Font *font, Renderer rend, int x, int y, std::string str);
-		static void Texture(std::string tex, uint8_t x, uint8_t y, Renderer rend);
+        SDL_Window *_window;
+        SDL_Renderer *_renderer;
+        SDL_Surface *_surface;
+		Renderer() {
+			_window = NULL;
+			_renderer = NULL;
+			_surface = NULL;
+		}
 };

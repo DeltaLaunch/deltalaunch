@@ -17,18 +17,20 @@
 */
 
 #pragma once
-#include <SDL2/SDL.h>
-#include <SDL2/SDL2_gfxPrimitives.h> 
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_ttf.h>
+#include <vector>
 #include <switch.h>
-#include <string>
+#include "Button.hpp"
+#include "Draw.hpp"
 #include "Renderer.hpp"
 
-class Draw
+class Dashboard
 {
     public:
-        static void Rectangle(int x, int y, int w, int h, SDL_Color scolor, Renderer rend);
-        static void Text(TTF_Font *font, Renderer rend, int x, int y, std::string str);
-		static void Texture(std::string tex, uint8_t x, uint8_t y, Renderer rend);
+        Dashboard();
+		~Dashboard();
+        void DrawWallpaper(std::string bgLay0, std::string bgLay1, std::string bgLay2, std::string dir, Renderer rend);
+        void DrawButtons(Renderer rend);
+        void AddButton(Button button);
+	private:
+		std::vector<Button> Buttons;
 };

@@ -16,19 +16,35 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-#include <SDL2/SDL.h>
-#include <SDL2/SDL2_gfxPrimitives.h> 
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_ttf.h>
-#include <switch.h>
-#include <string>
-#include "Renderer.hpp"
+#include "Button.hpp"
 
-class Draw
-{
-    public:
-        static void Rectangle(int x, int y, int w, int h, SDL_Color scolor, Renderer rend);
-        static void Text(TTF_Font *font, Renderer rend, int x, int y, std::string str);
-		static void Texture(std::string tex, uint8_t x, uint8_t y, Renderer rend);
-};
+Button::Button(std::string sprite, uint32_t x, uint32_t y, std::function<void()> callback) {
+	X = x;
+	Y = y;
+    Sprite = sprite;
+    Callback = callback;
+}
+
+Button::Button(uint32_t x, uint32_t y, uint32_t w, uint32_t h, std::function<void()> callback) {
+    X = x;
+	Y = y;
+    W = w;
+    H = h;
+	Callback = callback;
+}
+
+Button::~Button() {
+	//
+}
+
+void Button::SetText(std::string txt) {
+    Text = txt;
+}
+
+void Button::SetColor(SDL_Color col) {
+    Color = col;
+}
+
+void Button::Run() {
+	if(Callback != nullptr) Callback();
+}

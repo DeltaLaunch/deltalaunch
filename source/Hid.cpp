@@ -1,5 +1,5 @@
 /*
-* Qlaunch
+* ΔLaunch
 * Copyright (C) 2018  Reisyukaku
 *
 * This program is free software: you can redistribute it and/or modify
@@ -17,6 +17,7 @@
 */
 
 #include "Hid.hpp"
+#include "App.hpp"
 
 void Hid::Check() {
     hidScanInput();
@@ -27,5 +28,16 @@ void Hid::Check() {
         bpcInitialize();
         bpcShutdownSystem();
         bpcExit();
+    }
+    
+    if (kDown & KEY_MINUS) {
+        App::LaunchApplet(AppletId_shop, LibAppletMode_AllForeground);
+    }
+    
+    if ((kDown & KEY_DUP) || (kDown & KEY_LSTICK_UP)) {
+        
+    }
+    if ((kDown & KEY_DDOWN) || (kDown & KEY_LSTICK_DOWN)) {
+        
     }
 }

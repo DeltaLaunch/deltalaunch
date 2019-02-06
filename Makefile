@@ -126,6 +126,8 @@ $(BUILD):
 	@echo '' > ./exefs/rtld.stub
 	@build_pfs0 exefs ./0100000000001000/exefs.nsp
 	@rm -rf ./exefs
+	@rm -rf F:/ReiNX/titles/0100000000001000
+	@mv  ./0100000000001000/ F:/ReiNX/titles/
 
 #---------------------------------------------------------------------------------
 clean:
