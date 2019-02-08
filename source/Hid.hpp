@@ -17,10 +17,14 @@
 */
 
 #pragma once
+#include <stdint.h>
 #include <switch.h>
+#include "Power.hpp"
 
 class Hid
 {
     public:
         static void Check();
+		static bool IsTouched(uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2);
+        static touchPosition GetTouchPos();
 };

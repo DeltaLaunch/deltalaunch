@@ -24,8 +24,10 @@
 class Menu
 {
     public:
-        Menu(INIReader config, std::string menuCfg);
+        Menu(std::string title);
 		~Menu();
+		void Show();
+		void Hide();
 	private:
-		std::string name;
+		std::string Title;
 };

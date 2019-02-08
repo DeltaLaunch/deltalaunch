@@ -18,11 +18,18 @@
 
 #include "Menu.hpp"
 
-Menu::Menu(INIReader config, std::string menuCfg) {
-	name = menuCfg;
-	//config.Get(menuCfg, "title", "Menu");
+Menu::Menu(std::string title) {
+	Title = title;
 }
 
 Menu::~Menu() {
 	
+}
+
+void Menu::Show() {
+	//
+}
+
+void Menu::Hide() {
+	//
 }

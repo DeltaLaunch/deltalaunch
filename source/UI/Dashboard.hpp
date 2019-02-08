@@ -22,6 +22,7 @@
 #include "Button.hpp"
 #include "Draw.hpp"
 #include "Renderer.hpp"
+#include "../Hid.hpp"
 
 class Dashboard
 {
@@ -31,6 +32,7 @@ class Dashboard
         void DrawWallpaper(std::string bgLay0, std::string bgLay1, std::string bgLay2, std::string dir, Renderer rend);
         void DrawButtons(Renderer rend);
         void AddButton(Button button);
+		void Update();
 	private:
 		std::vector<Button> Buttons;
 };

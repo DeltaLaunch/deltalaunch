@@ -18,27 +18,29 @@
 
 #include "Canvas.hpp"
 
-void Canvas::Init() {
+Canvas::Canvas(uint32_t width, uint32_t height) {
+    //Read config file
+    baseThemeDir = "/Theme/";
+	INIReader cfg(baseThemeDir + "theme.cfg");
+    
     //Basic SDL init
-    romfsInit();
-    fsdevMountSdmc();
     SDL_Init(SDL_INIT_EVERYTHING);
-    SDL_CreateWindowAndRenderer(1280, 720, 0, &mRender._window, &mRender._renderer);
+    SDL_CreateWindowAndRenderer(width, height, 0, &mRender._window, &mRender._renderer);
     mRender._surface = SDL_GetWindowSurface(mRender._window);
     SDL_SetRenderDrawBlendMode(mRender._renderer, SDL_BLENDMODE_BLEND);
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "2");
     IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG);
     TTF_Init();
-    SDL_SetRenderDrawColor(mRender._renderer, 255, 255, 255, 255);
+    SDL_SetRenderDrawColor(mRender._renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+    Mix_Init(MIX_INIT_FLAC | MIX_INIT_MOD | MIX_INIT_MP3 | MIX_INIT_OGG);
+    Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 4096);
+    Mix_VolumeMusic(cfg.GetInteger("Background", "bgmVol", 64));
     
-    //Read config file
-    baseThemeDir = "/Theme/";
-	INIReader cfg(baseThemeDir + "theme.cfg");
-    
-    //Setup bgs
-    bgLay0 = cfg.Get("Background", "layer0", "None");
-	bgLay1 = cfg.Get("Background", "layer1", "None");
-	bgLay2 = cfg.Get("Background", "layer2", "None");
+    //Setup background
+    bgm = Mix_LoadMUS(cfg.Get("Background", "bgm", "").c_str());
+    bgLay0 = cfg.Get("Background", "layer0", "");
+	bgLay1 = cfg.Get("Background", "layer1", "");
+	bgLay2 = cfg.Get("Background", "layer2", "");
     
     //Setup fonts
     std::string font = cfg.Get("Config", "font", "");
@@ -49,24 +51,28 @@ void Canvas::Init() {
     dash = Dashboard();
     
     //Create buttons to add to dash
-    //dash.AddButton(Button(200, 700, 50, 50, nullptr));
-    //dash.AddButton(Button(baseThemeDir + cfg.Get("NewsButton", "sprite", ""), cfg.GetInteger("NewsButton", "x", 200), cfg.GetInteger("NewsButton", "y", 700), nullptr));
-    //dash.AddButton(Button(baseThemeDir + cfg.Get("ShopButton", "sprite", ""), cfg.GetInteger("ShopButton", "x", 350), cfg.GetInteger("ShopButton", "y", 700), nullptr));
-    //dash.AddButton(Button(baseThemeDir + cfg.Get("AlbumButton", "sprite", ""), cfg.GetInteger("AlbumButton", "x", 500), cfg.GetInteger("AlbumButton", "y", 700), nullptr));
+    dash.AddButton(Button(baseThemeDir + cfg.Get("NewsButton", "sprite", ""), cfg.GetInteger("NewsButton", "x", 250), cfg.GetInteger("NewsButton", "y", 600), nullptr));
+    dash.AddButton(Button(baseThemeDir + cfg.Get("ShopButton", "sprite", ""), cfg.GetInteger("ShopButton", "x", 400), cfg.GetInteger("ShopButton", "y", 600), nullptr));
+    dash.AddButton(Button(baseThemeDir + cfg.Get("AlbumButton", "sprite", ""), cfg.GetInteger("AlbumButton", "x", 550), cfg.GetInteger("AlbumButton", "y", 600), nullptr));
+    dash.AddButton(Button(baseThemeDir + cfg.Get("HomebrewButton", "sprite", ""), cfg.GetInteger("HomebrewButton", "x", 700), cfg.GetInteger("HomebrewButton", "y", 600), nullptr));
+    dash.AddButton(Button(baseThemeDir + cfg.Get("SettingsButton", "sprite", ""), cfg.GetInteger("SettingsButton", "x", 850), cfg.GetInteger("SettingsButton", "y", 600), nullptr));
+    dash.AddButton(Button(baseThemeDir + cfg.Get("PowerButton", "sprite", ""), cfg.GetInteger("PowerButton", "x", 1000), cfg.GetInteger("PowerButton", "y", 600), Power::Shutdown));
+	
+	Menus.push_back(Menu("Test"));
     
-    //Get list of games to add to dash
-    //App::GetList();
+    //Play BGM
+    if(bgm) Mix_PlayMusic(bgm, -1);
 }
 
-void Canvas::Free() {
+Canvas::~Canvas() {
     TTF_Quit();
     IMG_Quit();
+    Mix_CloseAudio();
+    Mix_Quit();
     SDL_DestroyRenderer(mRender._renderer);
     SDL_FreeSurface(mRender._surface);
     SDL_DestroyWindow(mRender._window);
     SDL_Quit();
-    romfsExit();
-    fsdevUnmountAll();
 }
 
 void Canvas::Render() {
@@ -79,13 +85,18 @@ void Canvas::Clear() {
 
 void Canvas::Update() {
 	Hid::Check();
-
+	dash.Update();
+	
     // 1) Draw wallpaper
     dash.DrawWallpaper(bgLay0, bgLay1, bgLay2, baseThemeDir, mRender);
     
     // 2) Draw overlay
     dash.DrawButtons(mRender);
-    Draw::Texture("/Theme/Graphics/Icons/News.png", 1280, 720, mRender);
+    
     //Random debug text
-    Draw::Text(fntSmall, mRender, 0, 0, "DeltaLaunch alpha!");
+	Debug dbg(fntSmall);
+	touchPosition touchPos;
+	hidTouchRead(&touchPos, 0);
+    dbg.Print(mRender, "DeltaLaunch alpha!");
+    dbg.Print(mRender, "Touch: X=" + std::to_string(touchPos.px) + "; y=" + std::to_string(touchPos.py));
 }

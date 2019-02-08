@@ -19,15 +19,15 @@
 #include "Hid.hpp"
 #include "App.hpp"
 
+#define tapped_inside(touchInfo, x1, y1, x2, y2) (touchInfo.firstTouch.px >= x1 && touchInfo.firstTouch.px <= x2 && touchInfo.firstTouch.py >= y1 && touchInfo.firstTouch.py <= y2)
+
 void Hid::Check() {
     hidScanInput();
         
     u64 kDown = hidKeysDown(CONTROLLER_P1_AUTO);
 
     if (kDown & KEY_PLUS) {
-        bpcInitialize();
-        bpcShutdownSystem();
-        bpcExit();
+        Power::Shutdown();
     }
     
     if (kDown & KEY_MINUS) {
@@ -40,4 +40,16 @@ void Hid::Check() {
     if ((kDown & KEY_DDOWN) || (kDown & KEY_LSTICK_DOWN)) {
         
     }
+}
+
+bool Hid::IsTouched(uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2){
+	touchPosition touchPos;
+	hidTouchRead(&touchPos, 0);
+	return (touchPos.px >= x1 && touchPos.px <= x2 && touchPos.py >= y1 && touchPos.py <= y2);
+}
+
+touchPosition Hid::GetTouchPos() {
+    touchPosition touchPos;
+	hidTouchRead(&touchPos, 0);
+    return touchPos;
 }

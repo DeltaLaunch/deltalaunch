@@ -76,6 +76,7 @@ void __attribute__((weak)) __appInit(void)
 	if (R_FAILED(rc)) 
         fatalSimple(MAKERESULT(Module_Libnx, LibnxError_NotInitialized));
     
+    romfsInit();
     fsdevMountSdmc();
 }
 
@@ -89,12 +90,12 @@ void __attribute__((weak)) __appExit(void)
     nvExit();
     smExit();
     fsExit();
+    romfsExit();
     fsdevUnmountAll();
 }
 
 void qlaunchLoop() {
-    Canvas canvas;
-    canvas.Init();
+    Canvas canvas(1280, 720);
 
 	//Render loop
     while (true)
@@ -103,7 +104,6 @@ void qlaunchLoop() {
         canvas.Update();
         canvas.Render();
     }
-    canvas.Free();
 }
 
 //Main loop

@@ -23,6 +23,14 @@ Button::Button(std::string sprite, uint32_t x, uint32_t y, std::function<void()>
 	Y = y;
     Sprite = sprite;
     Callback = callback;
+    SDL_Surface *img = IMG_Load(sprite.c_str());
+    if(img) {
+        W = img->w;
+        H = img->h;
+        SDL_FreeSurface(img);
+    }else{
+        Sprite = "";
+    }
 }
 
 Button::Button(uint32_t x, uint32_t y, uint32_t w, uint32_t h, std::function<void()> callback) {
