@@ -19,8 +19,8 @@
 #include "Button.hpp"
 
 Button::Button(std::string sprite, u32 x, u32 y, std::function<Result()> callback) {
-	X = x;
-	Y = y;
+    X = x;
+    Y = y;
     Sprite = sprite;
     Callback = callback;
     SDL_Surface *img = IMG_Load(sprite.c_str());
@@ -35,15 +35,15 @@ Button::Button(std::string sprite, u32 x, u32 y, std::function<Result()> callbac
 
 Button::Button(u32 x, u32 y, u32 w, u32 h, u32 col, std::function<Result()> callback) {
     X = x;
-	Y = y;
+    Y = y;
     W = w;
     H = h;
-	Callback = callback;
+    Callback = callback;
     Color = col;
 }
 
 Button::~Button() {
-	//
+    //
 }
 
 void Button::SetText(std::string txt) {
@@ -52,6 +52,6 @@ void Button::SetText(std::string txt) {
 
 Result Button::Run() {
     Result res = 0;
-	if(Callback != nullptr) res = Callback();
+    if(Callback != nullptr) res = Callback();
     return res;
 }

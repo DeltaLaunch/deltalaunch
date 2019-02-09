@@ -17,7 +17,6 @@
 */
 
 #include "Hid.hpp"
-#include "App.hpp"
 
 void Hid::Check() {
     hidScanInput();
@@ -41,13 +40,13 @@ void Hid::Check() {
 }
 
 bool Hid::IsTouched(u32 x1, u32 y1, u32 x2, u32 y2){
-	touchPosition touchPos;
-	hidTouchRead(&touchPos, 0);
-	return (touchPos.px >= x1 && touchPos.px <= x2 && touchPos.py >= y1 && touchPos.py <= y2);
+    touchPosition touchPos;
+    hidTouchRead(&touchPos, 0);
+    return (touchPos.px >= x1 && touchPos.px <= x2 && touchPos.py >= y1 && touchPos.py <= y2);
 }
 
 touchPosition Hid::GetTouchPos() {
     touchPosition touchPos;
-	hidTouchRead(&touchPos, 0);
+    hidTouchRead(&touchPos, 0);
     return touchPos;
 }

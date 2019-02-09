@@ -29,10 +29,10 @@ class Debug
         Debug(TTF_Font *font, bool debugMode);
         ~Debug();
         void Print(Renderer rend, std::string text);
-		void Clear();
+        void Clear();
         void Toggle();
-	private:
-		TTF_Font *Font;
-		unsigned X, Y;
+    private:
+        TTF_Font *Font;
+        unsigned X, Y;
         bool debugOn;
 };

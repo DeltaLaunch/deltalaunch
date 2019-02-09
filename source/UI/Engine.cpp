@@ -21,7 +21,7 @@
 Engine::Engine(uint32_t width, uint32_t height) {
     //Read config file
     baseThemeDir = "/Theme/";
-	INIReader cfg(baseThemeDir + "theme.cfg");
+    INIReader cfg(baseThemeDir + "theme.cfg");
     
     //Basic SDL init
     SDL_Init(SDL_INIT_EVERYTHING);
@@ -39,8 +39,8 @@ Engine::Engine(uint32_t width, uint32_t height) {
     //Setup background
     bgm = Mix_LoadMUS(cfg.Get("Background", "bgm", "").c_str());
     bgLay0 = cfg.Get("Background", "layer0", "");
-	bgLay1 = cfg.Get("Background", "layer1", "");
-	bgLay2 = cfg.Get("Background", "layer2", "");
+    bgLay1 = cfg.Get("Background", "layer1", "");
+    bgLay2 = cfg.Get("Background", "layer2", "");
     
     //Init dashboard
     debugInfo = true;
@@ -49,24 +49,24 @@ Engine::Engine(uint32_t width, uint32_t height) {
     dash->SetWallpaper(baseThemeDir + bgLay0, baseThemeDir + bgLay1, baseThemeDir + bgLay2);
     
     //Create buttons to add to dash
-	unsigned x = 230; 		//padding on edges
-	unsigned space = 100; 	//space inbetween
-	dash->AddButton(Button(baseThemeDir + cfg.Get("WebButton", "sprite", ""), cfg.GetInteger("WebButton", "x", x+=space), cfg.GetInteger("WebButton", "y", 600), std::bind(App::LaunchWebsite, "http://google.com/")));
+    unsigned x = 230;       //padding on edges
+    unsigned space = 100;   //space inbetween
+    dash->AddButton(Button(baseThemeDir + cfg.Get("WebButton", "sprite", ""), cfg.GetInteger("WebButton", "x", x+=space), cfg.GetInteger("WebButton", "y", 600), std::bind(App::LaunchWebsite, "http://google.com/")));
     dash->AddButton(Button(baseThemeDir + cfg.Get("NewsButton", "sprite", ""), cfg.GetInteger("NewsButton", "x", x+=space), cfg.GetInteger("NewsButton", "y", 600), nullptr));
     dash->AddButton(Button(baseThemeDir + cfg.Get("ShopButton", "sprite", ""), cfg.GetInteger("ShopButton", "x", x+=space), cfg.GetInteger("ShopButton", "y", 600), std::bind(App::LaunchApplet, AppletId_shop, LibAppletMode_AllForeground)));
     dash->AddButton(Button(baseThemeDir + cfg.Get("AlbumButton", "sprite", ""), cfg.GetInteger("AlbumButton", "x", x+=space), cfg.GetInteger("AlbumButton", "y", 600), std::bind(App::LaunchApplet, AppletId_photoViewer, LibAppletMode_AllForeground)));
     dash->AddButton(Button(baseThemeDir + cfg.Get("HomebrewButton", "sprite", ""), cfg.GetInteger("HomebrewButton", "x", x+=space), cfg.GetInteger("HomebrewButton", "y", 600), nullptr));
     dash->AddButton(Button(baseThemeDir + cfg.Get("SettingsButton", "sprite", ""), cfg.GetInteger("SettingsButton", "x", x+=space), cfg.GetInteger("SettingsButton", "y", 600), std::bind(App::LaunchApplet, AppletId_set, LibAppletMode_AllForeground)));
     dash->AddButton(Button(baseThemeDir + cfg.Get("PowerButton", "sprite", ""), cfg.GetInteger("PowerButton", "x", x+=space), cfg.GetInteger("PowerButton", "y", 600), Power::Shutdown));
-	
-	//Create game images
-	//App::GetList();
+    
+    //Create game images
+    //App::GetList();
     //Boundries: (120, 110), (x, 560) .. 450px vert
     int i, colums = 4, rows = 1;
     for(i = 0; i < colums*rows; i++)
         dash->AddButton(Button(100+(i*270), 110+(225-(rows*135))+((i%rows)*270), 256, 256, 0x70, nullptr));
-	
-	//Menus.push_back(Menu("Test"));
+    
+    //Menus.push_back(Menu("Test"));
     
     //Play BGM
     if(bgm) Mix_PlayMusic(bgm, -1);
@@ -93,9 +93,9 @@ void Engine::Clear() {
 }
 
 void Engine::Update() {
-	Hid::Check();
-	dash->Update();
-	
+    Hid::Check();
+    dash->Update();
+    
     // 1) Draw wallpaper
     dash->DrawWallpaper();
     

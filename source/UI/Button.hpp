@@ -28,18 +28,18 @@ class Button
     public:
         Button(std::string name, u32 x, u32 y, std::function<Result()> callback);
         Button(u32 x, u32 y, u32 w, u32 h, u32 col, std::function<Result()> callback);
-		~Button();
-		Result Run();
+        ~Button();
+        Result Run();
         void SetText(std::string txt);
-		
-		//vars
+        
+        //vars
         u32 X;
-		u32 Y;
+        u32 Y;
         u32 H;
-		u32 W;
+        u32 W;
         std::string Sprite;
         u32 Color;
-	private:
+    private:
         std::string Text;
-		std::function<Result()> Callback;
+        std::function<Result()> Callback;
 };

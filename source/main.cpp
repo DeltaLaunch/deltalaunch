@@ -73,7 +73,7 @@ void __attribute__((weak)) __appInit(void)
         fatalSimple(MAKERESULT(Module_Libnx, LibnxError_InitFail_FS));
     
     rc = nsInitialize();
-	if (R_FAILED(rc)) 
+    if (R_FAILED(rc)) 
         fatalSimple(MAKERESULT(Module_Libnx, LibnxError_NotInitialized));
     
     romfsInit();
@@ -97,7 +97,7 @@ void __attribute__((weak)) __appExit(void)
 void qlaunchLoop() {
     Engine eng(1280, 720);
 
-	//Render loop
+    //Render loop
     while (true)
     {
         eng.Clear();

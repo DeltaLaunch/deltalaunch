@@ -19,12 +19,13 @@
 #pragma once
 #include <stdint.h>
 #include <switch.h>
-#include "Power.hpp"
+#include "Services/Power.hpp"
+#include "Services/App.hpp"
 
 class Hid
 {
     public:
         static void Check();
-		static bool IsTouched(u32 x1, u32 y1, u32 x2, u32 y2);
+        static bool IsTouched(u32 x1, u32 y1, u32 x2, u32 y2);
         static touchPosition GetTouchPos();
 };

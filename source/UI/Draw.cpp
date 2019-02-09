@@ -20,46 +20,46 @@
 
 void Draw::Rectangle(int x, int y, int w, int h, u32 scolor, Renderer rend) {
     SDL_Rect pos;
-	pos.x = x;
-	pos.y = y;
-	pos.w = w;
-	pos.h = h;
-	
+    pos.x = x;
+    pos.y = y;
+    pos.w = w;
+    pos.h = h;
+    
     SDL_SetRenderDrawColor(rend._renderer, ((scolor >> 24) & 0xFF), ((scolor >> 16) & 0xFF), ((scolor >> 8) & 0xFF), (scolor & 0xFF));
     SDL_RenderFillRect(rend._renderer, &pos);
 }
 
 void Draw::Texture(std::string tex, u32 x, u32 y, Renderer rend) {
-	SDL_Surface *bgs = IMG_Load(tex.c_str()); //Maybe cache images in the future so not to constantly read SD?
+    SDL_Surface *bgs = IMG_Load(tex.c_str()); //Maybe cache images in the future so not to constantly read SD?
     if(!bgs) return;
     SDL_Texture *bgt = SDL_CreateTextureFromSurface(rend._renderer, bgs);
     SDL_Rect pos;
-	pos.x = x;
-	pos.y = y;
-	pos.w = bgs->w;
-	pos.h = bgs->h;
+    pos.x = x;
+    pos.y = y;
+    pos.w = bgs->w;
+    pos.h = bgs->h;
     SDL_RenderCopy(rend._renderer, bgt, NULL, &pos);
-	SDL_FreeSurface(bgs);
+    SDL_FreeSurface(bgs);
     SDL_DestroyTexture(bgt);
 }
 
 void Draw::Text(TTF_Font *font, Renderer rend, int x, int y, std::string str) {
     SDL_Color scolor;
-	scolor.r = scolor.g = scolor.b = scolor.a = 0xFF;
+    scolor.r = scolor.g = scolor.b = scolor.a = 0xFF;
     SDL_Surface *surface = TTF_RenderUTF8_Blended_Wrapped(font, str.c_str(), scolor, 1280);
-	if (!surface) return;
+    if (!surface) return;
 
-	SDL_SetSurfaceAlphaMod(surface, 0xFF);
-	SDL_Texture *texture = SDL_CreateTextureFromSurface(rend._renderer, surface);
+    SDL_SetSurfaceAlphaMod(surface, 0xFF);
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(rend._renderer, surface);
 
-	if (texture) {
-		SDL_Rect pos;
-		pos.x = x;
-		pos.y = y;
-		pos.w = surface->w;
-		pos.h = surface->h;
-		SDL_RenderCopy(rend._renderer, texture, NULL, &pos);
-		SDL_DestroyTexture(texture);
-	}
-	SDL_FreeSurface(surface);
+    if (texture) {
+        SDL_Rect pos;
+        pos.x = x;
+        pos.y = y;
+        pos.w = surface->w;
+        pos.h = surface->h;
+        SDL_RenderCopy(rend._renderer, texture, NULL, &pos);
+        SDL_DestroyTexture(texture);
+    }
+    SDL_FreeSurface(surface);
 }

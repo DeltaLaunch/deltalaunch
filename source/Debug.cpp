@@ -19,23 +19,23 @@
 #include "Debug.hpp"
 
 Debug::Debug(TTF_Font *font, bool debugMode) {
-	Font = font;
-	Y = 0;
-	X = 0;
+    Font = font;
+    Y = 0;
+    X = 0;
     debugOn = debugMode;
 }
 
 Debug::~Debug() {
-	//STUB
+    //STUB
 }
 
 void Debug::Print(Renderer rend, std::string text) {
     if(debugOn) Draw::Text(Font, rend, X, Y, text);
-	Y+=12;
+    Y+=12;
 }
 
 void Debug::Clear() {
-	Y = 0;
+    Y = 0;
 }
 
 void Debug::Toggle() {

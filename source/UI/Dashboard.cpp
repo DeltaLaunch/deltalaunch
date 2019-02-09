@@ -27,13 +27,13 @@ Dashboard::Dashboard(Renderer &rend, std::string fnt, u32 fntSize) {
 
 Dashboard::~Dashboard() {
     delete dbg;
-	Buttons.clear();
+    Buttons.clear();
 }
 
 void Dashboard::DrawWallpaper() {
     Draw::Texture(Lay0, 0, 0, Rend);
-	Draw::Texture(Lay1, 0, 0, Rend);
-	Draw::Texture(Lay2, 0, 0, Rend);
+    Draw::Texture(Lay1, 0, 0, Rend);
+    Draw::Texture(Lay2, 0, 0, Rend);
 }
 
 void Dashboard::DrawButtons() {
@@ -48,7 +48,7 @@ void Dashboard::DrawButtons() {
 void Dashboard::DrawDebugText() {
     //Debug text
     touchPosition touchPos;
-	hidTouchRead(&touchPos, 0);
+    hidTouchRead(&touchPos, 0);
     dbg->Print(Rend, "DeltaLaunch alpha!");
     dbg->Print(Rend, "Touch: X=" + std::to_string(touchPos.px) + "; y=" + std::to_string(touchPos.py));
     if(lastErr != 0) 
@@ -63,11 +63,11 @@ void Dashboard::SetWallpaper(std::string lay0, std::string lay1, std::string lay
 }
 
 void Dashboard::Update() {
-	//Listen for touch presses
-	for(auto &button: Buttons) {
+    //Listen for touch presses
+    for(auto &button: Buttons) {
         if(Hid::IsTouched(button.X, button.Y, button.X + button.W, button.Y + button.H)){
-			lastErr = button.Run();
-		}
+            lastErr = button.Run();
+        }
     }
 }
 

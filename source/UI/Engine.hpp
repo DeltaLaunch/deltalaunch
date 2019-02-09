@@ -33,8 +33,8 @@
 #include "Button.hpp"
 #include "Menu.hpp"
 #include "../Hid.hpp"
-#include "../App.hpp"
-#include "../Power.hpp"
+#include "../Services/App.hpp"
+#include "../Services/Power.hpp"
 
 class Engine
 {
@@ -43,13 +43,13 @@ class Engine
         ~Engine();
         void Render();
         void Clear();
-		void Update();
+        void Update();
         Renderer mRender;
         Dashboard *dash;
         Mix_Music *bgm;
     private:
         std::string baseThemeDir;
         std::string bgLay0, bgLay1, bgLay2;
-		std::vector<Menu> Menus;
-		bool debugInfo;
+        std::vector<Menu> Menus;
+        bool debugInfo;
 };

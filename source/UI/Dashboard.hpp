@@ -34,18 +34,18 @@ class Dashboard
 {
     public:
         Dashboard(Renderer &rend, std::string fnt, u32 fntSize);
-		~Dashboard();
+        ~Dashboard();
         void DrawWallpaper();
         void DrawButtons();
         void DrawDebugText();
         void AddButton(Button button);
-		void Update();
+        void Update();
         void SetWallpaper(std::string lay0, std::string lay1, std::string lay2);
-	private:
+    private:
         Renderer Rend;
         TTF_Font *smallFnt;
         Debug *dbg;
         Result lastErr;
         std::string Lay0, Lay1, Lay2;
-		std::vector<Button> Buttons;
+        std::vector<Button> Buttons;
 };
