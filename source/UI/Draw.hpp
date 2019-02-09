@@ -29,7 +29,7 @@
 class Draw
 {
     public:
-        static void Rectangle(int x, int y, int w, int h, uint32_t scolor, Renderer rend);
+        static void Rectangle(int x, int y, int w, int h, u32 scolor, Renderer rend);
         static void Text(TTF_Font *font, Renderer rend, int x, int y, std::string str);
-		static void Texture(std::string tex, uint32_t x, uint32_t y, Renderer rend);
+		static void Texture(std::string tex, u32 x, u32 y, Renderer rend);
 };

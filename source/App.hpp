@@ -17,13 +17,15 @@
 */
 
 #pragma once
+#include <string>
+#include <string.h>
 #include <switch.h>
 
 class App
 {
     public:
         static void GetList();
-		static void LaunchApplet(AppletId app, LibAppletMode mode);
-		static void LaunchApplication();
-		static void LaunchApplication(u64 tid);
+		static Result LaunchApplet(AppletId app, LibAppletMode mode);
+		static Result LaunchApplication(u64 tid);
+        static Result LaunchWebsite(std::string url);
 };

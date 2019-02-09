@@ -18,36 +18,53 @@
 
 #include "Dashboard.hpp"
 
-Dashboard::Dashboard() {
-    //
+Dashboard::Dashboard(Renderer &rend, TTF_Font *small, TTF_Font *med, TTF_Font *big) {
+    Rend = rend;
+    smallFnt = small;
+    medFnt = med;
+    bigFnt = big;
+    //Enable debug text by default
+    dbg = new Debug(small, true);
 }
 
 Dashboard::~Dashboard() {
+    delete dbg;
 	Buttons.clear();
 }
 
-void Dashboard::DrawWallpaper(std::string bgLay0, std::string bgLay1, std::string bgLay2, std::string dir, Renderer rend) {
-    if(bgLay0 != "") Draw::Texture(dir + bgLay0, 0, 0, rend);
-	if(bgLay1 != "") Draw::Texture(dir + bgLay1, 0, 0, rend);
-	if(bgLay2 != "") Draw::Texture(dir + bgLay2, 0, 0, rend);
+void Dashboard::DrawWallpaper(std::string bgLay0, std::string bgLay1, std::string bgLay2, std::string dir) {
+    if(bgLay0 != "") Draw::Texture(dir + bgLay0, 0, 0, Rend);
+	if(bgLay1 != "") Draw::Texture(dir + bgLay1, 0, 0, Rend);
+	if(bgLay2 != "") Draw::Texture(dir + bgLay2, 0, 0, Rend);
 }
 
 void Dashboard::Update() {
 	//Listen for touch presses
 	for(auto &button: Buttons) {
         if(Hid::IsTouched(button.X, button.Y, button.X + button.W, button.Y + button.H)){
-			button.Run();
+			lastErr = button.Run();
 		}
     }
 }
 
-void Dashboard::DrawButtons(Renderer rend) {
+void Dashboard::DrawButtons() {
     for(auto &button: Buttons) {
         if(button.Sprite != "")
-            Draw::Texture(button.Sprite, button.X, button.Y, rend);
+            Draw::Texture(button.Sprite, button.X, button.Y, Rend);
         else
-            Draw::Rectangle(button.X, button.Y, button.W, button.H, 0xFFFFFFFF, rend);
+            Draw::Rectangle(button.X, button.Y, button.W, button.H, button.Color, Rend);
     }
+}
+
+void Dashboard::DrawDebugText() {
+    //Debug text
+    touchPosition touchPos;
+	hidTouchRead(&touchPos, 0);
+    dbg->Print(Rend, "DeltaLaunch alpha!");
+    dbg->Print(Rend, "Touch: X=" + std::to_string(touchPos.px) + "; y=" + std::to_string(touchPos.py));
+    if(lastErr != 0) 
+        dbg->Print(Rend, "Errors: " + std::to_string(lastErr));
+    dbg->Clear();
 }
 
 void Dashboard::AddButton(Button button) {

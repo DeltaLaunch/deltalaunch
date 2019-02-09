@@ -18,7 +18,7 @@
 
 #include "Draw.hpp"
 
-void Draw::Rectangle(int x, int y, int w, int h, uint32_t scolor, Renderer rend) {
+void Draw::Rectangle(int x, int y, int w, int h, u32 scolor, Renderer rend) {
     SDL_Rect pos;
 	pos.x = x;
 	pos.y = y;
@@ -29,7 +29,7 @@ void Draw::Rectangle(int x, int y, int w, int h, uint32_t scolor, Renderer rend)
     SDL_RenderFillRect(rend._renderer, &pos);
 }
 
-void Draw::Texture(std::string tex, uint32_t x, uint32_t y, Renderer rend) {
+void Draw::Texture(std::string tex, u32 x, u32 y, Renderer rend) {
 	SDL_Surface *bgs = IMG_Load(tex.c_str());
     if(!bgs) return;
     SDL_Texture *bgt = SDL_CreateTextureFromSurface(rend._renderer, bgs);

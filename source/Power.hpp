@@ -22,5 +22,5 @@
 class Power
 {
     public:
-        static void Shutdown();
+        static Result Shutdown();
 };

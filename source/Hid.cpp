@@ -19,8 +19,6 @@
 #include "Hid.hpp"
 #include "App.hpp"
 
-#define tapped_inside(touchInfo, x1, y1, x2, y2) (touchInfo.firstTouch.px >= x1 && touchInfo.firstTouch.px <= x2 && touchInfo.firstTouch.py >= y1 && touchInfo.firstTouch.py <= y2)
-
 void Hid::Check() {
     hidScanInput();
         
@@ -42,7 +40,7 @@ void Hid::Check() {
     }
 }
 
-bool Hid::IsTouched(uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2){
+bool Hid::IsTouched(u32 x1, u32 y1, u32 x2, u32 y2){
 	touchPosition touchPos;
 	hidTouchRead(&touchPos, 0);
 	return (touchPos.px >= x1 && touchPos.px <= x2 && touchPos.py >= y1 && touchPos.py <= y2);

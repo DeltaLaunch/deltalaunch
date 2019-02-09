@@ -18,7 +18,7 @@
 
 #include "Power.hpp"
 
-void Power::Shutdown() {
+Result Power::Shutdown() {
     bpcInitialize();
     bpcShutdownSystem();
     bpcExit();

@@ -35,7 +35,6 @@
 #include "../Hid.hpp"
 #include "../App.hpp"
 #include "../Power.hpp"
-#include "../Debug.hpp"
 
 class Canvas
 {
@@ -46,8 +45,7 @@ class Canvas
         void Clear();
 		void Update();
         Renderer mRender;
-        Dashboard dash;
-        Debug *dbg;
+        Dashboard *dash;
         TTF_Font *fntMedium;
         TTF_Font *fntLarge;
         TTF_Font *fntSmall;
@@ -56,4 +54,5 @@ class Canvas
         std::string baseThemeDir;
         std::string bgLay0, bgLay1, bgLay2;
 		std::vector<Menu> Menus;
+		bool debugInfo;
 };

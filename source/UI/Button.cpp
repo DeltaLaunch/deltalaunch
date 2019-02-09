@@ -18,7 +18,7 @@
 
 #include "Button.hpp"
 
-Button::Button(std::string sprite, uint32_t x, uint32_t y, std::function<void()> callback) {
+Button::Button(std::string sprite, u32 x, u32 y, std::function<Result()> callback) {
 	X = x;
 	Y = y;
     Sprite = sprite;
@@ -33,12 +33,13 @@ Button::Button(std::string sprite, uint32_t x, uint32_t y, std::function<void()>
     }
 }
 
-Button::Button(uint32_t x, uint32_t y, uint32_t w, uint32_t h, std::function<void()> callback) {
+Button::Button(u32 x, u32 y, u32 w, u32 h, u32 col, std::function<Result()> callback) {
     X = x;
 	Y = y;
     W = w;
     H = h;
 	Callback = callback;
+    Color = col;
 }
 
 Button::~Button() {
@@ -49,10 +50,8 @@ void Button::SetText(std::string txt) {
     Text = txt;
 }
 
-void Button::SetColor(SDL_Color col) {
-    Color = col;
-}
-
-void Button::Run() {
-	if(Callback != nullptr) Callback();
+Result Button::Run() {
+    Result res = 0;
+	if(Callback != nullptr) res = Callback();
+    return res;
 }

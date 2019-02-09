@@ -25,6 +25,6 @@ class Hid
 {
     public:
         static void Check();
-		static bool IsTouched(uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2);
+		static bool IsTouched(u32 x1, u32 y1, u32 x2, u32 y2);
         static touchPosition GetTouchPos();
 };

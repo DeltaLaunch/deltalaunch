@@ -109,11 +109,10 @@ void qlaunchLoop() {
 //Main loop
 int main(int argc, char* argv[])
 {    
-    //appletUnlockForeground();
-    //appletRequestForeground();
+    appletUnlockForeground();
+    appletRequestForeground();
     
     //appletSetHandlesRequestToDisplay(true);
-    // Retrieve the default window
     
     qlaunchLoop();
     

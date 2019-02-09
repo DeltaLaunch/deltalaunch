@@ -26,21 +26,20 @@
 class Button
 {
     public:
-        Button(std::string name, uint32_t x, uint32_t y, std::function<void()> callback);
-        Button(uint32_t x, uint32_t y, uint32_t w, uint32_t h, std::function<void()> callback);
+        Button(std::string name, u32 x, u32 y, std::function<Result()> callback);
+        Button(u32 x, u32 y, u32 w, u32 h, u32 col, std::function<Result()> callback);
 		~Button();
-		void Run();
+		Result Run();
         void SetText(std::string txt);
-        void SetColor(SDL_Color col);
 		
 		//vars
-        uint32_t X;
-		uint32_t Y;
-        uint32_t H;
-		uint32_t W;
+        u32 X;
+		u32 Y;
+        u32 H;
+		u32 W;
         std::string Sprite;
+        u32 Color;
 	private:
         std::string Text;
-        SDL_Color Color;
-		std::function<void()> Callback;
+		std::function<Result()> Callback;
 };

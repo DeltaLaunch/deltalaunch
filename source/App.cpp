@@ -24,15 +24,57 @@ void App::GetList() {
     nsListApplicationRecord(records, 0x100, 0, &entries);
 }
 
-void App::LaunchApplet(AppletId app, LibAppletMode mode) {
+Result App::LaunchApplet(AppletId app, LibAppletMode mode) {
 	AppletHolder h;
 	appletCreateLibraryApplet(&h, app, mode);
 	appletHolderStart(&h);
 }
 
-void App::LaunchApplication(u64 tid) {
-	/*Service srv;
-	appCreateApplication(&srv, tid);
-	appRequestForApplicationToGetForeground(&srv);
-	appStart(&srv);*/
+Result App::LaunchApplication(u64 tid) {
+	AppletHolder holder;
+	//appCreateApplication(&holder, tid);
+    //appRequestForApplicationToGetForeground(&holder);
+    appletHolderJoin(&holder);
+}
+
+Result App::LaunchWebsite(std::string url) {
+    AppletHolder aHold;
+    AppletStorage aStore;
+    LibAppletArgs aArgs;
+    nsvmInitialize();
+    Result rc = appletCreateLibraryApplet(&aHold, AppletId_web, LibAppletMode_AllForeground);
+    if(R_FAILED(rc)) {
+        //showError("Error launching browser", "Error initializing applet", rc);
+    }
+    libappletArgsCreate(&aArgs, 0x50000);
+    libappletArgsPush(&aArgs, &aHold);
+    rc = appletCreateStorage(&aStore, 8192);
+    if(R_FAILED(rc)) {
+        //showError("Error launching browser", "Error initializing arg storage", rc);
+    }
+
+    u8 indata[8192] = {0};
+    *(u64*)&indata[4] = 281530811285509;
+    *(u64*)&indata[17] = 201326593;
+    *(u8*)&indata[16] = 1;
+    *(u16*)indata = 2;
+    strcpy((char*)&indata[25], url.c_str());
+
+    rc = appletStorageWrite(&aStore, 0, indata, 8192);
+    if(R_FAILED(rc)) {
+        //showError("Error launching browser", "Error writing arg storage", rc);
+    }
+    appletHolderPushInData(&aHold, &aStore);
+    rc = appletHolderStart(&aHold);
+    if(R_FAILED(rc)) {
+        //showError("Error launching browser", "Lookup errorcode for more info", rc);
+    }
+    appletHolderJoin(&aHold);
+    LibAppletExitReason e = appletHolderGetExitReason(&aHold);
+    if(e != LibAppletExitReason_Normal) {
+        //showError("Browser Error", "Lookup errorcode for more info", rc);
+    }
+    appletHolderClose(&aHold);
+    appletStorageClose(&aStore);
+    nsvmExit();
 }

@@ -17,22 +17,35 @@
 */
 
 #pragma once
+#include <SDL2/SDL.h>
+#include <SDL2/SDL2_gfxPrimitives.h> 
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_mixer.h>
+#include <SDL2/SDL_ttf.h>
 #include <vector>
 #include <switch.h>
 #include "Button.hpp"
 #include "Draw.hpp"
 #include "Renderer.hpp"
 #include "../Hid.hpp"
+#include "../Debug.hpp"
 
 class Dashboard
 {
     public:
-        Dashboard();
+        Dashboard(Renderer &rend, TTF_Font *small, TTF_Font *med, TTF_Font *big);
 		~Dashboard();
-        void DrawWallpaper(std::string bgLay0, std::string bgLay1, std::string bgLay2, std::string dir, Renderer rend);
-        void DrawButtons(Renderer rend);
+        void DrawWallpaper(std::string bgLay0, std::string bgLay1, std::string bgLay2, std::string dir);
+        void DrawButtons();
+        void DrawDebugText();
         void AddButton(Button button);
 		void Update();
 	private:
+        Renderer Rend;
+        TTF_Font *smallFnt;
+        TTF_Font *medFnt;
+        TTF_Font *bigFnt;
+        Debug *dbg;
+        Result lastErr;
 		std::vector<Button> Buttons;
 };
