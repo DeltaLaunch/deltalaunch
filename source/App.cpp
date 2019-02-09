@@ -32,9 +32,9 @@ Result App::LaunchApplet(AppletId app, LibAppletMode mode) {
 
 Result App::LaunchApplication(u64 tid) {
 	AppletHolder holder;
-	//appCreateApplication(&holder, tid);
+	appCreate(&holder, tid);
     //appRequestForApplicationToGetForeground(&holder);
-    appletHolderJoin(&holder);
+    appletHolderStart(&holder);
 }
 
 Result App::LaunchWebsite(std::string url) {

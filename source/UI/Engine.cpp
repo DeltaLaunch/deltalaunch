@@ -16,9 +16,9 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "Canvas.hpp"
+#include "Engine.hpp"
 
-Canvas::Canvas(uint32_t width, uint32_t height) {
+Engine::Engine(uint32_t width, uint32_t height) {
     //Read config file
     baseThemeDir = "/Theme/";
 	INIReader cfg(baseThemeDir + "theme.cfg");
@@ -42,15 +42,11 @@ Canvas::Canvas(uint32_t width, uint32_t height) {
 	bgLay1 = cfg.Get("Background", "layer1", "");
 	bgLay2 = cfg.Get("Background", "layer2", "");
     
-    //Setup fonts
-    std::string font = cfg.Get("Config", "font", "");
-    fntLarge = TTF_OpenFont((baseThemeDir + font).c_str(), cfg.GetInteger("Config", "bigFont", 25));
-    fntMedium = TTF_OpenFont((baseThemeDir + font).c_str(), cfg.GetInteger("Config", "medFont", 20));
-    fntSmall = TTF_OpenFont((baseThemeDir + font).c_str(), cfg.GetInteger("Config", "smallFont", 14));
-    
     //Init dashboard
     debugInfo = true;
-    dash = new Dashboard(mRender, fntSmall, fntMedium, fntLarge);
+    std::string font = cfg.Get("Config", "font", "");
+    dash = new Dashboard(mRender, baseThemeDir + font, cfg.GetInteger("Config", "smallFont", 14));
+    dash->SetWallpaper(baseThemeDir + bgLay0, baseThemeDir + bgLay1, baseThemeDir + bgLay2);
     
     //Create buttons to add to dash
 	unsigned x = 230; 		//padding on edges
@@ -76,7 +72,7 @@ Canvas::Canvas(uint32_t width, uint32_t height) {
     if(bgm) Mix_PlayMusic(bgm, -1);
 }
 
-Canvas::~Canvas() {
+Engine::~Engine() {
     delete dash;
     TTF_Quit();
     IMG_Quit();
@@ -88,20 +84,20 @@ Canvas::~Canvas() {
     SDL_Quit();
 }
 
-void Canvas::Render() {
+void Engine::Render() {
     SDL_RenderPresent(mRender._renderer);
 }
 
-void Canvas::Clear() {
+void Engine::Clear() {
     SDL_RenderClear(mRender._renderer);
 }
 
-void Canvas::Update() {
+void Engine::Update() {
 	Hid::Check();
 	dash->Update();
 	
     // 1) Draw wallpaper
-    dash->DrawWallpaper(bgLay0, bgLay1, bgLay2, baseThemeDir);
+    dash->DrawWallpaper();
     
     // 2) Draw overlay
     dash->DrawButtons();

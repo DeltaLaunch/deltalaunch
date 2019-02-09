@@ -30,7 +30,7 @@ void Draw::Rectangle(int x, int y, int w, int h, u32 scolor, Renderer rend) {
 }
 
 void Draw::Texture(std::string tex, u32 x, u32 y, Renderer rend) {
-	SDL_Surface *bgs = IMG_Load(tex.c_str());
+	SDL_Surface *bgs = IMG_Load(tex.c_str()); //Maybe cache images in the future so not to constantly read SD?
     if(!bgs) return;
     SDL_Texture *bgt = SDL_CreateTextureFromSurface(rend._renderer, bgs);
     SDL_Rect pos;
@@ -47,7 +47,6 @@ void Draw::Text(TTF_Font *font, Renderer rend, int x, int y, std::string str) {
     SDL_Color scolor;
 	scolor.r = scolor.g = scolor.b = scolor.a = 0xFF;
     SDL_Surface *surface = TTF_RenderUTF8_Blended_Wrapped(font, str.c_str(), scolor, 1280);
-
 	if (!surface) return;
 
 	SDL_SetSurfaceAlphaMod(surface, 0xFF);

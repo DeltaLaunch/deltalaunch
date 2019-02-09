@@ -23,11 +23,11 @@
 #include <stdint.h>
 #include <switch.h>
 
-#include "UI/Canvas.hpp"
+#include "UI/Engine.hpp"
 
 u32 __nx_applet_type = AppletType_SystemApplet;
 
-#define INNER_HEAP_SIZE 0x1000000
+#define INNER_HEAP_SIZE 0x10000000
 size_t nx_inner_heap_size = INNER_HEAP_SIZE;
 char   nx_inner_heap[INNER_HEAP_SIZE];
 
@@ -95,23 +95,22 @@ void __attribute__((weak)) __appExit(void)
 }
 
 void qlaunchLoop() {
-    Canvas canvas(1280, 720);
+    Engine eng(1280, 720);
 
 	//Render loop
     while (true)
     {
-        canvas.Clear();
-        canvas.Update();
-        canvas.Render();
+        eng.Clear();
+        eng.Update();
+        eng.Render();
     }
 }
 
 //Main loop
 int main(int argc, char* argv[])
 {    
-    appletUnlockForeground();
-    appletRequestForeground();
-    
+    //appletUnlockForeground();
+    //appletRequestForeground();
     //appletSetHandlesRequestToDisplay(true);
     
     qlaunchLoop();

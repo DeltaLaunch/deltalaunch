@@ -18,13 +18,11 @@
 
 #include "Dashboard.hpp"
 
-Dashboard::Dashboard(Renderer &rend, TTF_Font *small, TTF_Font *med, TTF_Font *big) {
+Dashboard::Dashboard(Renderer &rend, std::string fnt, u32 fntSize) {
     Rend = rend;
-    smallFnt = small;
-    medFnt = med;
-    bigFnt = big;
+    smallFnt = TTF_OpenFont(fnt.c_str(), fntSize);
     //Enable debug text by default
-    dbg = new Debug(small, true);
+    dbg = new Debug(smallFnt, true);
 }
 
 Dashboard::~Dashboard() {
@@ -32,19 +30,10 @@ Dashboard::~Dashboard() {
 	Buttons.clear();
 }
 
-void Dashboard::DrawWallpaper(std::string bgLay0, std::string bgLay1, std::string bgLay2, std::string dir) {
-    if(bgLay0 != "") Draw::Texture(dir + bgLay0, 0, 0, Rend);
-	if(bgLay1 != "") Draw::Texture(dir + bgLay1, 0, 0, Rend);
-	if(bgLay2 != "") Draw::Texture(dir + bgLay2, 0, 0, Rend);
-}
-
-void Dashboard::Update() {
-	//Listen for touch presses
-	for(auto &button: Buttons) {
-        if(Hid::IsTouched(button.X, button.Y, button.X + button.W, button.Y + button.H)){
-			lastErr = button.Run();
-		}
-    }
+void Dashboard::DrawWallpaper() {
+    Draw::Texture(Lay0, 0, 0, Rend);
+	Draw::Texture(Lay1, 0, 0, Rend);
+	Draw::Texture(Lay2, 0, 0, Rend);
 }
 
 void Dashboard::DrawButtons() {
@@ -65,6 +54,21 @@ void Dashboard::DrawDebugText() {
     if(lastErr != 0) 
         dbg->Print(Rend, "Errors: " + std::to_string(lastErr));
     dbg->Clear();
+}
+
+void Dashboard::SetWallpaper(std::string lay0, std::string lay1, std::string lay2) {
+    Lay0 = lay0;
+    Lay1 = lay1;
+    Lay2 = lay2;
+}
+
+void Dashboard::Update() {
+	//Listen for touch presses
+	for(auto &button: Buttons) {
+        if(Hid::IsTouched(button.X, button.Y, button.X + button.W, button.Y + button.H)){
+			lastErr = button.Run();
+		}
+    }
 }
 
 void Dashboard::AddButton(Button button) {

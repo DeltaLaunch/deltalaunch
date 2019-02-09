@@ -36,19 +36,16 @@
 #include "../App.hpp"
 #include "../Power.hpp"
 
-class Canvas
+class Engine
 {
     public:
-        Canvas(uint32_t width, uint32_t height);
-        ~Canvas();
+        Engine(uint32_t width, uint32_t height);
+        ~Engine();
         void Render();
         void Clear();
 		void Update();
         Renderer mRender;
         Dashboard *dash;
-        TTF_Font *fntMedium;
-        TTF_Font *fntLarge;
-        TTF_Font *fntSmall;
         Mix_Music *bgm;
     private:
         std::string baseThemeDir;
