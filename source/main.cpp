@@ -27,9 +27,12 @@
 
 u32 __nx_applet_type = AppletType_SystemApplet;
 
-#define INNER_HEAP_SIZE 0x10000000
+#define INNER_HEAP_SIZE 0x8000000
 size_t nx_inner_heap_size = INNER_HEAP_SIZE;
 char   nx_inner_heap[INNER_HEAP_SIZE];
+
+static void*  heapAddr;
+static size_t heapSize = 0x10000000;
 
 void __libnx_initheap(void)
 {
@@ -94,6 +97,15 @@ void __attribute__((weak)) __appExit(void)
     fsdevUnmountAll();
 }
 
+void HeapInit() {
+    void* addr = NULL;
+    Result rc = svcSetHeapSize(&addr, heapSize);
+    if (R_FAILED(rc) || addr==NULL) 
+        fatalSimple(0xDEAD);
+    heapAddr = addr;
+}
+
+
 void qlaunchLoop() {
     Engine eng(1280, 720);
 
@@ -109,9 +121,14 @@ void qlaunchLoop() {
 //Main loop
 int main(int argc, char* argv[])
 {    
-    //appletUnlockForeground();
-    //appletRequestForeground();
-    //appletSetHandlesRequestToDisplay(true);
+    HeapInit();
+    
+    AppletHolder h;
+    appletGetPopFromGeneralChannelEvent(&h);
+    appletHolderWaitInteractiveOut(&h);
+    appletRequestForeground();
+    
+    appletSetHandlesRequestToDisplay(true);
     
     qlaunchLoop();
     

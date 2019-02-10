@@ -27,16 +27,18 @@ void App::GetList() {
 Result App::LaunchApplet(AppletId app, LibAppletMode mode) {
 	AppletHolder h;
 	appletCreateLibraryApplet(&h, app, mode);
-	appletHolderStart(&h);
+	return appletHolderStart(&h);
 }
 
-Result App::LaunchApplication(u64 tid) {
+Result App::LaunchSystemApplication(u64 tid) {
 	AppletHolder holder;
-	appCreate(&holder, tid);
-    //appRequestForApplicationToGetForeground(&holder);
-    appletHolderStart(&holder);
+	appCreate(&holder, tid, true, Create_SystemApp);
+    appRequestForApplicationToGetForeground(&holder);
+    return appletHolderStart(&holder);
 }
 
 Result App::LaunchWebsite(std::string url) {
-    //
+    WebWifiConfig config;
+    webWifiCreate(&config, url.c_str());
+    return webWifiShow(&config);
 }

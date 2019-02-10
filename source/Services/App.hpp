@@ -26,6 +26,6 @@ class App
     public:
         static void GetList();
 		static Result LaunchApplet(AppletId app, LibAppletMode mode);
-		static Result LaunchApplication(u64 tid);
+		static Result LaunchSystemApplication(u64 tid);
         static Result LaunchWebsite(std::string url);
 };

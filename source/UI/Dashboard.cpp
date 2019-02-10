@@ -22,6 +22,7 @@ Dashboard::Dashboard(Renderer &rend, std::string fnt, u32 fntSize) {
     Rend = rend;
     smallFnt = TTF_OpenFont(fnt.c_str(), fntSize);
     //Enable debug text by default
+    lastErr = 0;
     dbg = new Debug(smallFnt, true);
 }
 

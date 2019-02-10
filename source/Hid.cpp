@@ -24,11 +24,7 @@ void Hid::Check() {
     u64 kDown = hidKeysDown(CONTROLLER_P1_AUTO);
 
     if (kDown & KEY_PLUS) {
-        Power::Shutdown();
-    }
-    
-    if (kDown & KEY_MINUS) {
-        App::LaunchApplet(AppletId_shop, LibAppletMode_AllForeground);
+        //App::LaunchSystemApplication(0x100000000001012);
     }
     
     if ((kDown & KEY_DUP) || (kDown & KEY_LSTICK_UP)) {
