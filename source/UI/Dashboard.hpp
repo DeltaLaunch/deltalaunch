@@ -46,6 +46,6 @@ class Dashboard
         TTF_Font *smallFnt;
         Debug *dbg;
         Result lastErr;
-        std::string Lay0, Lay1, Lay2;
+        SDL_Texture *Wallpaper;
         std::vector<Button> Buttons;
 };

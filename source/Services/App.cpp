@@ -42,3 +42,8 @@ Result App::LaunchWebsite(std::string url) {
     webWifiCreate(&config, url.c_str());
     return webWifiShow(&config);
 }
+
+Result App::LaunchHbl() {
+    //TODO
+    return 0;
+}

@@ -107,7 +107,7 @@ void HeapInit() {
 
 
 void qlaunchLoop() {
-    Engine eng(1280, 720);
+    Engine eng(1280, 720, heapAddr, heapSize);
 
     //Render loop
     while (true)

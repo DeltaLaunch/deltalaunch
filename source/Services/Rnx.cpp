@@ -16,18 +16,12 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-#include <string>
-#include <string.h>
-#include <stdlib.h>
-#include <switch.h>
+#include "Rnx.hpp"
 
-class App
-{
-    public:
-        static void GetList();
-		static Result LaunchApplet(AppletId app, LibAppletMode mode);
-		static Result LaunchSystemApplication(u64 tid);
-        static Result LaunchWebsite(std::string url);
-        static Result LaunchHbl();
-};
+bool Rnx::IsUsingReiNX() {
+    Handle srvHand;
+    if(R_FAILED(smRegisterService(&srvHand, "rnx", false, 1))) return false;
+    smUnregisterService("rnx");
+    
+    return true;
+}

@@ -35,11 +35,12 @@
 #include "../Hid.hpp"
 #include "../Services/App.hpp"
 #include "../Services/Power.hpp"
+#include "../Services/Rnx.hpp"
 
 class Engine
 {
     public:
-        Engine(uint32_t width, uint32_t height);
+        Engine(u32 width, u32 height, void *heapAddr, size_t heapSize);
         ~Engine();
         void Render();
         void Clear();
@@ -52,4 +53,6 @@ class Engine
         std::string bgLay0, bgLay1, bgLay2;
         std::vector<Menu> Menus;
         bool debugInfo;
+        void *HeapAddr;
+        size_t HeapSize;
 };

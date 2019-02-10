@@ -16,18 +16,10 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-#include <string>
-#include <string.h>
-#include <stdlib.h>
-#include <switch.h>
+#include "Settings.hpp"
 
-class App
-{
-    public:
-        static void GetList();
-		static Result LaunchApplet(AppletId app, LibAppletMode mode);
-		static Result LaunchSystemApplication(u64 tid);
-        static Result LaunchWebsite(std::string url);
-        static Result LaunchHbl();
-};
+std::string Settings::GetFirmwareVersion() {
+    std::string str;
+    //TODO
+    return str;
+}

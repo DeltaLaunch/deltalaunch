@@ -20,21 +20,23 @@
 
 Dashboard::Dashboard(Renderer &rend, std::string fnt, u32 fntSize) {
     Rend = rend;
-    smallFnt = TTF_OpenFont(fnt.c_str(), fntSize);
-    //Enable debug text by default
     lastErr = 0;
+    smallFnt = TTF_OpenFont(fnt.c_str(), fntSize);
+    Wallpaper = SDL_CreateTexture(Rend._renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 1280, 720);
     dbg = new Debug(smallFnt, true);
 }
 
 Dashboard::~Dashboard() {
     delete dbg;
     Buttons.clear();
+    SDL_DestroyTexture(Wallpaper);
 }
 
 void Dashboard::DrawWallpaper() {
-    Draw::Texture(Lay0, 0, 0, Rend);
-    Draw::Texture(Lay1, 0, 0, Rend);
-    Draw::Texture(Lay2, 0, 0, Rend);
+    SDL_Rect pos;
+    pos.x = 0; pos.y = 0;
+    pos.w = 1280; pos.h = 720;
+    SDL_RenderCopy(Rend._renderer, Wallpaper, NULL, &pos);
 }
 
 void Dashboard::DrawButtons() {
@@ -58,9 +60,21 @@ void Dashboard::DrawDebugText() {
 }
 
 void Dashboard::SetWallpaper(std::string lay0, std::string lay1, std::string lay2) {
-    Lay0 = lay0;
-    Lay1 = lay1;
-    Lay2 = lay2;
+    SDL_Surface *l0 = IMG_Load(lay0.c_str());
+    SDL_Surface *l1 = IMG_Load(lay1.c_str());
+    SDL_Surface *l2 = IMG_Load(lay2.c_str());
+    SDL_Surface *wall = SDL_CreateRGBSurface(0,l0->w,l0->h,32,0,0,0,0);
+    SDL_Rect pos;
+    pos.x = 0; pos.y = 0;
+    pos.w = l0->w; pos.h = l0->h;
+    SDL_BlitSurface(l0, &pos, wall, NULL);
+    SDL_BlitSurface(l1, &pos, wall, NULL);
+    SDL_BlitSurface(l2, &pos, wall, NULL);
+    Wallpaper = SDL_CreateTextureFromSurface(Rend._renderer, wall);
+    SDL_FreeSurface(l0);
+    SDL_FreeSurface(l1);
+    SDL_FreeSurface(l2);
+    SDL_FreeSurface(wall);
 }
 
 void Dashboard::Update() {

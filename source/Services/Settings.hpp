@@ -18,16 +18,10 @@
 
 #pragma once
 #include <string>
-#include <string.h>
-#include <stdlib.h>
 #include <switch.h>
 
-class App
+class Settings
 {
     public:
-        static void GetList();
-		static Result LaunchApplet(AppletId app, LibAppletMode mode);
-		static Result LaunchSystemApplication(u64 tid);
-        static Result LaunchWebsite(std::string url);
-        static Result LaunchHbl();
+        static std::string GetFirmwareVersion();
 };

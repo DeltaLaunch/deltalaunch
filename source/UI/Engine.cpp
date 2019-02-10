@@ -18,10 +18,12 @@
 
 #include "Engine.hpp"
 
-Engine::Engine(uint32_t width, uint32_t height) {
+Engine::Engine(u32 width, u32 height, void *heapAddr, size_t heapSize) {
     //Read config file
     baseThemeDir = "/Theme/";
     INIReader cfg(baseThemeDir + "theme.cfg");
+    HeapAddr = heapAddr;
+    HeapSize = heapSize;
     
     //Basic SDL init
     SDL_Init(SDL_INIT_EVERYTHING);
@@ -35,6 +37,11 @@ Engine::Engine(uint32_t width, uint32_t height) {
     Mix_Init(MIX_INIT_FLAC | MIX_INIT_MOD | MIX_INIT_MP3 | MIX_INIT_OGG);
     Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 4096);
     Mix_VolumeMusic(cfg.GetInteger("Background", "bgmVol", 64));
+    
+    //Detect reinx
+    if(!Rnx::IsUsingReiNX()) {
+        fatalSimple(0xDEADBABE);
+    }
     
     //Setup background
     bgm = Mix_LoadMUS(cfg.Get("Background", "bgm", "").c_str());
@@ -55,7 +62,7 @@ Engine::Engine(uint32_t width, uint32_t height) {
     dash->AddButton(Button(baseThemeDir + cfg.Get("NewsButton", "sprite", ""), cfg.GetInteger("NewsButton", "x", x+=space), cfg.GetInteger("NewsButton", "y", 600), nullptr));
     dash->AddButton(Button(baseThemeDir + cfg.Get("ShopButton", "sprite", ""), cfg.GetInteger("ShopButton", "x", x+=space), cfg.GetInteger("ShopButton", "y", 600), std::bind(App::LaunchApplet, AppletId_shop, LibAppletMode_AllForeground)));
     dash->AddButton(Button(baseThemeDir + cfg.Get("AlbumButton", "sprite", ""), cfg.GetInteger("AlbumButton", "x", x+=space), cfg.GetInteger("AlbumButton", "y", 600), std::bind(App::LaunchApplet, AppletId_photoViewer, LibAppletMode_AllForeground)));
-    dash->AddButton(Button(baseThemeDir + cfg.Get("HomebrewButton", "sprite", ""), cfg.GetInteger("HomebrewButton", "x", x+=space), cfg.GetInteger("HomebrewButton", "y", 600), std::bind(App::LaunchApplet, AppletId_photoViewer, LibAppletMode_AllForeground)));
+    dash->AddButton(Button(baseThemeDir + cfg.Get("HomebrewButton", "sprite", ""), cfg.GetInteger("HomebrewButton", "x", x+=space), cfg.GetInteger("HomebrewButton", "y", 600), App::LaunchHbl));
     dash->AddButton(Button(baseThemeDir + cfg.Get("SettingsButton", "sprite", ""), cfg.GetInteger("SettingsButton", "x", x+=space), cfg.GetInteger("SettingsButton", "y", 600), std::bind(App::LaunchApplet, AppletId_set, LibAppletMode_AllForeground)));
     dash->AddButton(Button(baseThemeDir + cfg.Get("PowerButton", "sprite", ""), cfg.GetInteger("PowerButton", "x", x+=space), cfg.GetInteger("PowerButton", "y", 600), Power::Shutdown));
     
