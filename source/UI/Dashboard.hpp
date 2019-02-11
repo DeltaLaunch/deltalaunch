@@ -29,6 +29,7 @@
 #include "Renderer.hpp"
 #include "../Hid.hpp"
 #include "../Debug.hpp"
+#include "../Services/Settings.hpp"
 
 class Dashboard
 {
@@ -39,7 +40,6 @@ class Dashboard
         void DrawButtons();
         void DrawDebugText();
         void AddButton(Button button);
-        void Update();
         void SetWallpaper(std::string lay0, std::string lay1, std::string lay2);
     private:
         Renderer Rend;

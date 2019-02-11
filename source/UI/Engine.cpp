@@ -19,6 +19,11 @@
 #include "Engine.hpp"
 
 Engine::Engine(u32 width, u32 height, void *heapAddr, size_t heapSize) {
+    //Detect reinx
+    if(!Rnx::IsUsingReiNX()) {
+        fatalSimple(0xDEADBABE);
+    }
+    
     //Read config file
     baseThemeDir = "/Theme/";
     INIReader cfg(baseThemeDir + "theme.cfg");
@@ -37,11 +42,6 @@ Engine::Engine(u32 width, u32 height, void *heapAddr, size_t heapSize) {
     Mix_Init(MIX_INIT_FLAC | MIX_INIT_MOD | MIX_INIT_MP3 | MIX_INIT_OGG);
     Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 4096);
     Mix_VolumeMusic(cfg.GetInteger("Background", "bgmVol", 64));
-    
-    //Detect reinx
-    if(!Rnx::IsUsingReiNX()) {
-        fatalSimple(0xDEADBABE);
-    }
     
     //Setup background
     bgm = Mix_LoadMUS(cfg.Get("Background", "bgm", "").c_str());
@@ -73,8 +73,6 @@ Engine::Engine(u32 width, u32 height, void *heapAddr, size_t heapSize) {
     for(i = 0; i < colums*rows; i++)
         dash->AddButton(Button(100+(i*270), 110+(225-(rows*135))+((i%rows)*270), 256, 256, 0x70, nullptr));
     
-    //Menus.push_back(Menu("Test"));
-    
     //Play BGM
     if(bgm) Mix_PlayMusic(bgm, -1);
 }
@@ -101,7 +99,6 @@ void Engine::Clear() {
 
 void Engine::Update() {
     Hid::Check();
-    dash->Update();
     
     // 1) Draw wallpaper
     dash->DrawWallpaper();

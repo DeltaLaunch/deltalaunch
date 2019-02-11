@@ -16,13 +16,15 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "Settings.hpp"
+#pragma once
+#include <switch.h>
 
-std::string Settings::GetFirmwareVersion() {
-    SetSysFirmwareVersion firm;
-    setsysInitialize();
-    setsysGetFirmwareVersion(&firm);
-    setsysExit();
-    std::string str = std::string(firm.display_version);
-    return str + " ReiNX";
-}
+class Apm
+{
+    public:
+        static float GetCpuClock();
+        static float GetGpuClock();
+        static float GetMemClock();
+    private:
+        static u32 GetProfile();
+};

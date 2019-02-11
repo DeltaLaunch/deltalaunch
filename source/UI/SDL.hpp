@@ -16,13 +16,20 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "Settings.hpp"
+#pragma once
+#include <SDL2/SDL.h>
+#include <SDL2/SDL2_gfxPrimitives.h> 
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
+#include <switch.h>
+#include <stdint.h>
+#include <string>
+#include "Renderer.hpp"
 
-std::string Settings::GetFirmwareVersion() {
-    SetSysFirmwareVersion firm;
-    setsysInitialize();
-    setsysGetFirmwareVersion(&firm);
-    setsysExit();
-    std::string str = std::string(firm.display_version);
-    return str + " ReiNX";
-}
+class SDL
+{
+    public:
+        static void Rectangle(int x, int y, int w, int h, u32 scolor, Renderer rend);
+        static void Text(TTF_Font *font, Renderer rend, int x, int y, std::string str);
+        static void Texture(std::string tex, u32 x, u32 y, Renderer rend);
+};

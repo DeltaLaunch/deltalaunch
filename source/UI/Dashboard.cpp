@@ -45,6 +45,9 @@ void Dashboard::DrawButtons() {
             Draw::Texture(button.Sprite, button.X, button.Y, Rend);
         else
             Draw::Rectangle(button.X, button.Y, button.W, button.H, button.Color, Rend);
+        
+        if(Hid::IsTouched(button.X, button.Y, button.X + button.W, button.Y + button.H))
+            lastErr = button.Run();
     }
 }
 
@@ -53,6 +56,7 @@ void Dashboard::DrawDebugText() {
     touchPosition touchPos;
     hidTouchRead(&touchPos, 0);
     dbg->Print(Rend, "DeltaLaunch alpha!");
+    dbg->Print(Rend, "Firmware: " + Settings::GetFirmwareVersion());
     dbg->Print(Rend, "Touch: X=" + std::to_string(touchPos.px) + "; y=" + std::to_string(touchPos.py));
     if(lastErr != 0) 
         dbg->Print(Rend, "Errors: " + std::to_string(lastErr));
@@ -75,15 +79,6 @@ void Dashboard::SetWallpaper(std::string lay0, std::string lay1, std::string lay
     SDL_FreeSurface(l1);
     SDL_FreeSurface(l2);
     SDL_FreeSurface(wall);
-}
-
-void Dashboard::Update() {
-    //Listen for touch presses
-    for(auto &button: Buttons) {
-        if(Hid::IsTouched(button.X, button.Y, button.X + button.W, button.Y + button.H)){
-            lastErr = button.Run();
-        }
-    }
 }
 
 void Dashboard::AddButton(Button button) {
