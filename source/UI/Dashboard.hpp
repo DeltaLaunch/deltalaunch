@@ -27,9 +27,11 @@
 #include "Button.hpp"
 #include "Draw.hpp"
 #include "Renderer.hpp"
+#include "Menu.hpp"
 #include "../Hid.hpp"
 #include "../Debug.hpp"
 #include "../Services/Settings.hpp"
+#include "../Services/Apm.hpp"
 
 class Dashboard
 {
@@ -38,9 +40,14 @@ class Dashboard
         ~Dashboard();
         void DrawWallpaper();
         void DrawButtons();
+        void DrawMenus();
         void DrawDebugText();
         void AddButton(Button button);
         void SetWallpaper(std::string lay0, std::string lay1, std::string lay2);
+        Result OpenMenu(std::string name);
+        Result CloseMenus();
+        void AddMenu(Menu menu);
+        bool IsMenuOpen;
     private:
         Renderer Rend;
         TTF_Font *smallFnt;
@@ -48,4 +55,5 @@ class Dashboard
         Result lastErr;
         SDL_Texture *Wallpaper;
         std::vector<Button> Buttons;
+		std::vector<Menu> Menus;
 };

@@ -18,23 +18,6 @@
 
 #include "Hid.hpp"
 
-void Hid::Check() {
-    hidScanInput();
-        
-    u64 kDown = hidKeysDown(CONTROLLER_P1_AUTO);
-
-    if (kDown & KEY_PLUS) {
-        //App::LaunchSystemApplication(0x100000000001012);
-    }
-    
-    if ((kDown & KEY_DUP) || (kDown & KEY_LSTICK_UP)) {
-        
-    }
-    if ((kDown & KEY_DDOWN) || (kDown & KEY_LSTICK_DOWN)) {
-        
-    }
-}
-
 bool Hid::IsTouched(u32 x1, u32 y1, u32 x2, u32 y2){
     touchPosition touchPos;
     hidTouchRead(&touchPos, 0);

@@ -32,8 +32,8 @@ Result App::LaunchApplet(AppletId app, LibAppletMode mode) {
 
 Result App::LaunchSystemApplication(u64 tid) {
 	AppletHolder holder;
-	appCreate(&holder, tid, true, Create_SystemApp);
-    appRequestForApplicationToGetForeground(&holder);
+	//appCreate(&holder, tid, true, Create_SystemApp);
+    //appRequestForApplicationToGetForeground(&holder);
     return appletHolderStart(&holder);
 }
 

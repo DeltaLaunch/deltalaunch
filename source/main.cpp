@@ -27,27 +27,18 @@
 
 u32 __nx_applet_type = AppletType_SystemApplet;
 
-#define INNER_HEAP_SIZE 0x8000000
-size_t nx_inner_heap_size = INNER_HEAP_SIZE;
-char   nx_inner_heap[INNER_HEAP_SIZE];
-
 static void*  heapAddr;
 static size_t heapSize = 0x10000000;
 
-void __libnx_initheap(void)
-{
-    void*  addr = nx_inner_heap;
-    size_t size = nx_inner_heap_size;
-
-    extern char* fake_heap_start;
-    extern char* fake_heap_end;
-
-    fake_heap_start = (char*)addr;
-    fake_heap_end   = (char*)addr + size;
+void HeapInit() {
+    void* addr = NULL;
+    Result rc = svcSetHeapSize(&addr, heapSize);
+    if (R_FAILED(rc) || addr==NULL) 
+        fatalSimple(0xDEAD);
+    heapAddr = addr;
 }
 
-void __attribute__((weak)) __appInit(void)
-{
+void __attribute__((weak)) __appInit(void) {
     Result rc;
     
     // Initialize default services.
@@ -83,9 +74,7 @@ void __attribute__((weak)) __appInit(void)
     fsdevMountSdmc();
 }
 
-void __attribute__((weak)) __appExit(void)
-{
-    // Cleanup default services.
+void __attribute__((weak)) __appExit(void) {
     timeExit();
     hidExit();
     nsExit();
@@ -97,30 +86,8 @@ void __attribute__((weak)) __appExit(void)
     fsdevUnmountAll();
 }
 
-void HeapInit() {
-    void* addr = NULL;
-    Result rc = svcSetHeapSize(&addr, heapSize);
-    if (R_FAILED(rc) || addr==NULL) 
-        fatalSimple(0xDEAD);
-    heapAddr = addr;
-}
-
-
-void qlaunchLoop() {
-    Engine eng(1280, 720, heapAddr, heapSize);
-
-    //Render loop
-    while (true)
-    {
-        eng.Clear();
-        eng.Update();
-        eng.Render();
-    }
-}
-
 //Main loop
-int main(int argc, char* argv[])
-{    
+int main(int argc, char* argv[]) {
     HeapInit();
     
     AppletHolder h;
@@ -130,7 +97,13 @@ int main(int argc, char* argv[])
     
     appletSetHandlesRequestToDisplay(true);
     
-    qlaunchLoop();
+    //Qlaunch loop
+    Engine eng(1280, 720, heapAddr, heapSize);
+    while (true) {
+        eng.Clear();
+        eng.Update();
+        eng.Render();
+    }
     
     return 0;
 }

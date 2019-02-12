@@ -18,18 +18,27 @@
 
 #include "Menu.hpp"
 
-Menu::Menu(std::string title) {
+Menu::Menu(std::string title, std::string text, u32 x, u32 y, u32 w, u32 h, u32 col) {
 	Title = title;
+	Text = text;
+	Visible = false;
+	Pos.x = x; Pos.y = y;
+	Pos.w = w; Pos.h = h;
+	Color = col;
 }
 
 Menu::~Menu() {
 	
 }
 
+void Menu::AddButton(Button button) {
+	Buttons.push_back(button);
+}
+
 void Menu::Show() {
-	//
+	Visible = true;
 }
 
 void Menu::Hide() {
-	//
+	Visible = false;
 }

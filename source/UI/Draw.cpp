@@ -25,6 +25,10 @@ void Draw::Rectangle(int x, int y, int w, int h, u32 scolor, Renderer rend) {
     pos.w = w;
     pos.h = h;
     
+    Rectangle(pos, scolor, rend);
+}
+
+void Draw::Rectangle(SDL_Rect pos, u32 scolor, Renderer rend) {
     SDL_SetRenderDrawColor(rend._renderer, ((scolor >> 24) & 0xFF), ((scolor >> 16) & 0xFF), ((scolor >> 8) & 0xFF), (scolor & 0xFF));
     SDL_RenderFillRect(rend._renderer, &pos);
 }

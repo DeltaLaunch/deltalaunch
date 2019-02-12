@@ -45,13 +45,13 @@ class Engine
         void Render();
         void Clear();
         void Update();
+		
         Renderer mRender;
         Dashboard *dash;
         Mix_Music *bgm;
-    private:
+    private:        
         std::string baseThemeDir;
         std::string bgLay0, bgLay1, bgLay2;
-        std::vector<Menu> Menus;
         bool debugInfo;
         void *HeapAddr;
         size_t HeapSize;

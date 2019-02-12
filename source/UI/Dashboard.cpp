@@ -21,6 +21,7 @@
 Dashboard::Dashboard(Renderer &rend, std::string fnt, u32 fntSize) {
     Rend = rend;
     lastErr = 0;
+    IsMenuOpen = false;
     smallFnt = TTF_OpenFont(fnt.c_str(), fntSize);
     Wallpaper = SDL_CreateTexture(Rend._renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 1280, 720);
     dbg = new Debug(smallFnt, true);
@@ -46,8 +47,16 @@ void Dashboard::DrawButtons() {
         else
             Draw::Rectangle(button.X, button.Y, button.W, button.H, button.Color, Rend);
         
-        if(Hid::IsTouched(button.X, button.Y, button.X + button.W, button.Y + button.H))
+        if(Hid::IsTouched(button.X, button.Y, button.X + button.W, button.Y + button.H) && !IsMenuOpen)
             lastErr = button.Run();
+    }
+}
+
+void Dashboard::DrawMenus() {
+    for(auto &menu: Menus) {
+        if(menu.IsOpen()) {
+            Draw::Rectangle(menu.Pos, menu.Color, Rend);
+        }
     }
 }
 
@@ -81,6 +90,30 @@ void Dashboard::SetWallpaper(std::string lay0, std::string lay1, std::string lay
     SDL_FreeSurface(wall);
 }
 
+Result Dashboard::OpenMenu(std::string name) {
+	for(auto &menu: Menus) {
+        if(menu.GetTitle() == name) {
+			IsMenuOpen = true;;
+			menu.Show();
+		}
+    }
+    return 0;
+}
+
+Result Dashboard::CloseMenus() {
+	for(auto &menu: Menus) {
+        if(menu.IsOpen()) {
+            IsMenuOpen = false;
+			menu.Hide();
+		}
+    }
+    return 0;
+}
+
 void Dashboard::AddButton(Button button) {
     Buttons.push_back(button);
+}
+
+void Dashboard::AddMenu(Menu menu) {
+    Menus.push_back(menu);
 }

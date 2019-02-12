@@ -63,8 +63,10 @@ Engine::Engine(u32 width, u32 height, void *heapAddr, size_t heapSize) {
     dash->AddButton(Button(baseThemeDir + cfg.Get("ShopButton", "sprite", ""), cfg.GetInteger("ShopButton", "x", x+=space), cfg.GetInteger("ShopButton", "y", 600), std::bind(App::LaunchApplet, AppletId_shop, LibAppletMode_AllForeground)));
     dash->AddButton(Button(baseThemeDir + cfg.Get("AlbumButton", "sprite", ""), cfg.GetInteger("AlbumButton", "x", x+=space), cfg.GetInteger("AlbumButton", "y", 600), std::bind(App::LaunchApplet, AppletId_photoViewer, LibAppletMode_AllForeground)));
     dash->AddButton(Button(baseThemeDir + cfg.Get("HomebrewButton", "sprite", ""), cfg.GetInteger("HomebrewButton", "x", x+=space), cfg.GetInteger("HomebrewButton", "y", 600), App::LaunchHbl));
-    dash->AddButton(Button(baseThemeDir + cfg.Get("SettingsButton", "sprite", ""), cfg.GetInteger("SettingsButton", "x", x+=space), cfg.GetInteger("SettingsButton", "y", 600), std::bind(App::LaunchApplet, AppletId_set, LibAppletMode_AllForeground)));
+    dash->AddButton(Button(baseThemeDir + cfg.Get("SettingsButton", "sprite", ""), cfg.GetInteger("SettingsButton", "x", x+=space), cfg.GetInteger("SettingsButton", "y", 600), std::bind(&Dashboard::OpenMenu, dash, "Settings")));
     dash->AddButton(Button(baseThemeDir + cfg.Get("PowerButton", "sprite", ""), cfg.GetInteger("PowerButton", "x", x+=space), cfg.GetInteger("PowerButton", "y", 600), Power::Shutdown));
+	
+	dash->AddMenu(Menu("Settings", "", 0, 0, width, height, 0x55555555));
     
     //Create game images
     //App::GetList();
@@ -98,13 +100,33 @@ void Engine::Clear() {
 }
 
 void Engine::Update() {
-    Hid::Check();
+    hidScanInput();
+    u64 kDown = hidKeysDown(CONTROLLER_P1_AUTO);
+
+	if(kDown & KEY_B) {
+		if(dash->IsMenuOpen) {
+			dash->CloseMenus();
+            dash->IsMenuOpen = false;
+		}
+	}
+    if (kDown & KEY_PLUS) {
+        //App::LaunchSystemApplication(0x100000000001012);
+    }
+    if ((kDown & KEY_DUP) || (kDown & KEY_LSTICK_UP)) {
+        
+    }
+    if ((kDown & KEY_DDOWN) || (kDown & KEY_LSTICK_DOWN)) {
+        
+    }
     
     // 1) Draw wallpaper
     dash->DrawWallpaper();
     
     // 2) Draw overlay
     dash->DrawButtons();
+    
+    // 3) Draw menus
+    dash->DrawMenus();
     
     // 3) Draw debug text
     if(debugInfo)
