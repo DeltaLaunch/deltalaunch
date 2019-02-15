@@ -26,16 +26,15 @@
 #include <algorithm>
 #include <switch.h>
 
-#include "Renderer.hpp"
-#include "Draw.hpp"
-#include "INI.hpp"
-#include "Dashboard.hpp"
-#include "Button.hpp"
-#include "Menu.hpp"
-#include "../Hid.hpp"
-#include "../Services/App.hpp"
-#include "../Services/Power.hpp"
-#include "../Services/Rnx.hpp"
+#include "UI/Renderer.hpp"
+#include "UI/Draw.hpp"
+#include "UI/INI.hpp"
+#include "UI/Dashboard.hpp"
+#include "UI/Button.hpp"
+#include "UI/Menu.hpp"
+#include "Hid.hpp"
+#include "Services/App.hpp"
+#include "Services/Power.hpp"
 
 class Engine
 {
@@ -45,14 +44,15 @@ class Engine
         void Render();
         void Clear();
         void Update();
+        void GetInputs();
 		
         Renderer mRender;
         Dashboard *dash;
         Mix_Music *bgm;
-    private:        
+    private:
+        bool screenLocked;
         std::string baseThemeDir;
-        std::string bgLay0, bgLay1, bgLay2;
-        bool debugInfo;
+        u32 Width, Height;
         void *HeapAddr;
         size_t HeapSize;
 };

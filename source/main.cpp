@@ -23,7 +23,7 @@
 #include <stdint.h>
 #include <switch.h>
 
-#include "UI/Engine.hpp"
+#include "Engine.hpp"
 
 u32 __nx_applet_type = AppletType_SystemApplet;
 
@@ -90,12 +90,12 @@ void __attribute__((weak)) __appExit(void) {
 int main(int argc, char* argv[]) {
     HeapInit();
     
-    AppletHolder h;
+    /*AppletHolder h;
     appletGetPopFromGeneralChannelEvent(&h);
     appletHolderWaitInteractiveOut(&h);
     appletRequestForeground();
     
-    appletSetHandlesRequestToDisplay(true);
+    appletSetHandlesRequestToDisplay(true);*/
     
     //Qlaunch loop
     Engine eng(1280, 720, heapAddr, heapSize);

@@ -17,22 +17,12 @@
 */
 
 #pragma once
-#include <SDL2/SDL_ttf.h>
 #include <string>
 #include <switch.h>
-#include "UI/Draw.hpp"
-#include "UI/Renderer.hpp"
 
-class Debug
+class Account
 {
     public:
-        Debug(TTF_Font *font, bool debugMode);
-        ~Debug();
-        void Print(Renderer rend, std::string text);
-        void Clear();
-        void Toggle();
-    private:
-        TTF_Font *Font;
-        unsigned X, Y;
-        bool debugOn;
+        static s32 GetUserCount();
+		static u128 *GetListOfAccounts();
 };

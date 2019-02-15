@@ -24,4 +24,5 @@ class Settings
 {
     public:
         static std::string GetFirmwareVersion();
+		static std::string GetSerialNumber();
 };

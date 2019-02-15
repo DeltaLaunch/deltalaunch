@@ -29,6 +29,8 @@ Engine::Engine(u32 width, u32 height, void *heapAddr, size_t heapSize) {
     INIReader cfg(baseThemeDir + "theme.cfg");
     HeapAddr = heapAddr;
     HeapSize = heapSize;
+    Width = width;
+    Height = height;
     
     //Basic SDL init
     SDL_Init(SDL_INIT_EVERYTHING);
@@ -45,35 +47,35 @@ Engine::Engine(u32 width, u32 height, void *heapAddr, size_t heapSize) {
     
     //Setup background
     bgm = Mix_LoadMUS(cfg.Get("Background", "bgm", "").c_str());
-    bgLay0 = cfg.Get("Background", "layer0", "");
-    bgLay1 = cfg.Get("Background", "layer1", "");
-    bgLay2 = cfg.Get("Background", "layer2", "");
+    std::string bgLay0 = cfg.Get("Background", "layer0", "");
+    std::string bgLay1 = cfg.Get("Background", "layer1", "");
+    std::string bgLay2 = cfg.Get("Background", "layer2", "");
     
     //Init dashboard
-    debugInfo = true;
-    std::string font = cfg.Get("Config", "font", "");
-    dash = new Dashboard(mRender, baseThemeDir + font, cfg.GetInteger("Config", "smallFont", 14));
+    dash = new Dashboard(&mRender, Width, Height, (baseThemeDir+cfg.Get("Config", "font", "")).c_str());
     dash->SetWallpaper(baseThemeDir + bgLay0, baseThemeDir + bgLay1, baseThemeDir + bgLay2);
+    dash->SetLockScreen(baseThemeDir + cfg.Get("Config", "lockscreen_image", ""));
+    screenLocked = cfg.GetBoolean("Config", "lockscreen_enable", true);
     
     //Create buttons to add to dash
     unsigned x = 230;       //padding on edges
     unsigned space = 100;   //space inbetween
-    dash->AddButton(Button(baseThemeDir + cfg.Get("WebButton", "sprite", ""), cfg.GetInteger("WebButton", "x", x+=space), cfg.GetInteger("WebButton", "y", 600), std::bind(App::LaunchWebsite, "https://google.com/")));
-    dash->AddButton(Button(baseThemeDir + cfg.Get("NewsButton", "sprite", ""), cfg.GetInteger("NewsButton", "x", x+=space), cfg.GetInteger("NewsButton", "y", 600), nullptr));
-    dash->AddButton(Button(baseThemeDir + cfg.Get("ShopButton", "sprite", ""), cfg.GetInteger("ShopButton", "x", x+=space), cfg.GetInteger("ShopButton", "y", 600), std::bind(App::LaunchApplet, AppletId_shop, LibAppletMode_AllForeground)));
-    dash->AddButton(Button(baseThemeDir + cfg.Get("AlbumButton", "sprite", ""), cfg.GetInteger("AlbumButton", "x", x+=space), cfg.GetInteger("AlbumButton", "y", 600), std::bind(App::LaunchApplet, AppletId_photoViewer, LibAppletMode_AllForeground)));
-    dash->AddButton(Button(baseThemeDir + cfg.Get("HomebrewButton", "sprite", ""), cfg.GetInteger("HomebrewButton", "x", x+=space), cfg.GetInteger("HomebrewButton", "y", 600), App::LaunchHbl));
-    dash->AddButton(Button(baseThemeDir + cfg.Get("SettingsButton", "sprite", ""), cfg.GetInteger("SettingsButton", "x", x+=space), cfg.GetInteger("SettingsButton", "y", 600), std::bind(&Dashboard::OpenMenu, dash, "Settings")));
-    dash->AddButton(Button(baseThemeDir + cfg.Get("PowerButton", "sprite", ""), cfg.GetInteger("PowerButton", "x", x+=space), cfg.GetInteger("PowerButton", "y", 600), Power::Shutdown));
+    dash->AddButton(new Button(baseThemeDir + cfg.Get("WebButton", "sprite", ""), cfg.GetInteger("WebButton", "x", x+=space), cfg.GetInteger("WebButton", "y", 600), &mRender, std::bind(App::LaunchWebsite, "https://google.com/")));
+    dash->AddButton(new Button(baseThemeDir + cfg.Get("NewsButton", "sprite", ""), cfg.GetInteger("NewsButton", "x", x+=space), cfg.GetInteger("NewsButton", "y", 600), &mRender, nullptr));
+    dash->AddButton(new Button(baseThemeDir + cfg.Get("ShopButton", "sprite", ""), cfg.GetInteger("ShopButton", "x", x+=space), cfg.GetInteger("ShopButton", "y", 600), &mRender, App::LaunchShop));
+    dash->AddButton(new Button(baseThemeDir + cfg.Get("AlbumButton", "sprite", ""), cfg.GetInteger("AlbumButton", "x", x+=space), cfg.GetInteger("AlbumButton", "y", 600), &mRender, App::LaunchAlbum));
+    dash->AddButton(new Button(baseThemeDir + cfg.Get("HomebrewButton", "sprite", ""), cfg.GetInteger("HomebrewButton", "x", x+=space), cfg.GetInteger("HomebrewButton", "y", 600), &mRender, App::LaunchHbl));
+    dash->AddButton(new Button(baseThemeDir + cfg.Get("SettingsButton", "sprite", ""), cfg.GetInteger("SettingsButton", "x", x+=space), cfg.GetInteger("SettingsButton", "y", 600), &mRender, std::bind(&Dashboard::OpenMenu, dash, "Settings")));
+    dash->AddButton(new Button(baseThemeDir + cfg.Get("PowerButton", "sprite", ""), cfg.GetInteger("PowerButton", "x", x+=space), cfg.GetInteger("PowerButton", "y", 600), &mRender, Power::Shutdown));
 	
-	dash->AddMenu(Menu("Settings", "", 0, 0, width, height, 0x55555555));
+	dash->AddMenu(new Menu("Settings", "", 0, 0, baseThemeDir + cfg.Get("Menus", "settings", ""), &mRender));
     
     //Create game images
     //App::GetList();
     //Boundries: (120, 110), (x, 560) .. 450px vert
     int i, colums = 4, rows = 1;
     for(i = 0; i < colums*rows; i++)
-        dash->AddButton(Button(100+(i*270), 110+(225-(rows*135))+((i%rows)*270), 256, 256, 0x70, nullptr));
+        dash->AddButton(new Button(100+(i*270), 110+(225-(rows*135))+((i%rows)*270), 256, 256, 0x70, nullptr));
     
     //Play BGM
     if(bgm) Mix_PlayMusic(bgm, -1);
@@ -99,9 +101,13 @@ void Engine::Clear() {
     SDL_RenderClear(mRender._renderer);
 }
 
-void Engine::Update() {
+void Engine::GetInputs() {
     hidScanInput();
     u64 kDown = hidKeysDown(CONTROLLER_P1_AUTO);
+    
+    if(kDown & KEY_A) {
+        if(screenLocked) screenLocked = false;
+    }
 
 	if(kDown & KEY_B) {
 		if(dash->IsMenuOpen) {
@@ -109,15 +115,31 @@ void Engine::Update() {
             dash->IsMenuOpen = false;
 		}
 	}
+    
     if (kDown & KEY_PLUS) {
-        //App::LaunchSystemApplication(0x100000000001012);
+        dash->ToggleDebug();
     }
+    
     if ((kDown & KEY_DUP) || (kDown & KEY_LSTICK_UP)) {
         
     }
+    
     if ((kDown & KEY_DDOWN) || (kDown & KEY_LSTICK_DOWN)) {
         
     }
+}
+
+void Engine::Update() {
+    
+    // 0) Lockscreen
+    while(screenLocked && !Hid::IsTouched()) {
+        Clear();
+        dash->DrawLockScreen();
+        Render();
+        GetInputs();
+    }
+    screenLocked = false;
+    GetInputs();
     
     // 1) Draw wallpaper
     dash->DrawWallpaper();
@@ -129,6 +151,5 @@ void Engine::Update() {
     dash->DrawMenus();
     
     // 3) Draw debug text
-    if(debugInfo)
-        dash->DrawDebugText();
+    dash->DrawDebugText();
 }

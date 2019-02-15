@@ -29,8 +29,10 @@
 class Draw
 {
     public:
-        static void Rectangle(int x, int y, int w, int h, u32 scolor, Renderer rend);
-        static void Rectangle(SDL_Rect pos, u32 scolor, Renderer rend);
-        static void Text(TTF_Font *font, Renderer rend, int x, int y, std::string str);
-        static void Texture(std::string tex, u32 x, u32 y, Renderer rend);
+        static void Rectangle(u32 x, u32 y, u32 w, u32 h, u32 scolor, Renderer *rend);
+        static void Rectangle(SDL_Rect pos, u32 scolor, Renderer *rend);
+        static SDL_Texture *CreateTexFromSurf(SDL_Surface *surf, Renderer *rend);
+        static void Text(Renderer *rend, TTF_Font *font, u32 x, u32 y, std::string str);
+        static void DrawTexture(std::string tex, u32 x, u32 y, Renderer *rend);
+        static void RenderTexture(SDL_Texture *tex, SDL_Rect pos, Renderer *rend);
 };

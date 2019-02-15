@@ -16,28 +16,21 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "Debug.hpp"
+#include "Account.hpp"
 
-Debug::Debug(TTF_Font *font, bool debugMode) {
-    Font = font;
-    Y = 0;
-    X = 0;
-    debugOn = debugMode;
+s32 Account::GetUserCount() {
+    s32 cnt = 0;
+    accountInitialize();
+    accountGetUserCount(&cnt);
+    accountExit();
+    return cnt;
 }
 
-Debug::~Debug() {
-    //STUB
-}
-
-void Debug::Print(Renderer rend, std::string text) {
-    if(debugOn) Draw::Text(Font, rend, X, Y, text);
-    Y+=12;
-}
-
-void Debug::Clear() {
-    Y = 0;
-}
-
-void Debug::Toggle() {
-    debugOn = !debugOn;
+u128 *Account::GetListOfAccounts() {
+	u128 *userIDs = (u128*)malloc(20*sizeof(u128));
+	size_t total;
+	accountInitialize();
+	accountListAllUsers(userIDs, 20, &total);
+	accountExit();
+	return userIDs;
 }

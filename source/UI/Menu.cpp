@@ -18,6 +18,21 @@
 
 #include "Menu.hpp"
 
+Menu::Menu(std::string title, std::string text, u32 x, u32 y, std::string texture, Renderer *rend) {
+	Title = title;
+	Text = text;
+	Visible = false;
+	Pos.x = x; Pos.y = y;
+	Sprite = nullptr;
+	SDL_Surface *img = IMG_Load(texture.c_str());
+    Sprite = Draw::CreateTexFromSurf(img, rend);
+    if(img) {
+        Pos.w = img->w;
+        Pos.h = img->h;
+        SDL_FreeSurface(img);
+    }
+}
+
 Menu::Menu(std::string title, std::string text, u32 x, u32 y, u32 w, u32 h, u32 col) {
 	Title = title;
 	Text = text;
@@ -25,13 +40,18 @@ Menu::Menu(std::string title, std::string text, u32 x, u32 y, u32 w, u32 h, u32 
 	Pos.x = x; Pos.y = y;
 	Pos.w = w; Pos.h = h;
 	Color = col;
+	Sprite = nullptr;
 }
 
 Menu::~Menu() {
-	
+	for(auto button: Buttons) {
+        delete button;
+    }
+    Buttons.clear();
+	SDL_DestroyTexture(Sprite);
 }
 
-void Menu::AddButton(Button button) {
+void Menu::AddButton(Button *button) {
 	Buttons.push_back(button);
 }
 

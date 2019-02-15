@@ -22,4 +22,11 @@ Result Power::Shutdown() {
     bpcInitialize();
     bpcShutdownSystem();
     bpcExit();
+    return 0;
+}
+
+Result Power::EnterSleepMode() {
+    appletRequestToEnterSleep();
+    appletStartSleepSequence();
+    return 0;
 }

@@ -18,10 +18,16 @@
 
 #include "Hid.hpp"
 
-bool Hid::IsTouched(u32 x1, u32 y1, u32 x2, u32 y2){
+bool Hid::IsTouched(){
     touchPosition touchPos;
     hidTouchRead(&touchPos, 0);
-    return (touchPos.px >= x1 && touchPos.px <= x2 && touchPos.py >= y1 && touchPos.py <= y2);
+    return (touchPos.px != 0 && touchPos.py != 0);
+}
+
+bool Hid::IsTouched(SDL_Rect pos){
+    touchPosition touchPos;
+    hidTouchRead(&touchPos, 0);
+    return (touchPos.px >= pos.x && touchPos.px <= (pos.x + pos.w) && touchPos.py >= pos.y && touchPos.py <= (pos.y + pos.h));
 }
 
 touchPosition Hid::GetTouchPos() {

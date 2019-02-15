@@ -26,3 +26,11 @@ std::string Settings::GetFirmwareVersion() {
     std::string str = std::string(firm.display_version);
     return str + " ReiNX";
 }
+
+std::string Settings::GetSerialNumber() {
+	char serial[0x20] = {0};
+	setsysInitialize();
+	setsysGetSerialNumber(serial);
+	setsysExit();
+	return std::string(serial);
+}

@@ -22,22 +22,20 @@
 #include <functional>
 #include <string>
 #include <switch.h>
+#include "Draw.hpp"
 
 class Button
 {
     public:
-        Button(std::string name, u32 x, u32 y, std::function<Result()> callback);
+        Button(std::string sprite, u32 x, u32 y, Renderer *rend, std::function<Result()> callback);
         Button(u32 x, u32 y, u32 w, u32 h, u32 col, std::function<Result()> callback);
         ~Button();
         Result Run();
         void SetText(std::string txt);
         
         //vars
-        u32 X;
-        u32 Y;
-        u32 H;
-        u32 W;
-        std::string Sprite;
+        SDL_Rect Pos;
+        SDL_Texture *Sprite;
         u32 Color;
     private:
         std::string Text;

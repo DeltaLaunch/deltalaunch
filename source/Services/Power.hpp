@@ -23,4 +23,5 @@ class Power
 {
     public:
         static Result Shutdown();
+        static Result EnterSleepMode();
 };

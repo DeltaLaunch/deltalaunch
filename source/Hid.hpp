@@ -17,6 +17,7 @@
 */
 
 #pragma once
+#include <SDL2/SDL.h>
 #include <stdint.h>
 #include <switch.h>
 #include "Services/Power.hpp"
@@ -25,6 +26,7 @@
 class Hid
 {
     public:
-        static bool IsTouched(u32 x1, u32 y1, u32 x2, u32 y2);
+        static bool IsTouched();
+        static bool IsTouched(SDL_Rect pos);
         static touchPosition GetTouchPos();
 };

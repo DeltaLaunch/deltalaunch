@@ -26,8 +26,11 @@ class App
 {
     public:
         static void GetList();
-		static Result LaunchApplet(AppletId app, LibAppletMode mode);
+		static Result LaunchAlbum();
+		static Result LaunchShop();
 		static Result LaunchSystemApplication(u64 tid);
         static Result LaunchWebsite(std::string url);
         static Result LaunchHbl();
+        static Result LaunchGame(u64 tid, u128 userID);
+		static Result ShowError(std::string text1, std::string text2, Result rc);
 };

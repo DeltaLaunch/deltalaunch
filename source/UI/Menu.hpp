@@ -17,6 +17,8 @@
 */
 
 #pragma once
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 #include <string>
 #include <switch.h>
 #include "INI.hpp"
@@ -25,19 +27,21 @@
 class Menu
 {
     public:
+		Menu(std::string title, std::string text, u32 x, u32 y, std::string texture, Renderer *rend);
         Menu(std::string title, std::string text, u32 x, u32 y, u32 w, u32 h, u32 col);
 		~Menu();
 		
 		void Show();
 		void Hide();
         bool IsOpen() { return Visible; }
-		void AddButton(Button button);
+		void AddButton(Button *button);
 		std::string GetTitle() { return Title; }
         
         SDL_Rect Pos;
 		u32 Color;
 		std::string Title, Text;
-		std::vector<Button> Buttons;
+		std::vector<Button*> Buttons;
+		SDL_Texture *Sprite;
 	private:
         bool Visible;
 };

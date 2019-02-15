@@ -29,31 +29,36 @@
 #include "Renderer.hpp"
 #include "Menu.hpp"
 #include "../Hid.hpp"
-#include "../Debug.hpp"
+#include "../Services/Rnx.hpp"
 #include "../Services/Settings.hpp"
 #include "../Services/Apm.hpp"
 
 class Dashboard
 {
     public:
-        Dashboard(Renderer &rend, std::string fnt, u32 fntSize);
+        Dashboard(Renderer *rend, u32 width, u32 height, std::string font);
         ~Dashboard();
         void DrawWallpaper();
+        void SetWallpaper(std::string lay0, std::string lay1, std::string lay2);
+        void DrawLockScreen();
+        void SetLockScreen(std::string image);
         void DrawButtons();
         void DrawMenus();
         void DrawDebugText();
-        void AddButton(Button button);
-        void SetWallpaper(std::string lay0, std::string lay1, std::string lay2);
+        void ToggleDebug(){ debugInfo = !debugInfo; }
+        void AddButton(Button *button);
         Result OpenMenu(std::string name);
         Result CloseMenus();
-        void AddMenu(Menu menu);
+        void AddMenu(Menu *menu);
         bool IsMenuOpen;
     private:
-        Renderer Rend;
-        TTF_Font *smallFnt;
-        Debug *dbg;
-        Result lastErr;
+        u32 Width, Height;
+        bool debugInfo;
+        Renderer *Rend;
+        TTF_Font *Font;
+		Result lastErr;
         SDL_Texture *Wallpaper;
-        std::vector<Button> Buttons;
-		std::vector<Menu> Menus;
+        SDL_Texture *LockScreen;
+        std::vector<Button*> Buttons;
+		std::vector<Menu*> Menus;
 };
