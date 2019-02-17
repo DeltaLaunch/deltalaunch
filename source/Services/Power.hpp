@@ -24,4 +24,5 @@ class Power
     public:
         static Result Shutdown();
         static Result EnterSleepMode();
+		static u32 GetBatteryLife();
 };

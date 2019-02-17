@@ -16,25 +16,22 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "Power.hpp"
+#pragma once
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include <functional>
+#include <string>
+#include <switch.h>
+#include "Draw.hpp"
+#include "Button.hpp"
 
-Result Power::Shutdown() {
-    bpcInitialize();
-    bpcShutdownSystem();
-    bpcExit();
-    return 0;
-}
-
-Result Power::EnterSleepMode() {
-    appletRequestToEnterSleep();
-    appletStartSleepSequence();
-    return 0;
-}
-
-u32 Power::GetBatteryLife() {
-	u32 pwr = 0;
-    psmInitialize();
-	psmGetBatteryChargePercentage(&pwr);
-    psmExit();
-	return pwr;
-}
+class Game : public Button
+{
+    public:
+        Game(u32 x, u32 y, Renderer *rend, u64 tid, u8 flag, std::function<Result()> callback);
+		Game(u32 x, u32 y, u32 w, u32 h, u32 col, std::function<Result()> callback);
+        ~Game();
+		u64 TitleId;
+		u8 Flag;
+		SDL_Texture *Icon;
+};

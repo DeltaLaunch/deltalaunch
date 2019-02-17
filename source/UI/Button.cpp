@@ -22,13 +22,15 @@ Button::Button(std::string sprite, u32 x, u32 y, Renderer *rend, std::function<R
     Pos.x = x; Pos.y = y;
     Callback = callback;
     Sprite = nullptr;
-    SDL_Surface *img = IMG_Load(sprite.c_str());
-    Sprite = Draw::CreateTexFromSurf(img, rend);
-    if(img) {
-        Pos.w = img->w;
-        Pos.h = img->h;
-        SDL_FreeSurface(img);
-    }
+	if(sprite != "") {
+		SDL_Surface *img = IMG_Load(sprite.c_str());
+		Sprite = Draw::CreateTexFromSurf(img, rend);
+		if(img) {
+			Pos.w = img->w;
+			Pos.h = img->h;
+			SDL_FreeSurface(img);
+		}
+	}
 }
 
 Button::Button(u32 x, u32 y, u32 w, u32 h, u32 col, std::function<Result()> callback) {

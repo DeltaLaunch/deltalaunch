@@ -16,25 +16,15 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "Power.hpp"
+#include "Time.hpp"
 
-Result Power::Shutdown() {
-    bpcInitialize();
-    bpcShutdownSystem();
-    bpcExit();
-    return 0;
-}
-
-Result Power::EnterSleepMode() {
-    appletRequestToEnterSleep();
-    appletStartSleepSequence();
-    return 0;
-}
-
-u32 Power::GetBatteryLife() {
-	u32 pwr = 0;
-    psmInitialize();
-	psmGetBatteryChargePercentage(&pwr);
-    psmExit();
-	return pwr;
+std::string Time::GetClock() {
+    u64 time = 0;
+    TimeCalendarTime calTime;
+    TimeCalendarAdditionalInfo info;
+    timeGetCurrentTime(TimeType_Default, &time);
+    timeToCalendarTimeWithMyRule(time, &calTime, &info);
+    char buff[100];
+    snprintf(buff, sizeof(buff), "%02d:%02d", calTime.hour, calTime.minute);
+    return std::string(buff);
 }

@@ -23,7 +23,7 @@
 #include <SDL2/SDL_mixer.h>
 #include <SDL2/SDL_ttf.h>
 #include <string>
-#include <algorithm>
+#include <vector>
 #include <switch.h>
 
 #include "UI/Renderer.hpp"
@@ -31,10 +31,13 @@
 #include "UI/INI.hpp"
 #include "UI/Dashboard.hpp"
 #include "UI/Button.hpp"
+#include "UI/Game.hpp"
 #include "UI/Menu.hpp"
 #include "Hid.hpp"
 #include "Services/App.hpp"
 #include "Services/Power.hpp"
+
+#define BACKGROUND_LAYERS 99
 
 class Engine
 {

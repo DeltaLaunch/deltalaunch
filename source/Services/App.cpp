@@ -18,10 +18,26 @@
 
 #include "App.hpp"
 
-void App::GetList() {
-    NsApplicationRecord records[0x100];
-    size_t entries = 0;
-    nsListApplicationRecord(records, 0x100, 0, &entries);
+Result App::GetTitleIds(std::vector<u64> &tids) {
+    Result rc;
+    size_t size = 0;
+    NsApplicationRecord rec[2000];
+    rc = nsInitialize();
+    rc = nsListApplicationRecord(rec, 2000, 0, &size);
+    for(int i = 0; i < size; i++) {
+        tids.push_back(rec[i].titleID);
+    }
+    nsExit();
+    return rc;
+}
+
+NsApplicationControlData App::GetGameControlData(u64 tid, u8 flag) {
+	NsApplicationControlData buffer;
+	size_t s = 0;
+    nsInitialize();
+	nsGetApplicationControlData(flag, tid, &buffer, 0x20000, &s);
+    nsExit();
+	return buffer;
 }
 
 Result App::LaunchAlbum() {
@@ -131,7 +147,7 @@ Result App::LaunchHbl() {
 }
 
 Result App::LaunchGame(u64 tid, u128 userID) {
-    AppletHolder h;
+    /*AppletHolder h;
     AppletStorage aStore;
     //LibAppletArgs aArgs;
     
@@ -160,8 +176,52 @@ Result App::LaunchGame(u64 tid, u128 userID) {
     }
     appletHolderJoin(&h);
     appletHolderClose(&h);
+    appletStorageClose(&aStore);*/
+    Result rc = 0;
+    u128 ids[5];
+    size_t total;
+    rc = accountInitialize();
+    rc = nsInitialize();
+    rc = accountListAllUsers(ids, 5, &total);
+    accountExit();
+    AppletHolder h;
+    AppletStorage aStore;            
+    
+    rc = appCreate(&h, tid, true, Create_App);
+    if(R_FAILED(rc)) {
+        ShowError("Error appCreate", "Error initializing arg storage", rc);
+    }
+    rc = appRequestForApplicationToGetForeground(&h);
+    if(R_FAILED(rc)) {
+        ShowError("Error appRequestForApplicationToGetForeground", "Error initializing arg storage", rc);
+    }
+    
+    rc = appletCreateStorage(&aStore, 0x88);
+    if(R_FAILED(rc)) {
+        ShowError("Error appletCreateStorage", "Error initializing arg storage", rc);
+    }
+    
+    u8 indata[0x88] = {0};
+    *(u32*)&indata[0] = 0xC79497CA;
+    *(u8*)&indata[4] = 1;
+    *(u128*)&indata[5] = ids[0];
+    
+    rc = appletStorageWrite(&aStore, 0, indata, 0x88);
+    if(R_FAILED(rc)) {
+        ShowError("Error appletStorageWrite", "Error initializing arg storage", rc);
+    }
+    rc = appletHolderPushInData(&h, &aStore);
+    if(R_FAILED(rc)) {
+        ShowError("Error appletHolderPushInData", "Error initializing arg storage", rc);
+    }
+    rc = appletHolderStart(&h);
+    if(R_FAILED(rc)) {
+        ShowError("Error appletHolderStart", "Error initializing arg storage", rc);
+    }
+    appletHolderJoin(&h);
+    appletHolderClose(&h);
     appletStorageClose(&aStore);
-
+    nsExit();
     return rc;
 }
 

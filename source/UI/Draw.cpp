@@ -41,10 +41,12 @@ void Draw::DrawTexture(std::string tex, u32 x, u32 y, Renderer *rend) {
     pos.y = y;
     pos.w = bgs->w;
     pos.h = bgs->h;
-    SDL_Texture *bgt = SDL_CreateTextureFromSurface(rend->_renderer, bgs);
-    RenderTexture(bgt, pos, rend);
-    SDL_FreeSurface(bgs);
-    SDL_DestroyTexture(bgt);
+    SDL_Texture *t = SDL_CreateTextureFromSurface(rend->_renderer, bgs);
+	if(t) {
+		RenderTexture(t, pos, rend);
+		SDL_FreeSurface(bgs);
+	}
+    SDL_DestroyTexture(t);
 }
 
 SDL_Texture *Draw::CreateTexFromSurf(SDL_Surface *surf, Renderer *rend) {
@@ -52,6 +54,7 @@ SDL_Texture *Draw::CreateTexFromSurf(SDL_Surface *surf, Renderer *rend) {
 }
 
 void Draw::RenderTexture(SDL_Texture *tex, SDL_Rect pos, Renderer *rend) {
+	if(!tex) return;
     SDL_RenderCopy(rend->_renderer, tex, NULL, &pos);
 }
 

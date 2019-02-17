@@ -21,7 +21,7 @@
 Engine::Engine(u32 width, u32 height, void *heapAddr, size_t heapSize) {
     //Detect reinx
     if(!Rnx::IsUsingReiNX()) {
-        fatalSimple(0xDEADBABE);
+        fatalSimple(0xBADC0DE);
     }
     
     //Read config file
@@ -47,21 +47,29 @@ Engine::Engine(u32 width, u32 height, void *heapAddr, size_t heapSize) {
     
     //Setup background
     bgm = Mix_LoadMUS(cfg.Get("Background", "bgm", "").c_str());
-    std::string bgLay0 = cfg.Get("Background", "layer0", "");
-    std::string bgLay1 = cfg.Get("Background", "layer1", "");
-    std::string bgLay2 = cfg.Get("Background", "layer2", "");
+    std::vector<std::string> layers;
+	std::string tmp;
+	int lay;for(lay=0; lay < BACKGROUND_LAYERS; lay++) {
+		tmp = cfg.Get("Background", "layer"+ std::to_string(lay), "");
+		if(tmp == "") continue;
+		layers.push_back(baseThemeDir + tmp);
+	}
     
     //Init dashboard
+    SDL_Rect batPos; batPos.x = cfg.GetInteger("BatteryOverlay", "x", 1180); batPos.y = cfg.GetInteger("BatteryOverlay", "y", 14);
+    SDL_Rect clkPos; clkPos.x = cfg.GetInteger("ClockOverlay", "x", 1130); clkPos.y = cfg.GetInteger("ClockOverlay", "y", 14);
     dash = new Dashboard(&mRender, Width, Height, (baseThemeDir+cfg.Get("Config", "font", "")).c_str());
-    dash->SetWallpaper(baseThemeDir + bgLay0, baseThemeDir + bgLay1, baseThemeDir + bgLay2);
+    dash->SetWallpaper(layers);
     dash->SetLockScreen(baseThemeDir + cfg.Get("Config", "lockscreen_image", ""));
+    dash->SetOverlay(baseThemeDir + cfg.Get("BatteryOverlay", "battery", ""), batPos, clkPos);
     screenLocked = cfg.GetBoolean("Config", "lockscreen_enable", true);
+	layers.clear();
     
     //Create buttons to add to dash
     unsigned x = 230;       //padding on edges
     unsigned space = 100;   //space inbetween
     dash->AddButton(new Button(baseThemeDir + cfg.Get("WebButton", "sprite", ""), cfg.GetInteger("WebButton", "x", x+=space), cfg.GetInteger("WebButton", "y", 600), &mRender, std::bind(App::LaunchWebsite, "https://google.com/")));
-    dash->AddButton(new Button(baseThemeDir + cfg.Get("NewsButton", "sprite", ""), cfg.GetInteger("NewsButton", "x", x+=space), cfg.GetInteger("NewsButton", "y", 600), &mRender, nullptr));
+    dash->AddButton(new Button(baseThemeDir + cfg.Get("NewsButton", "sprite", ""), cfg.GetInteger("NewsButton", "x", x+=space), cfg.GetInteger("NewsButton", "y", 600), &mRender, std::bind(App::LaunchGame, 0x0100000000010000, 0)));
     dash->AddButton(new Button(baseThemeDir + cfg.Get("ShopButton", "sprite", ""), cfg.GetInteger("ShopButton", "x", x+=space), cfg.GetInteger("ShopButton", "y", 600), &mRender, App::LaunchShop));
     dash->AddButton(new Button(baseThemeDir + cfg.Get("AlbumButton", "sprite", ""), cfg.GetInteger("AlbumButton", "x", x+=space), cfg.GetInteger("AlbumButton", "y", 600), &mRender, App::LaunchAlbum));
     dash->AddButton(new Button(baseThemeDir + cfg.Get("HomebrewButton", "sprite", ""), cfg.GetInteger("HomebrewButton", "x", x+=space), cfg.GetInteger("HomebrewButton", "y", 600), &mRender, App::LaunchHbl));
@@ -71,11 +79,19 @@ Engine::Engine(u32 width, u32 height, void *heapAddr, size_t heapSize) {
 	dash->AddMenu(new Menu("Settings", "", 0, 0, baseThemeDir + cfg.Get("Menus", "settings", ""), &mRender));
     
     //Create game images
-    //App::GetList();
+	std::vector<u64> tids;
+    App::GetTitleIds(tids);
     //Boundries: (120, 110), (x, 560) .. 450px vert
     int i, colums = 4, rows = 1;
-    for(i = 0; i < colums*rows; i++)
-        dash->AddButton(new Button(100+(i*270), 110+(225-(rows*135))+((i%rows)*270), 256, 256, 0x70, nullptr));
+    for(i = 0; i < colums*rows; i++){
+		if(i < tids.size()) {
+			dash->AddGame(new Game(100+(i*270), 110+(225-(rows*135))+((i%rows)*270), &mRender, tids[i], 0, nullptr));
+		}else{
+			dash->AddGame(new Game(100+(i*270), 110+(225-(rows*135))+((i%rows)*270), 256, 256, 0x70, nullptr));
+		}
+	}
+    tids.clear();
+	dash->SetGames();
     
     //Play BGM
     if(bgm) Mix_PlayMusic(bgm, -1);
@@ -91,6 +107,7 @@ Engine::~Engine() {
     SDL_FreeSurface(mRender._surface);
     SDL_DestroyWindow(mRender._window);
     SDL_Quit();
+	Power::Shutdown();
 }
 
 void Engine::Render() {
@@ -120,6 +137,10 @@ void Engine::GetInputs() {
         dash->ToggleDebug();
     }
     
+    if(kDown & KEY_MINUS) {
+        fatalSimple(0x123);//App::LaunchGame(0x0100000000010000,0);
+    }
+    
     if ((kDown & KEY_DUP) || (kDown & KEY_LSTICK_UP)) {
         
     }
@@ -131,7 +152,7 @@ void Engine::GetInputs() {
 
 void Engine::Update() {
     
-    // 0) Lockscreen
+    //Lockscreen
     while(screenLocked && !Hid::IsTouched()) {
         Clear();
         dash->DrawLockScreen();
@@ -141,15 +162,11 @@ void Engine::Update() {
     screenLocked = false;
     GetInputs();
     
-    // 1) Draw wallpaper
+    //Dash
     dash->DrawWallpaper();
-    
-    // 2) Draw overlay
     dash->DrawButtons();
-    
-    // 3) Draw menus
+	dash->DrawGames();
+    dash->DrawOverlay();
     dash->DrawMenus();
-    
-    // 3) Draw debug text
     dash->DrawDebugText();
 }

@@ -20,12 +20,14 @@
 #include <string>
 #include <string.h>
 #include <stdlib.h>
+#include <vector>
 #include <switch.h>
 
 class App
 {
     public:
-        static void GetList();
+        static Result GetTitleIds(std::vector<u64> &tids);
+		static NsApplicationControlData GetGameControlData(u64 tid, u8 flag);
 		static Result LaunchAlbum();
 		static Result LaunchShop();
 		static Result LaunchSystemApplication(u64 tid);

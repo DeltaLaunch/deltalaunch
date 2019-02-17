@@ -16,25 +16,12 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "Power.hpp"
+#pragma once
+#include <string>
+#include <switch.h>
 
-Result Power::Shutdown() {
-    bpcInitialize();
-    bpcShutdownSystem();
-    bpcExit();
-    return 0;
-}
-
-Result Power::EnterSleepMode() {
-    appletRequestToEnterSleep();
-    appletStartSleepSequence();
-    return 0;
-}
-
-u32 Power::GetBatteryLife() {
-	u32 pwr = 0;
-    psmInitialize();
-	psmGetBatteryChargePercentage(&pwr);
-    psmExit();
-	return pwr;
-}
+class Time
+{
+    public:
+        static std::string GetClock();
+};

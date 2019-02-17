@@ -25,6 +25,7 @@
 #include <vector>
 #include <switch.h>
 #include "Button.hpp"
+#include "Game.hpp"
 #include "Draw.hpp"
 #include "Renderer.hpp"
 #include "Menu.hpp"
@@ -32,6 +33,9 @@
 #include "../Services/Rnx.hpp"
 #include "../Services/Settings.hpp"
 #include "../Services/Apm.hpp"
+#include "../Services/Time.hpp"
+#include "../Services/Power.hpp"
+#include "../Services/App.hpp"
 
 class Dashboard
 {
@@ -39,14 +43,19 @@ class Dashboard
         Dashboard(Renderer *rend, u32 width, u32 height, std::string font);
         ~Dashboard();
         void DrawWallpaper();
-        void SetWallpaper(std::string lay0, std::string lay1, std::string lay2);
+        void SetWallpaper(std::vector<std::string> layers);
         void DrawLockScreen();
         void SetLockScreen(std::string image);
         void DrawButtons();
+		void DrawGames();
+		void SetGames();
+        void DrawOverlay();
+        void SetOverlay(std::string battery, SDL_Rect batPos, SDL_Rect clkPos);
         void DrawMenus();
         void DrawDebugText();
         void ToggleDebug(){ debugInfo = !debugInfo; }
         void AddButton(Button *button);
+		void AddGame(Game *game);
         Result OpenMenu(std::string name);
         Result CloseMenus();
         void AddMenu(Menu *menu);
@@ -57,8 +66,11 @@ class Dashboard
         Renderer *Rend;
         TTF_Font *Font;
 		Result lastErr;
+        SDL_Rect BatPos, ClkPos;
         SDL_Texture *Wallpaper;
         SDL_Texture *LockScreen;
+        SDL_Texture *Battery;
         std::vector<Button*> Buttons;
+		std::vector<Game*> Games;
 		std::vector<Menu*> Menus;
 };

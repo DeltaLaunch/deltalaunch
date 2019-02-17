@@ -38,12 +38,20 @@ Dashboard::~Dashboard() {
 	for(auto menu: Menus) {
         delete menu;
     }
+	for(auto game: Games) {
+        delete game;
+    }
     Buttons.clear();
 	Menus.clear();
+	Games.clear();
     SDL_DestroyTexture(Wallpaper);
     SDL_DestroyTexture(LockScreen);
+	SDL_DestroyTexture(Battery);
 }
 
+/*
+*   Draw/Set Graphics
+*/
 void Dashboard::DrawWallpaper() {
     SDL_Rect pos;
     pos.x = 0; pos.y = 0;
@@ -51,21 +59,17 @@ void Dashboard::DrawWallpaper() {
 	Draw::RenderTexture(Wallpaper, pos, Rend);
 }
 
-void Dashboard::SetWallpaper(std::string lay0, std::string lay1, std::string lay2) {
-    SDL_Surface *l0 = IMG_Load(lay0.c_str());
-    SDL_Surface *l1 = IMG_Load(lay1.c_str());
-    SDL_Surface *l2 = IMG_Load(lay2.c_str());
-    SDL_Surface *wall = SDL_CreateRGBSurface(0,l0->w,l0->h,32,0,0,0,0);
-    SDL_Rect pos;
+void Dashboard::SetWallpaper(std::vector<std::string> layers) {
+	SDL_Rect pos;
     pos.x = 0; pos.y = 0;
-    pos.w = l0->w; pos.h = l0->h;
-    SDL_BlitSurface(l0, &pos, wall, NULL);
-    SDL_BlitSurface(l1, &pos, wall, NULL);
-    SDL_BlitSurface(l2, &pos, wall, NULL);
-    Wallpaper = SDL_CreateTextureFromSurface(Rend->_renderer, wall);
-    SDL_FreeSurface(l0);
-    SDL_FreeSurface(l1);
-    SDL_FreeSurface(l2);
+    pos.w = Width; pos.h = Height;
+	SDL_Surface *wall = SDL_CreateRGBSurface(0,Width,Height,32,0,0,0,0);
+	for(auto &l: layers) {
+		SDL_Surface *lay = IMG_Load(l.c_str());
+		SDL_BlitSurface(lay, &pos, wall, NULL);
+		SDL_FreeSurface(lay);
+	}
+	Wallpaper = SDL_CreateTextureFromSurface(Rend->_renderer, wall);
     SDL_FreeSurface(wall);
 }
 
@@ -96,6 +100,45 @@ void Dashboard::DrawButtons() {
     }
 }
 
+void Dashboard::DrawGames() {
+	for(auto game: Games) {
+		if(game->TitleId != 0) {
+			Draw::RenderTexture(game->Icon, game->Pos, Rend);
+		} else {
+			Draw::Rectangle(game->Pos, game->Color, Rend);
+		}
+	}
+}
+
+void Dashboard::SetGames() {
+	for(auto game: Games) {
+		if(game->TitleId != 0) {
+			NsApplicationControlData data = App::GetGameControlData(game->TitleId, game->Flag);
+			SDL_RWops *rw = SDL_RWFromMem(data.icon, sizeof(0x20000));
+			SDL_Surface *img = IMG_Load_RW(rw, 1);
+            game->Icon = SDL_CreateTexture(Rend->_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 256, 256);
+			if(img) 
+                game->Icon = SDL_CreateTextureFromSurface(Rend->_renderer, img);
+			SDL_FreeSurface(img);
+		}
+	}
+}
+
+void Dashboard::DrawOverlay() {
+	Draw::RenderTexture(Battery, BatPos, Rend);
+    Draw::Text(Rend, Font, ClkPos.x, ClkPos.y, Time::GetClock());
+}
+
+void Dashboard::SetOverlay(std::string battery, SDL_Rect batPos, SDL_Rect clkPos) {
+    SDL_Surface *img = IMG_Load(battery.c_str());
+    BatPos = batPos;
+	BatPos.w = img->w; BatPos.h = img->h;
+    ClkPos = clkPos;
+	Battery = SDL_CreateTexture(Rend->_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, img->w, img->h);
+    Battery = SDL_CreateTextureFromSurface(Rend->_renderer, img);
+    SDL_FreeSurface(img);
+}
+
 void Dashboard::DrawMenus() {
     for(auto menu: Menus) {
         if(menu->IsOpen()) {
@@ -115,11 +158,15 @@ void Dashboard::DrawDebugText() {
         Draw::Text(Rend, Font, X, Y+=s, "DeltaLaunch alpha!");
         Draw::Text(Rend, Font, X, Y+=s, "Firmware: " + Settings::GetFirmwareVersion());
         Draw::Text(Rend, Font, X, Y+=s, "Serial: " + Settings::GetSerialNumber());
+		Draw::Text(Rend, Font, X, Y+=s, "Battery: " + std::to_string(Power::GetBatteryLife()) + "%");
         Draw::Text(Rend, Font, X, Y+=s, "Touch: X=" + std::to_string(touchPos.px) + "; y=" + std::to_string(touchPos.py));
         Y = 0;
     }
 }
 
+/*
+*   Trigger events
+*/
 Result Dashboard::OpenMenu(std::string name) {
 	for(auto menu: Menus) {
         if(menu->GetTitle() == name) {
@@ -140,8 +187,15 @@ Result Dashboard::CloseMenus() {
     return 0;
 }
 
+/*
+*   Add elements to form
+*/
 void Dashboard::AddButton(Button *button) {
     Buttons.push_back(button);
+}
+
+void Dashboard::AddGame(Game *game) {
+	Games.push_back(game);
 }
 
 void Dashboard::AddMenu(Menu *menu) {

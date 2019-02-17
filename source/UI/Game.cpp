@@ -16,25 +16,17 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "Power.hpp"
+#include "Game.hpp"
 
-Result Power::Shutdown() {
-    bpcInitialize();
-    bpcShutdownSystem();
-    bpcExit();
-    return 0;
+Game::Game(u32 x, u32 y, Renderer *rend, u64 tid, u8 flag, std::function<Result()> callback) : Button("", x, y, rend, callback) {
+    TitleId = tid;
+	Flag = flag;
 }
 
-Result Power::EnterSleepMode() {
-    appletRequestToEnterSleep();
-    appletStartSleepSequence();
-    return 0;
+Game::Game(u32 x, u32 y, u32 w, u32 h, u32 col, std::function<Result()> callback) : Button(x, y, w, h, col, callback) {
+	TitleId = 0;
 }
 
-u32 Power::GetBatteryLife() {
-	u32 pwr = 0;
-    psmInitialize();
-	psmGetBatteryChargePercentage(&pwr);
-    psmExit();
-	return pwr;
+Game::~Game() {
+	
 }

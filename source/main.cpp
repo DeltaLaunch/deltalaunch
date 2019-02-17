@@ -65,11 +65,7 @@ void __attribute__((weak)) __appInit(void) {
     rc = fsInitialize();
     if (R_FAILED(rc)) 
         fatalSimple(MAKERESULT(Module_Libnx, LibnxError_InitFail_FS));
-    
-    rc = nsInitialize();
-    if (R_FAILED(rc)) 
-        fatalSimple(MAKERESULT(Module_Libnx, LibnxError_NotInitialized));
-    
+	
     romfsInit();
     fsdevMountSdmc();
 }
@@ -77,7 +73,6 @@ void __attribute__((weak)) __appInit(void) {
 void __attribute__((weak)) __appExit(void) {
     timeExit();
     hidExit();
-    nsExit();
     appletExit();
     nvExit();
     smExit();
@@ -90,12 +85,12 @@ void __attribute__((weak)) __appExit(void) {
 int main(int argc, char* argv[]) {
     HeapInit();
     
-    /*AppletHolder h;
+    AppletHolder h;
     appletGetPopFromGeneralChannelEvent(&h);
     appletHolderWaitInteractiveOut(&h);
     appletRequestForeground();
     
-    appletSetHandlesRequestToDisplay(true);*/
+    appletSetHandlesRequestToDisplay(true);
     
     //Qlaunch loop
     Engine eng(1280, 720, heapAddr, heapSize);
