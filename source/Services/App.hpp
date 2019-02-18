@@ -29,6 +29,7 @@ class App
         static Result GetTitleIds(std::vector<u64> &tids);
 		static NsApplicationControlData GetGameControlData(u64 tid, u8 flag);
 		static Result LaunchAlbum();
+        static Result LaunchPSelect();
 		static Result LaunchShop();
 		static Result LaunchSystemApplication(u64 tid);
         static Result LaunchWebsite(std::string url);

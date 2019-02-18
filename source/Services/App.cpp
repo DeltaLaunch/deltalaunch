@@ -53,6 +53,19 @@ Result App::LaunchAlbum() {
     return 0;
 }
 
+Result App::LaunchPSelect() {
+	AppletHolder h;
+	LibAppletArgs args;
+	
+	appletCreateLibraryApplet(&h, AppletId_playerSelect, LibAppletMode_AllForeground);
+	libappletArgsCreate(&args, 1);
+    libappletArgsPush(&args, &h);
+	appletHolderStart(&h);
+    appletHolderJoin(&h);
+    appletHolderClose(&h);
+    return 0;
+}
+
 Result App::LaunchShop() {
 	AppletHolder h;
 	LibAppletArgs args;

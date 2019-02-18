@@ -192,7 +192,7 @@ Result Dashboard::CloseMenus() {
 void Dashboard::OffsetGameIcons(u32 deltaX) {
     int i = 0;
     for(auto game: Games) {
-		game->Pos.x = (game->Pos.x <= 200+(i*270)) ? (game->Pos.x + deltaX) : 200+(i*270);
+		game->Pos.x = (game->Pos.x <= 100+(i*(game->Pos.w+14))) ? (game->Pos.x + deltaX) : 100+(i*(game->Pos.w+14));
         i++;
 	}
 }

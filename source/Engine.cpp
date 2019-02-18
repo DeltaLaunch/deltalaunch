@@ -131,7 +131,7 @@ void Engine::GetInputs() {
         case DASHBOARD:
         {
             if(kDown & KEY_PLUS) dash->ToggleDebug();
-            if(kDown & KEY_MINUS) fatalSimple(0x123);
+            if(kDown & KEY_MINUS) App::LaunchPSelect();
             if(Hid::IsTouched(dash->GameIconArea)) {
                 if(lastPosX != 0) 
                     dash->OffsetGameIcons(Hid::GetTouchPos().px - lastPosX);
