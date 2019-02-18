@@ -189,16 +189,16 @@ Result App::LaunchGame(u64 tid, u128 userID) {
     
     rc = appCreate(&h, tid, true, Create_App);
     if(R_FAILED(rc)) {
-        ShowError("Error appCreate", "Error initializing arg storage", rc);
+        ShowError("Error appCreate", std::to_string(rc), rc);
     }
     rc = appRequestForApplicationToGetForeground(&h);
     if(R_FAILED(rc)) {
-        ShowError("Error appRequestForApplicationToGetForeground", "Error initializing arg storage", rc);
+        ShowError("Error appRequestForApplicationToGetForeground", std::to_string(rc), rc);
     }
     
     rc = appletCreateStorage(&aStore, 0x88);
     if(R_FAILED(rc)) {
-        ShowError("Error appletCreateStorage", "Error initializing arg storage", rc);
+        ShowError("Error appletCreateStorage", std::to_string(rc), rc);
     }
     
     u8 indata[0x88] = {0};
@@ -208,15 +208,15 @@ Result App::LaunchGame(u64 tid, u128 userID) {
     
     rc = appletStorageWrite(&aStore, 0, indata, 0x88);
     if(R_FAILED(rc)) {
-        ShowError("Error appletStorageWrite", "Error initializing arg storage", rc);
+        ShowError("Error appletStorageWrite", std::to_string(rc), rc);
     }
     rc = appletHolderPushInData(&h, &aStore);
     if(R_FAILED(rc)) {
-        ShowError("Error appletHolderPushInData", "Error initializing arg storage", rc);
+        ShowError("Error appletHolderPushInData", std::to_string(rc), rc);
     }
     rc = appletHolderStart(&h);
     if(R_FAILED(rc)) {
-        ShowError("Error appletHolderStart", "Error initializing arg storage", rc);
+        ShowError("Error appletHolderStart", std::to_string(rc), rc);
     }
     appletHolderJoin(&h);
     appletHolderClose(&h);

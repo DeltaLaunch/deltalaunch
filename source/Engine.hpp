@@ -41,6 +41,11 @@
 
 class Engine
 {
+    enum EngineState {
+        LOCKSCREEN,
+        DASHBOARD,
+        SETTINGS
+    };
     public:
         Engine(u32 width, u32 height, void *heapAddr, size_t heapSize);
         ~Engine();
@@ -52,8 +57,9 @@ class Engine
         Renderer mRender;
         Dashboard *dash;
         Mix_Music *bgm;
+        u32 lastPosX;
     private:
-        bool screenLocked;
+        EngineState State;
         std::string baseThemeDir;
         u32 Width, Height;
         void *HeapAddr;

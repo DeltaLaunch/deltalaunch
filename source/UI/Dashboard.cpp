@@ -28,6 +28,8 @@ Dashboard::Dashboard(Renderer *rend, u32 width, u32 height, std::string font) {
     debugInfo = false;
     Wallpaper = SDL_CreateTexture(Rend->_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, Width, Height);
     LockScreen = SDL_CreateTexture(Rend->_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, Width, Height);
+    GameIconArea.x = 120; GameIconArea.y = 110;
+    GameIconArea.w = 1080; GameIconArea.h = 450;
 }
 
 Dashboard::~Dashboard() {
@@ -185,6 +187,14 @@ Result Dashboard::CloseMenus() {
 		}
     }
     return 0;
+}
+
+void Dashboard::OffsetGameIcons(u32 deltaX) {
+    int i = 0;
+    for(auto game: Games) {
+		game->Pos.x = (game->Pos.x <= 200+(i*270)) ? (game->Pos.x + deltaX) : 200+(i*270);
+        i++;
+	}
 }
 
 /*

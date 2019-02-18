@@ -62,7 +62,7 @@ Engine::Engine(u32 width, u32 height, void *heapAddr, size_t heapSize) {
     dash->SetWallpaper(layers);
     dash->SetLockScreen(baseThemeDir + cfg.Get("Config", "lockscreen_image", ""));
     dash->SetOverlay(baseThemeDir + cfg.Get("BatteryOverlay", "battery", ""), batPos, clkPos);
-    screenLocked = cfg.GetBoolean("Config", "lockscreen_enable", true);
+    State = (cfg.GetBoolean("Config", "lockscreen_enable", true)) ? LOCKSCREEN : DASHBOARD;
 	layers.clear();
     
     //Create buttons to add to dash
@@ -81,12 +81,12 @@ Engine::Engine(u32 width, u32 height, void *heapAddr, size_t heapSize) {
     //Create game images
 	std::vector<u64> tids;
     App::GetTitleIds(tids);
-    //Boundries: (120, 110), (x, 560) .. 450px vert
-    int i, colums = 4, rows = 1;
+    //Boundries: (120, 110), (1200, 560) .. 450px vert
+    int i, colums = 10, rows = 1;
     for(i = 0; i < colums*rows; i++){
 		if(i < tids.size()) {
-			dash->AddGame(new Game(100+(i*270), 110+(225-(rows*135))+((i%rows)*270), &mRender, tids[i], 0, nullptr));
-		}else{
+			//dash->AddGame(new Game(100+(i*270), 110+(225-(rows*135))+((i%rows)*270), &mRender, tids[i], 0, nullptr));
+		//}else{
 			dash->AddGame(new Game(100+(i*270), 110+(225-(rows*135))+((i%rows)*270), 256, 256, 0x70, nullptr));
 		}
 	}
@@ -122,44 +122,43 @@ void Engine::GetInputs() {
     hidScanInput();
     u64 kDown = hidKeysDown(CONTROLLER_P1_AUTO);
     
-    if(kDown & KEY_A) {
-        if(screenLocked) screenLocked = false;
-    }
-
-	if(kDown & KEY_B) {
-		if(dash->IsMenuOpen) {
-			dash->CloseMenus();
-            dash->IsMenuOpen = false;
-		}
-	}
-    
-    if (kDown & KEY_PLUS) {
-        dash->ToggleDebug();
-    }
-    
-    if(kDown & KEY_MINUS) {
-        fatalSimple(0x123);//App::LaunchGame(0x0100000000010000,0);
-    }
-    
-    if ((kDown & KEY_DUP) || (kDown & KEY_LSTICK_UP)) {
-        
-    }
-    
-    if ((kDown & KEY_DDOWN) || (kDown & KEY_LSTICK_DOWN)) {
-        
+    switch(State) {
+        case LOCKSCREEN:
+        {
+            if(kDown & KEY_A) State = DASHBOARD;
+            break;
+        }
+        case DASHBOARD:
+        {
+            if(kDown & KEY_PLUS) dash->ToggleDebug();
+            if(kDown & KEY_MINUS) fatalSimple(0x123);
+            if(Hid::IsTouched(dash->GameIconArea)) {
+                if(lastPosX != 0) 
+                    dash->OffsetGameIcons(Hid::GetTouchPos().px - lastPosX);
+                lastPosX = Hid::GetTouchPos().px;
+            } else {
+                lastPosX = 0;
+            }
+            break;
+        }
+        case SETTINGS:
+        {
+            if(kDown & KEY_B) dash->CloseMenus();
+            break;
+        }
     }
 }
 
 void Engine::Update() {
     
     //Lockscreen
-    while(screenLocked && !Hid::IsTouched()) {
+    while(State == LOCKSCREEN && !Hid::IsTouched()) {
         Clear();
         dash->DrawLockScreen();
         Render();
         GetInputs();
     }
-    screenLocked = false;
+    State = dash->IsMenuOpen ? SETTINGS : DASHBOARD;
     GetInputs();
     
     //Dash

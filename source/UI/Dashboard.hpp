@@ -48,6 +48,7 @@ class Dashboard
         void SetLockScreen(std::string image);
         void DrawButtons();
 		void DrawGames();
+        void OffsetGameIcons(u32 deltaX);
 		void SetGames();
         void DrawOverlay();
         void SetOverlay(std::string battery, SDL_Rect batPos, SDL_Rect clkPos);
@@ -60,6 +61,7 @@ class Dashboard
         Result CloseMenus();
         void AddMenu(Menu *menu);
         bool IsMenuOpen;
+        SDL_Rect GameIconArea;
     private:
         u32 Width, Height;
         bool debugInfo;
