@@ -21,10 +21,12 @@
 Game::Game(u32 x, u32 y, Renderer *rend, u64 tid, u8 flag, std::function<Result()> callback) : Button("", x, y, rend, callback) {
     TitleId = tid;
 	Flag = flag;
+    Icon = nullptr;
 }
 
 Game::Game(u32 x, u32 y, u32 w, u32 h, u32 col, std::function<Result()> callback) : Button(x, y, w, h, col, callback) {
 	TitleId = 0;
+    Icon = nullptr;
 }
 
 Game::~Game() {

@@ -64,4 +64,5 @@ class Engine
         u32 Width, Height;
         void *HeapAddr;
         size_t HeapSize;
+        bool GcState;
 };

@@ -78,20 +78,13 @@ Engine::Engine(u32 width, u32 height, void *heapAddr, size_t heapSize) {
 	
 	dash->AddMenu(new Menu("Settings", "", 0, 0, baseThemeDir + cfg.Get("Menus", "settings", ""), &mRender));
     
-    //Create game images
-	std::vector<u64> tids;
-    App::GetTitleIds(tids);
+    
     //Boundries: (120, 110), (1200, 560) .. 450px vert
     int i, colums = 10, rows = 1;
     for(i = 0; i < colums*rows; i++){
-		if(i < tids.size()) {
-			//dash->AddGame(new Game(100+(i*270), 110+(225-(rows*135))+((i%rows)*270), &mRender, tids[i], 0, nullptr));
-		//}else{
-			dash->AddGame(new Game(100+(i*270), 110+(225-(rows*135))+((i%rows)*270), 256, 256, 0x70, nullptr));
-		}
+		dash->AddGame(new Game(100+(i*270), 110+(225-(rows*135))+((i%rows)*270), 256, 256, 0x70, nullptr));
 	}
-    tids.clear();
-	dash->SetGames();
+    dash->SetGames();
     
     //Play BGM
     if(bgm) Mix_PlayMusic(bgm, -1);
@@ -131,7 +124,7 @@ void Engine::GetInputs() {
         case DASHBOARD:
         {
             if(kDown & KEY_PLUS) dash->ToggleDebug();
-            if(kDown & KEY_MINUS) App::LaunchPSelect();
+            if(kDown & KEY_MINUS) dash->SetGames();
             if(Hid::IsTouched(dash->GameIconArea)) {
                 if(lastPosX != 0) 
                     dash->OffsetGameIcons(Hid::GetTouchPos().px - lastPosX);
@@ -147,6 +140,11 @@ void Engine::GetInputs() {
             break;
         }
     }
+    
+    /*if(App::IsGamecardInserted() == GcState) {
+        dash->SetGames();
+        GcState = !GcState;
+    }*/
 }
 
 void Engine::Update() {

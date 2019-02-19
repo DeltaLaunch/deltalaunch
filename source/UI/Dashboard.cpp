@@ -113,17 +113,26 @@ void Dashboard::DrawGames() {
 }
 
 void Dashboard::SetGames() {
+    //Create game images
+	std::vector<u64> tids;
+    App::GetTitleIds(tids);
+    int i = 0;
 	for(auto game: Games) {
-		if(game->TitleId != 0) {
-			NsApplicationControlData data = App::GetGameControlData(game->TitleId, game->Flag);
-			SDL_RWops *rw = SDL_RWFromMem(data.icon, sizeof(0x20000));
-			SDL_Surface *img = IMG_Load_RW(rw, 1);
-            game->Icon = SDL_CreateTexture(Rend->_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 256, 256);
-			if(img) 
-                game->Icon = SDL_CreateTextureFromSurface(Rend->_renderer, img);
-			SDL_FreeSurface(img);
-		}
+		game->TitleId = tids[i];
+        game->Flag = 0;
+        NsApplicationControlData data = App::GetGameControlData(tids[i], 0);
+        SDL_Surface *img = IMG_Load_RW(SDL_RWFromMem(data.icon, 0x20000), 1);
+        if(game->Icon != nullptr)
+            SDL_DestroyTexture(game->Icon);
+        game->Icon = SDL_CreateTexture(Rend->_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 256, 256);
+        game->Pos.w = 256;
+        game->Pos.h = 256;
+        if(img) 
+            game->Icon = SDL_CreateTextureFromSurface(Rend->_renderer, img);
+        SDL_FreeSurface(img);
+        i++;
 	}
+    tids.clear();
 }
 
 void Dashboard::DrawOverlay() {
@@ -161,6 +170,7 @@ void Dashboard::DrawDebugText() {
         Draw::Text(Rend, Font, X, Y+=s, "Firmware: " + Settings::GetFirmwareVersion());
         Draw::Text(Rend, Font, X, Y+=s, "Serial: " + Settings::GetSerialNumber());
 		Draw::Text(Rend, Font, X, Y+=s, "Battery: " + std::to_string(Power::GetBatteryLife()) + "%");
+        Draw::Text(Rend, Font, X, Y+=s, "GameInserted: " + (App::IsGamecardInserted() ? std::string("true") : std::string("false")));
         Draw::Text(Rend, Font, X, Y+=s, "Touch: X=" + std::to_string(touchPos.px) + "; y=" + std::to_string(touchPos.py));
         Y = 0;
     }

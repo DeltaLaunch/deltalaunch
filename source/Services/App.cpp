@@ -40,6 +40,14 @@ NsApplicationControlData App::GetGameControlData(u64 tid, u8 flag) {
 	return buffer;
 }
 
+bool App::IsGamecardInserted() {
+    FsDeviceOperator opt;
+    bool b = false;
+    fsOpenDeviceOperator(&opt);
+    fsDeviceOperatorIsGameCardInserted(&opt, &b);
+    return b;
+}
+
 Result App::LaunchAlbum() {
 	AppletHolder h;
 	LibAppletArgs args;

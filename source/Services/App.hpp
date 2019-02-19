@@ -28,6 +28,7 @@ class App
     public:
         static Result GetTitleIds(std::vector<u64> &tids);
 		static NsApplicationControlData GetGameControlData(u64 tid, u8 flag);
+        static bool IsGamecardInserted();
 		static Result LaunchAlbum();
         static Result LaunchPSelect();
 		static Result LaunchShop();
