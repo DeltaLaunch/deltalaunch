@@ -66,7 +66,9 @@ class Dashboard
         u32 Width, Height;
         bool debugInfo;
         Renderer *Rend;
-        TTF_Font *Font;
+        TTF_Font *debugFont;
+		TTF_Font *hdrFont;
+		TTF_Font *smallFont;
 		Result lastErr;
         SDL_Rect BatPos, ClkPos;
         SDL_Texture *Wallpaper;

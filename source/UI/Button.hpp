@@ -31,13 +31,12 @@ class Button
         Button(u32 x, u32 y, u32 w, u32 h, u32 col, std::function<Result()> callback);
         ~Button();
         Result Run();
-        void SetText(std::string txt);
         
         //vars
         SDL_Rect Pos;
         SDL_Texture *Sprite;
         u32 Color;
-    private:
         std::string Text;
+    private:
         std::function<Result()> Callback;
 };

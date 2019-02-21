@@ -22,7 +22,9 @@ Dashboard::Dashboard(Renderer *rend, u32 width, u32 height, std::string font) {
     Rend = rend;
     Width = width;
     Height = height;
-    Font = TTF_OpenFont(font.c_str(), 14);
+    debugFont = TTF_OpenFont(font.c_str(), 14);
+	hdrFont = TTF_OpenFont(font.c_str(), 28);
+	smallFont = TTF_OpenFont(font.c_str(), 20);
     lastErr = 0;
     IsMenuOpen = false;
     debugInfo = false;
@@ -33,16 +35,12 @@ Dashboard::Dashboard(Renderer *rend, u32 width, u32 height, std::string font) {
 }
 
 Dashboard::~Dashboard() {
-    TTF_CloseFont(Font);
-	for(auto button: Buttons) {
-        delete button;
-    }
-	for(auto menu: Menus) {
-        delete menu;
-    }
-	for(auto game: Games) {
-        delete game;
-    }
+    TTF_CloseFont(debugFont);
+	TTF_CloseFont(hdrFont);
+	TTF_CloseFont(smallFont);
+	for(auto button: Buttons) delete button;
+	for(auto menu: Menus) delete menu;
+	for(auto game: Games) delete game;
     Buttons.clear();
 	Menus.clear();
 	Games.clear();
@@ -104,10 +102,15 @@ void Dashboard::DrawButtons() {
 
 void Dashboard::DrawGames() {
 	for(auto game: Games) {
-		if(game->TitleId != 0) {
+		if(game->GetTitleId() != 0) {
 			Draw::RenderTexture(game->Icon, game->Pos, Rend);
 		} else {
 			Draw::Rectangle(game->Pos, game->Color, Rend);
+		}
+        
+        if(Hid::IsTouched(game->Pos) && !IsMenuOpen) {
+            //lastErr = game->Run();
+			//if(lastErr) App::ShowError("An Error has occurred!", "Error code: " + std::to_string(lastErr), lastErr);
 		}
 	}
 }
@@ -118,8 +121,8 @@ void Dashboard::SetGames() {
     App::GetTitleIds(tids);
     int i = 0;
 	for(auto game: Games) {
-		game->TitleId = tids[i];
-        game->Flag = 0;
+        game->SetFlag(0);
+        game->SetTitleId(tids[i]);
         NsApplicationControlData data = App::GetGameControlData(tids[i], 0);
         SDL_Surface *img = IMG_Load_RW(SDL_RWFromMem(data.icon, 0x20000), 1);
         if(game->Icon != nullptr)
@@ -137,7 +140,7 @@ void Dashboard::SetGames() {
 
 void Dashboard::DrawOverlay() {
 	Draw::RenderTexture(Battery, BatPos, Rend);
-    Draw::Text(Rend, Font, ClkPos.x, ClkPos.y, Time::GetClock());
+    Draw::Text(Rend, smallFont, ClkPos.x, ClkPos.y, Time::GetClock());
 }
 
 void Dashboard::SetOverlay(std::string battery, SDL_Rect batPos, SDL_Rect clkPos) {
@@ -157,21 +160,27 @@ void Dashboard::DrawMenus() {
 				Draw::RenderTexture(menu->Sprite, menu->Pos, Rend);
 			else
 				Draw::Rectangle(menu->Pos, menu->Color, Rend);
+			
+			Draw::Text(Rend, hdrFont, 30, 25, menu->Title);
+            for(auto button: menu->Buttons) {
+                Draw::Rectangle(button->Pos, button->Color, Rend);
+                Draw::Text(Rend, smallFont, button->Pos.x, button->Pos.y, button->Text);
+            }
         }
     }
 }
 
 void Dashboard::DrawDebugText() {
-    if(debugInfo && Font) {
+    if(debugInfo && debugFont) {
         touchPosition touchPos;
         hidTouchRead(&touchPos, 0);
         u32 X = 14,  Y = 0, s = 14;
-        Draw::Text(Rend, Font, X, Y+=s, "DeltaLaunch alpha!");
-        Draw::Text(Rend, Font, X, Y+=s, "Firmware: " + Settings::GetFirmwareVersion());
-        Draw::Text(Rend, Font, X, Y+=s, "Serial: " + Settings::GetSerialNumber());
-		Draw::Text(Rend, Font, X, Y+=s, "Battery: " + std::to_string(Power::GetBatteryLife()) + "%");
-        Draw::Text(Rend, Font, X, Y+=s, "GameInserted: " + (App::IsGamecardInserted() ? std::string("true") : std::string("false")));
-        Draw::Text(Rend, Font, X, Y+=s, "Touch: X=" + std::to_string(touchPos.px) + "; y=" + std::to_string(touchPos.py));
+        Draw::Text(Rend, debugFont, X, Y+=s, "DeltaLaunch alpha!");
+        Draw::Text(Rend, debugFont, X, Y+=s, "Firmware: " + Settings::GetFirmwareVersion());
+        Draw::Text(Rend, debugFont, X, Y+=s, "Serial: " + Settings::GetSerialNumber());
+		Draw::Text(Rend, debugFont, X, Y+=s, "Battery: " + std::to_string(Power::GetBatteryLife()) + "%");
+		Draw::Text(Rend, debugFont, X, Y+=s, "Audio vol: " + std::to_string(Settings::GetAudioVolume()));
+        Draw::Text(Rend, debugFont, X, Y+=s, "Touch: X=" + std::to_string(touchPos.px) + "; y=" + std::to_string(touchPos.py));
         Y = 0;
     }
 }

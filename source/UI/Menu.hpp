@@ -28,7 +28,6 @@ class Menu
 {
     public:
 		Menu(std::string title, std::string text, u32 x, u32 y, std::string texture, Renderer *rend);
-        Menu(std::string title, std::string text, u32 x, u32 y, u32 w, u32 h, u32 col);
 		~Menu();
 		
 		void Show();

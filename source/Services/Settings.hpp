@@ -25,4 +25,8 @@ class Settings
     public:
         static std::string GetFirmwareVersion();
 		static std::string GetSerialNumber();
+        static u8 GetLockScreenFlag();
+        static void SetLockScreenFlag(u8 flag);
+        static u8 GetAudioVolume();
+        static void SetAudioVolume(u8 vol);
 };

@@ -23,15 +23,24 @@
 #include <string>
 #include <switch.h>
 #include "Draw.hpp"
-#include "Button.hpp"
+#include "../Services/App.hpp"
 
-class Game : public Button
+class Game
 {
     public:
-        Game(u32 x, u32 y, Renderer *rend, u64 tid, u8 flag, std::function<Result()> callback);
-		Game(u32 x, u32 y, u32 w, u32 h, u32 col, std::function<Result()> callback);
+		Game(u32 x, u32 y, u32 w, u32 h, u32 col);
         ~Game();
-		u64 TitleId;
-		u8 Flag;
+        void SetTitleId(u64 tid);
+        void SetFlag(u8 flag);
+        u64 GetTitleId() {return TitleId;}
+        Result Play(u128 userID);
+
 		SDL_Texture *Icon;
+        SDL_Rect Pos;
+        SDL_Texture *Sprite;
+        u32 Color;
+        std::string Text;
+    private:
+        u64 TitleId;
+		u8 Flag;
 };

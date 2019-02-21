@@ -45,10 +45,6 @@ Button::~Button() {
     SDL_DestroyTexture(Sprite);
 }
 
-void Button::SetText(std::string txt) {
-    Text = txt;
-}
-
 Result Button::Run() {
     Result res = 0;
     if(Callback != nullptr) res = Callback();

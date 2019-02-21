@@ -33,16 +33,6 @@ Menu::Menu(std::string title, std::string text, u32 x, u32 y, std::string textur
     }
 }
 
-Menu::Menu(std::string title, std::string text, u32 x, u32 y, u32 w, u32 h, u32 col) {
-	Title = title;
-	Text = text;
-	Visible = false;
-	Pos.x = x; Pos.y = y;
-	Pos.w = w; Pos.h = h;
-	Color = col;
-	Sprite = nullptr;
-}
-
 Menu::~Menu() {
 	for(auto button: Buttons) {
         delete button;

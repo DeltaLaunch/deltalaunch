@@ -61,17 +61,20 @@ Result App::LaunchAlbum() {
     return 0;
 }
 
-Result App::LaunchPSelect() {
+u128 App::LaunchPSelect() {
 	AppletHolder h;
 	LibAppletArgs args;
-	
+	u128 player;
+    
 	appletCreateLibraryApplet(&h, AppletId_playerSelect, LibAppletMode_AllForeground);
 	libappletArgsCreate(&args, 1);
     libappletArgsPush(&args, &h);
 	appletHolderStart(&h);
     appletHolderJoin(&h);
     appletHolderClose(&h);
-    return 0;
+    //TODO get usersid
+    
+    return player;
 }
 
 Result App::LaunchShop() {

@@ -57,12 +57,12 @@ Engine::Engine(u32 width, u32 height, void *heapAddr, size_t heapSize) {
     
     //Init dashboard
     SDL_Rect batPos; batPos.x = cfg.GetInteger("BatteryOverlay", "x", 1180); batPos.y = cfg.GetInteger("BatteryOverlay", "y", 14);
-    SDL_Rect clkPos; clkPos.x = cfg.GetInteger("ClockOverlay", "x", 1130); clkPos.y = cfg.GetInteger("ClockOverlay", "y", 14);
+    SDL_Rect clkPos; clkPos.x = cfg.GetInteger("ClockOverlay", "x", 1110); clkPos.y = cfg.GetInteger("ClockOverlay", "y", 14);
     dash = new Dashboard(&mRender, Width, Height, (baseThemeDir+cfg.Get("Config", "font", "")).c_str());
     dash->SetWallpaper(layers);
     dash->SetLockScreen(baseThemeDir + cfg.Get("Config", "lockscreen_image", ""));
     dash->SetOverlay(baseThemeDir + cfg.Get("BatteryOverlay", "battery", ""), batPos, clkPos);
-    State = (cfg.GetBoolean("Config", "lockscreen_enable", true)) ? LOCKSCREEN : DASHBOARD;
+    State = (Settings::GetLockScreenFlag() ? LOCKSCREEN : DASHBOARD);
 	layers.clear();
     
     //Create buttons to add to dash
@@ -76,13 +76,16 @@ Engine::Engine(u32 width, u32 height, void *heapAddr, size_t heapSize) {
     dash->AddButton(new Button(baseThemeDir + cfg.Get("SettingsButton", "sprite", ""), cfg.GetInteger("SettingsButton", "x", x+=space), cfg.GetInteger("SettingsButton", "y", 600), &mRender, std::bind(&Dashboard::OpenMenu, dash, "Settings")));
     dash->AddButton(new Button(baseThemeDir + cfg.Get("PowerButton", "sprite", ""), cfg.GetInteger("PowerButton", "x", x+=space), cfg.GetInteger("PowerButton", "y", 600), &mRender, Power::Shutdown));
 	
-	dash->AddMenu(new Menu("Settings", "", 0, 0, baseThemeDir + cfg.Get("Menus", "settings", ""), &mRender));
+    //Settings
+    Menu *settings = new Menu("Settings", "", 0, 0, baseThemeDir + cfg.Get("Menus", "settings", ""), &mRender);
+    settings->AddButton(new Button(10, 10, 10, 20, 0x11111111, nullptr));
+	dash->AddMenu(settings);
     
     
     //Boundries: (120, 110), (1200, 560) .. 450px vert
     int i, colums = 10, rows = 1;
     for(i = 0; i < colums*rows; i++){
-		dash->AddGame(new Game(100+(i*270), 110+(225-(rows*135))+((i%rows)*270), 256, 256, 0x70, nullptr));
+		dash->AddGame(new Game(100+(i*270), 110+(225-(rows*135))+((i%rows)*270), 256, 256, 0x70));
 	}
     dash->SetGames();
     

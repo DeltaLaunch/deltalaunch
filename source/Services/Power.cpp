@@ -20,6 +20,7 @@
 
 Result Power::Shutdown() {
     bpcInitialize();
+	appletSetHandlesRequestToDisplay(false);
     bpcShutdownSystem();
     bpcExit();
     return 0;

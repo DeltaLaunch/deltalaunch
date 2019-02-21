@@ -30,7 +30,7 @@ class App
 		static NsApplicationControlData GetGameControlData(u64 tid, u8 flag);
         static bool IsGamecardInserted();
 		static Result LaunchAlbum();
-        static Result LaunchPSelect();
+        static u128 LaunchPSelect();
 		static Result LaunchShop();
 		static Result LaunchSystemApplication(u64 tid);
         static Result LaunchWebsite(std::string url);

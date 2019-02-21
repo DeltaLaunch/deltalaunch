@@ -34,3 +34,31 @@ std::string Settings::GetSerialNumber() {
 	setsysExit();
 	return std::string(serial);
 }
+
+u8 Settings::GetLockScreenFlag() {
+    u8 flag;
+    setsysInitialize();
+    setsysGetLockScreenFlag(&flag);
+    setsysExit();
+    return flag;
+}
+
+void Settings::SetLockScreenFlag(u8 flag) {
+    setsysInitialize();
+    setsysSetLockScreenFlag(flag);
+    setsysExit();
+}
+
+u8 Settings::GetAudioVolume() {
+    u8 vol;
+    setsysInitialize();
+    setsysGetAudioVolume(&vol);
+    setsysExit();
+    return vol;
+}
+
+void Settings::SetAudioVolume(u8 vol) {
+    setsysInitialize();
+    setsysSetAudioVolume(vol);
+    setsysExit();
+}

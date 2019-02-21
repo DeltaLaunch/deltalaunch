@@ -18,17 +18,27 @@
 
 #include "Game.hpp"
 
-Game::Game(u32 x, u32 y, Renderer *rend, u64 tid, u8 flag, std::function<Result()> callback) : Button("", x, y, rend, callback) {
-    TitleId = tid;
-	Flag = flag;
+Game::Game(u32 x, u32 y, u32 w, u32 h, u32 col) {
+    Pos.x = x; Pos.y = y;
+    Pos.w = w; Pos.h = h;
+    Sprite = nullptr;
     Icon = nullptr;
-}
-
-Game::Game(u32 x, u32 y, u32 w, u32 h, u32 col, std::function<Result()> callback) : Button(x, y, w, h, col, callback) {
 	TitleId = 0;
-    Icon = nullptr;
+	Flag = 0;
 }
 
 Game::~Game() {
 	
+}
+
+void Game::SetTitleId(u64 tid) {
+    TitleId = tid;
+}
+
+void Game::SetFlag(u8 flag) {
+    Flag = flag;
+}
+
+Result Game::Play(u128 userID) {
+    return App::LaunchGame(TitleId, userID);
 }
