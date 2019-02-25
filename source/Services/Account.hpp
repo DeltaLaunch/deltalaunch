@@ -25,4 +25,5 @@ class Account
     public:
         static s32 GetUserCount();
 		static u128 *GetListOfAccounts();
+		static Result SetProfilePicture(u128 userId, u8 *jpg, size_t jpgSize);
 };

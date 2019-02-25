@@ -69,7 +69,7 @@ Engine::Engine(u32 width, u32 height, void *heapAddr, size_t heapSize) {
     unsigned x = 230;       //padding on edges
     unsigned space = 100;   //space inbetween
     dash->AddButton(new Button(baseThemeDir + cfg.Get("WebButton", "sprite", ""), cfg.GetInteger("WebButton", "x", x+=space), cfg.GetInteger("WebButton", "y", 600), &mRender, std::bind(App::LaunchWebsite, "https://google.com/")));
-    dash->AddButton(new Button(baseThemeDir + cfg.Get("NewsButton", "sprite", ""), cfg.GetInteger("NewsButton", "x", x+=space), cfg.GetInteger("NewsButton", "y", 600), &mRender, std::bind(App::LaunchGame, 0x0100000000010000, 0)));
+    dash->AddButton(new Button(baseThemeDir + cfg.Get("NewsButton", "sprite", ""), cfg.GetInteger("NewsButton", "x", x+=space), cfg.GetInteger("NewsButton", "y", 600), &mRender, std::bind(&Dashboard::LaunchGame, dash, (u64)0x0100000000010000)));
     dash->AddButton(new Button(baseThemeDir + cfg.Get("ShopButton", "sprite", ""), cfg.GetInteger("ShopButton", "x", x+=space), cfg.GetInteger("ShopButton", "y", 600), &mRender, App::LaunchShop));
     dash->AddButton(new Button(baseThemeDir + cfg.Get("AlbumButton", "sprite", ""), cfg.GetInteger("AlbumButton", "x", x+=space), cfg.GetInteger("AlbumButton", "y", 600), &mRender, App::LaunchAlbum));
     dash->AddButton(new Button(baseThemeDir + cfg.Get("HomebrewButton", "sprite", ""), cfg.GetInteger("HomebrewButton", "x", x+=space), cfg.GetInteger("HomebrewButton", "y", 600), &mRender, App::LaunchHbl));
@@ -78,7 +78,12 @@ Engine::Engine(u32 width, u32 height, void *heapAddr, size_t heapSize) {
 	
     //Settings
     Menu *settings = new Menu("Settings", "", 0, 0, baseThemeDir + cfg.Get("Menus", "settings", ""), &mRender);
-    settings->AddButton(new Button(10, 10, 10, 20, 0x11111111, nullptr));
+    u32 Y = 20, butW = 200, butH = 60, butCol = 0x202020FF;
+    space = 20+butH;
+    settings->AddButton(new Button("Lock Screen", 60, Y+=space, butW, butH, butCol, nullptr));
+    settings->AddButton(new Button("Internet", 60, Y+=space, butW, butH, butCol, nullptr));
+    settings->AddButton(new Button("Profile", 60, Y+=space, butW, butH, butCol, nullptr));
+    settings->AddButton(new Button("System Info", 60, Y+=space, butW, butH, butCol, nullptr));
 	dash->AddMenu(settings);
     
     
@@ -139,15 +144,18 @@ void Engine::GetInputs() {
         }
         case SETTINGS:
         {
-            if(kDown & KEY_B) dash->CloseMenus();
+            if(kDown & KEY_A) dash->ActivateMenu();
+			if(kDown & KEY_B) dash->DisengageMenu();
+			if(kDown & KEY_DUP) dash->DecrementMenuSel();
+			if(kDown & KEY_DDOWN) dash->IncrementMenuSel();
             break;
         }
     }
     
-    /*if(App::IsGamecardInserted() == GcState) {
+    if(App::IsGamecardInserted() == GcState) {
         dash->SetGames();
         GcState = !GcState;
-    }*/
+    }
 }
 
 void Engine::Update() {

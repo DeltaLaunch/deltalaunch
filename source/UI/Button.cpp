@@ -33,12 +33,13 @@ Button::Button(std::string sprite, u32 x, u32 y, Renderer *rend, std::function<R
 	}
 }
 
-Button::Button(u32 x, u32 y, u32 w, u32 h, u32 col, std::function<Result()> callback) {
+Button::Button(std::string text, u32 x, u32 y, u32 w, u32 h, u32 col, std::function<Result()> callback) {
     Pos.x = x; Pos.y = y;
     Pos.w = w; Pos.h = h;
     Callback = callback;
     Color = col;
 	Sprite = nullptr;
+    Text = text;
 }
 
 Button::~Button() {

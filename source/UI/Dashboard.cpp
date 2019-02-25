@@ -22,9 +22,20 @@ Dashboard::Dashboard(Renderer *rend, u32 width, u32 height, std::string font) {
     Rend = rend;
     Width = width;
     Height = height;
-    debugFont = TTF_OpenFont(font.c_str(), 14);
-	hdrFont = TTF_OpenFont(font.c_str(), 28);
-	smallFont = TTF_OpenFont(font.c_str(), 20);
+    if(font == "") {
+        /*PlFontData fnt;
+        plInitialize();
+        plGetSharedFontByType(&fnt, PlSharedFontType_Standard);
+        debugFont = TTF_OpenFontRW(SDL_RWFromMem(fnt.address, fnt.size), 1, 14);
+        hdrFont = TTF_OpenFontRW(SDL_RWFromMem(fnt.address, fnt.size), 1, 28);
+        smallFont = TTF_OpenFontRW(SDL_RWFromMem(fnt.address, fnt.size), 1, 20);
+        plExit();*/
+    } 
+    else {
+        debugFont = TTF_OpenFont(font.c_str(), 14);
+        hdrFont = TTF_OpenFont(font.c_str(), 28);
+        smallFont = TTF_OpenFont(font.c_str(), 20);
+    }
     lastErr = 0;
     IsMenuOpen = false;
     debugInfo = false;
@@ -116,6 +127,7 @@ void Dashboard::DrawGames() {
 }
 
 void Dashboard::SetGames() {
+	randomNumer++;
     //Create game images
 	std::vector<u64> tids;
     App::GetTitleIds(tids);
@@ -155,16 +167,57 @@ void Dashboard::SetOverlay(std::string battery, SDL_Rect batPos, SDL_Rect clkPos
 
 void Dashboard::DrawMenus() {
     for(auto menu: Menus) {
+		//Only draw menus that are open
         if(menu->IsOpen()) {
             if(menu->Sprite != nullptr)
 				Draw::RenderTexture(menu->Sprite, menu->Pos, Rend);
 			else
 				Draw::Rectangle(menu->Pos, menu->Color, Rend);
 			
+			//Populate menu
 			Draw::Text(Rend, hdrFont, 30, 25, menu->Title);
+			int i = 0;
             for(auto button: menu->Buttons) {
-                Draw::Rectangle(button->Pos, button->Color, Rend);
-                Draw::Text(Rend, smallFont, button->Pos.x, button->Pos.y, button->Text);
+				if(i == menu->GetSelection()) {
+					SDL_Rect pos; 
+					pos.x = button->Pos.x-5; pos.y = button->Pos.y-5;
+					pos.w = button->Pos.w+10; pos.h = button->Pos.h+10;
+					Draw::Rectangle(pos, 0xFFCEFF, Rend);
+					Draw::Rectangle(button->Pos, button->Color, Rend);
+				} else {
+					Draw::Rectangle(button->Pos, button->Color, Rend);
+				}
+				
+                Draw::Text(Rend, smallFont, button->Pos.x + 12, button->Pos.y + (button->Pos.h/2) - 4, button->Text);
+                //Draw settings panel
+                u32 panX = 500, panY = 100;
+                if(!menu->Title.compare("Settings")) {
+                    switch(menu->GetSelection()){
+                        case 0:
+                        {
+                            Draw::Text(Rend, smallFont, panX, panY, "Toggle the lock screen flag.");
+                            break;
+                        }
+                        case 1:
+                        {
+                            Draw::Text(Rend, smallFont, panX, panY, "View internet settings.");
+                            break;
+                        }
+                        case 2:
+                        {
+                            Draw::Text(Rend, smallFont, panX, panY, "Edit profile.");
+                            break;
+                        }
+                        case 3:
+                        {
+                            Draw::Text(Rend, smallFont, panX, panY, "Special specific information.");
+							Draw::Text(Rend, smallFont, panX+5, panY+50, "Firmware: " + Settings::GetFirmwareVersion());
+							Draw::Text(Rend, smallFont, panX+5, panY+70, "Serial: " + Settings::GetSerialNumber());
+                            break;
+                        }
+                    }
+                }
+				i++;
             }
         }
     }
@@ -179,7 +232,7 @@ void Dashboard::DrawDebugText() {
         Draw::Text(Rend, debugFont, X, Y+=s, "Firmware: " + Settings::GetFirmwareVersion());
         Draw::Text(Rend, debugFont, X, Y+=s, "Serial: " + Settings::GetSerialNumber());
 		Draw::Text(Rend, debugFont, X, Y+=s, "Battery: " + std::to_string(Power::GetBatteryLife()) + "%");
-		Draw::Text(Rend, debugFont, X, Y+=s, "Audio vol: " + std::to_string(Settings::GetAudioVolume()));
+		Draw::Text(Rend, debugFont, X, Y+=s, "Random: " + std::to_string(randomNumer));
         Draw::Text(Rend, debugFont, X, Y+=s, "Touch: X=" + std::to_string(touchPos.px) + "; y=" + std::to_string(touchPos.py));
         Y = 0;
     }
@@ -214,6 +267,74 @@ void Dashboard::OffsetGameIcons(u32 deltaX) {
 		game->Pos.x = (game->Pos.x <= 100+(i*(game->Pos.w+14))) ? (game->Pos.x + deltaX) : 100+(i*(game->Pos.w+14));
         i++;
 	}
+}
+
+void Dashboard::IncrementMenuSel() {
+	for(auto menu: Menus) {
+        if(menu->IsOpen()) {
+			if(menu->GetSelection() < menu->Buttons.size()-1)
+				menu->IncrementSelect();
+			else
+				menu->SetSelection(0);
+		}
+	}
+}
+
+void Dashboard::DecrementMenuSel() {
+	for(auto menu: Menus) {
+        if(menu->GetSelection() > 0)
+			menu->DecrementSelect();
+		else
+			menu->SetSelection(menu->Buttons.size()-1);
+	}
+}
+
+void Dashboard::ActivateMenu() {
+	for(auto menu: Menus) {
+		if(menu->IsOpen()){
+			if(menu->currLayer = 0) menu->currLayer++;
+			else {
+				//Settings
+				if(!menu->Title.compare("Settings")) {
+					switch(menu->GetSelection()){
+						case 0:
+						{
+							//toggle lock 
+							break;
+						}
+						case 1:
+						{
+							//Internet settings
+							break;
+						}
+						case 2:
+						{
+							//Profile
+							break;
+						}
+						case 3:
+						{
+							//system info/update
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+void Dashboard::DisengageMenu() {
+	for(auto menu: Menus) {
+		if(menu->IsOpen()) {
+			if(menu->currLayer <= 0) CloseMenus();
+			else menu->currLayer--;
+		}
+	}
+}
+
+Result Dashboard::LaunchGame(u64 tid) {
+    u128 userid = 0;//App::LaunchPSelect();
+    return App::LaunchGame(tid, userid);
 }
 
 /*

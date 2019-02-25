@@ -22,6 +22,8 @@ Menu::Menu(std::string title, std::string text, u32 x, u32 y, std::string textur
 	Title = title;
 	Text = text;
 	Visible = false;
+	currLayer = 0;
+	SelectPos = 0;
 	Pos.x = x; Pos.y = y;
 	Sprite = nullptr;
 	SDL_Surface *img = IMG_Load(texture.c_str());
@@ -51,4 +53,8 @@ void Menu::Show() {
 
 void Menu::Hide() {
 	Visible = false;
+}
+
+void Menu::Run(u32 index) {
+	
 }

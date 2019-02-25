@@ -34,3 +34,15 @@ u128 *Account::GetListOfAccounts() {
 	accountExit();
 	return userIDs;
 }
+
+Result Account::SetProfilePicture(u128 userId, u8 *jpg, size_t jpgSize) {
+	Result rc = 0;
+	AccountProfile prof;
+	AccountProfileBase pb;
+	AccountUserData accData;
+	
+	rc = accGetProfileEditor(&prof, userId);
+	rc = accStoreWithImage(&prof, &pb, &accData, jpg, jpgSize);
+	
+	return rc;
+}

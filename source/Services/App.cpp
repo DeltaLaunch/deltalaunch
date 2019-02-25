@@ -58,21 +58,38 @@ Result App::LaunchAlbum() {
 	appletHolderStart(&h);
     appletHolderJoin(&h);
     appletHolderClose(&h);
+    libappletRequestHomeMenu();
     return 0;
 }
 
 u128 App::LaunchPSelect() {
 	AppletHolder h;
-	LibAppletArgs args;
+    AppletStorage storage;
 	u128 player;
+    Result rc = 0;
     
 	appletCreateLibraryApplet(&h, AppletId_playerSelect, LibAppletMode_AllForeground);
-	libappletArgsCreate(&args, 1);
-    libappletArgsPush(&args, &h);
-	appletHolderStart(&h);
+    u8 argBuf[0xA0] = {0};
+    appletCreateStorage(&storage, sizeof(argBuf));
+    rc = appletStorageWrite(&storage, 0, argBuf, sizeof(argBuf));
+    if(R_FAILED(rc)) {
+        appletStorageClose(&storage);
+        ShowError("Error launching player select", "Error writing storage.", rc);
+    }
+    appletHolderPushInData(&h, &storage);
+	rc = appletHolderStart(&h);
     appletHolderJoin(&h);
+    if(R_FAILED(rc)) {
+        ShowError("Error launching player select", "Error starting applet.", rc);
+    }
+    else {
+        appletHolderPopOutData(&h, &storage);
+        u8 buf[0x18] = {0};
+        appletStorageRead(&storage, 0, buf, 0x18);
+        player = *(u128*)(buf+8);
+    }
     appletHolderClose(&h);
-    //TODO get usersid
+    appletStorageClose(&storage);
     
     return player;
 }
@@ -171,81 +188,44 @@ Result App::LaunchHbl() {
 }
 
 Result App::LaunchGame(u64 tid, u128 userID) {
-    /*AppletHolder h;
+    AppletHolder h;
     AppletStorage aStore;
-    //LibAppletArgs aArgs;
-    
     Result rc = 0;
+    
 	appCreate(&h, tid, true, Create_App);
-    appRequestForApplicationToGetForeground(&h);
+    appletUnlockForeground();
     
     rc = appletCreateStorage(&aStore, 0x88);
     if(R_FAILED(rc)) {
-        ShowError("Error launching browser", "Error initializing arg storage", rc);
+        ShowError("Error launching game", "Error initializing arg storage", rc);
     }
     
-    u8 indata[0x88] = {0};
-    *(u32*)&indata[0] = 0xC79497CA;
-    *(u8*)&indata[4] = 1;
-    *(u128*)&indata[8] = userID;
+    struct InData{
+        u32 code;
+        u8 unk1;
+        u8 pad[3];
+        u128 id;
+        u8 unk2[0x70];
+    };
+    InData indata = {0};
+    indata.code = 0xC79497CA;
+    indata.unk1 = 1;
+    indata.id = userID;
     
-    rc = appletStorageWrite(&aStore, 0, indata, 0x88);
+    rc = appletStorageWrite(&aStore, 0, &indata, 0x88);
     if(R_FAILED(rc)) {
         ShowError("Error launching game", "Error writing arg storage", rc);
     }
     appletHolderPushInData(&h, &aStore);
+    appRequestForApplicationToGetForeground(&h);
     rc = appletHolderStart(&h);
     if(R_FAILED(rc)) {
-        ShowError("Error launching browser", "Lookup errorcode for more info", rc);
-    }
-    appletHolderJoin(&h);
-    appletHolderClose(&h);
-    appletStorageClose(&aStore);*/
-    Result rc = 0;
-    u128 ids[5];
-    size_t total;
-    rc = accountInitialize();
-    rc = nsInitialize();
-    rc = accountListAllUsers(ids, 5, &total);
-    accountExit();
-    AppletHolder h;
-    AppletStorage aStore;            
-    
-    rc = appCreate(&h, tid, true, Create_App);
-    if(R_FAILED(rc)) {
-        ShowError("Error appCreate", std::to_string(rc), rc);
-    }
-    rc = appRequestForApplicationToGetForeground(&h);
-    if(R_FAILED(rc)) {
-        ShowError("Error appRequestForApplicationToGetForeground", std::to_string(rc), rc);
-    }
-    
-    rc = appletCreateStorage(&aStore, 0x88);
-    if(R_FAILED(rc)) {
-        ShowError("Error appletCreateStorage", std::to_string(rc), rc);
-    }
-    
-    u8 indata[0x88] = {0};
-    *(u32*)&indata[0] = 0xC79497CA;
-    *(u8*)&indata[4] = 1;
-    *(u128*)&indata[5] = ids[0];
-    
-    rc = appletStorageWrite(&aStore, 0, indata, 0x88);
-    if(R_FAILED(rc)) {
-        ShowError("Error appletStorageWrite", std::to_string(rc), rc);
-    }
-    rc = appletHolderPushInData(&h, &aStore);
-    if(R_FAILED(rc)) {
-        ShowError("Error appletHolderPushInData", std::to_string(rc), rc);
-    }
-    rc = appletHolderStart(&h);
-    if(R_FAILED(rc)) {
-        ShowError("Error appletHolderStart", std::to_string(rc), rc);
+        ShowError("Error launching game", "Lookup errorcode for more info", rc);
     }
     appletHolderJoin(&h);
     appletHolderClose(&h);
     appletStorageClose(&aStore);
-    nsExit();
+    
     return rc;
 }
 

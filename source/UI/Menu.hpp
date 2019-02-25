@@ -23,6 +23,7 @@
 #include <switch.h>
 #include "INI.hpp"
 #include "Button.hpp"
+#include "Draw.hpp"
 
 class Menu
 {
@@ -34,13 +35,20 @@ class Menu
 		void Hide();
         bool IsOpen() { return Visible; }
 		void AddButton(Button *button);
+        void IncrementSelect() {SelectPos++;}
+		void DecrementSelect() {SelectPos--;}
+		u32 GetSelection() {return SelectPos;}
+		void SetSelection(u32 sel) {SelectPos = sel;}
 		std::string GetTitle() { return Title; }
+		void Run(u32 index);
         
         SDL_Rect Pos;
 		u32 Color;
 		std::string Title, Text;
 		std::vector<Button*> Buttons;
 		SDL_Texture *Sprite;
+		u8 currLayer;
 	private:
         bool Visible;
+        u32 SelectPos;
 };

@@ -42,27 +42,39 @@ class Dashboard
     public:
         Dashboard(Renderer *rend, u32 width, u32 height, std::string font);
         ~Dashboard();
+        //Draw/set
         void DrawWallpaper();
         void SetWallpaper(std::vector<std::string> layers);
         void DrawLockScreen();
         void SetLockScreen(std::string image);
         void DrawButtons();
 		void DrawGames();
-        void OffsetGameIcons(u32 deltaX);
-		void SetGames();
+        void SetGames();
         void DrawOverlay();
         void SetOverlay(std::string battery, SDL_Rect batPos, SDL_Rect clkPos);
         void DrawMenus();
         void DrawDebugText();
         void ToggleDebug(){ debugInfo = !debugInfo; }
-        void AddButton(Button *button);
-		void AddGame(Game *game);
+        
+        
+        //Interactions
+        void OffsetGameIcons(u32 deltaX);
+		void IncrementMenuSel();
+		void DecrementMenuSel();
+		void ActivateMenu();
+		void DisengageMenu();
         Result OpenMenu(std::string name);
         Result CloseMenus();
-        void AddMenu(Menu *menu);
+        Result LaunchGame(u64 tid);
         bool IsMenuOpen;
         SDL_Rect GameIconArea;
+        
+        //Add elements
+        void AddButton(Button *button);
+		void AddGame(Game *game);
+        void AddMenu(Menu *menu);
     private:
+		u32 randomNumer;
         u32 Width, Height;
         bool debugInfo;
         Renderer *Rend;
