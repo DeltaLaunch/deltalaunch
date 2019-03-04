@@ -39,6 +39,17 @@ void Game::SetFlag(u8 flag) {
     Flag = flag;
 }
 
-Result Game::Play(u128 userID) {
-    return App::LaunchGame(TitleId, userID);
+void Game::MountSaveData() {
+    FsSave save = {0};
+    save.titleID = TitleId;
+    FsFileSystem *fs = fsdevGetDefaultFileSystem();
+    fsMountSaveData(fs, 0, &save);
+}
+
+Result Game::Play() {
+    u128 userid = App::LaunchPSelect();
+    return App::LaunchGame(TitleId, userid);
+    /*std::stringstream ss;
+    ss << std::hex << "TitleID: " << TitleId;
+    return App::ShowError("An Error has occurred!", ss.str(), 0);*/
 }

@@ -18,32 +18,15 @@
 
 #pragma once
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <functional>
-#include <string>
-#include <ios>
-#include <sstream>
+#include <stdint.h>
 #include <switch.h>
-#include "Draw.hpp"
-#include "../Services/App.hpp"
+#include "Power.hpp"
+#include "App.hpp"
 
-class Game
+class Hid
 {
     public:
-		Game(u32 x, u32 y, u32 w, u32 h, u32 col);
-        ~Game();
-        void SetTitleId(u64 tid);
-        void SetFlag(u8 flag);
-        u64 GetTitleId() {return TitleId;}
-        void MountSaveData();
-        Result Play();
-
-		SDL_Texture *Icon;
-        SDL_Rect Pos;
-        SDL_Texture *Sprite;
-        u32 Color;
-        std::string Text;
-    private:
-        u64 TitleId;
-		u8 Flag;
+        static bool IsTouched();
+        static bool IsTouched(SDL_Rect pos);
+        static touchPosition GetTouchPos();
 };

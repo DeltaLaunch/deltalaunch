@@ -22,14 +22,13 @@ Dashboard::Dashboard(Renderer *rend, u32 width, u32 height, std::string font) {
     Rend = rend;
     Width = width;
     Height = height;
+    plInitialize();
     if(font == "") {
-        /*PlFontData fnt;
-        plInitialize();
+        PlFontData fnt;
         plGetSharedFontByType(&fnt, PlSharedFontType_Standard);
         debugFont = TTF_OpenFontRW(SDL_RWFromMem(fnt.address, fnt.size), 1, 14);
         hdrFont = TTF_OpenFontRW(SDL_RWFromMem(fnt.address, fnt.size), 1, 28);
         smallFont = TTF_OpenFontRW(SDL_RWFromMem(fnt.address, fnt.size), 1, 20);
-        plExit();*/
     } 
     else {
         debugFont = TTF_OpenFont(font.c_str(), 14);
@@ -46,6 +45,7 @@ Dashboard::Dashboard(Renderer *rend, u32 width, u32 height, std::string font) {
 }
 
 Dashboard::~Dashboard() {
+    plExit();
     TTF_CloseFont(debugFont);
 	TTF_CloseFont(hdrFont);
 	TTF_CloseFont(smallFont);
@@ -120,8 +120,8 @@ void Dashboard::DrawGames() {
 		}
         
         if(Hid::IsTouched(game->Pos) && !IsMenuOpen) {
-            //lastErr = game->Run();
-			//if(lastErr) App::ShowError("An Error has occurred!", "Error code: " + std::to_string(lastErr), lastErr);
+            lastErr = game->Play();
+			if(lastErr) App::ShowError("An Error has occurred!", "Error code: " + std::to_string(lastErr), lastErr);
 		}
 	}
 }
@@ -330,11 +330,6 @@ void Dashboard::DisengageMenu() {
 			else menu->currLayer--;
 		}
 	}
-}
-
-Result Dashboard::LaunchGame(u64 tid) {
-    u128 userid = 0;//App::LaunchPSelect();
-    return App::LaunchGame(tid, userid);
 }
 
 /*

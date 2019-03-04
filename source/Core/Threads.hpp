@@ -17,16 +17,8 @@
 */
 
 #pragma once
-#include <SDL2/SDL.h>
-#include <stdint.h>
-#include <switch.h>
-#include "Services/Power.hpp"
-#include "Services/App.hpp"
 
-class Hid
-{
+class Threads  {
     public:
-        static bool IsTouched();
-        static bool IsTouched(SDL_Rect pos);
-        static touchPosition GetTouchPos();
+        static void TestThread(void* arg);
 };

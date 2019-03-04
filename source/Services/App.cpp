@@ -54,11 +54,11 @@ Result App::LaunchAlbum() {
 	
 	appletCreateLibraryApplet(&h, AppletId_photoViewer, LibAppletMode_AllForeground);
 	libappletArgsCreate(&args, 1);
+    libappletArgsSetPlayStartupSound(&args, true);
     libappletArgsPush(&args, &h);
 	appletHolderStart(&h);
     appletHolderJoin(&h);
     appletHolderClose(&h);
-    libappletRequestHomeMenu();
     return 0;
 }
 
@@ -249,6 +249,7 @@ Result App::ShowError(std::string errText, std::string details, Result rc) {
 
     appletHolderStart(&h);
     appletHolderJoin(&h);
-	
+	appletHolderClose(&h);
+    
 	return 0;
 }

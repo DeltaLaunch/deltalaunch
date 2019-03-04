@@ -29,7 +29,7 @@
 #include "Draw.hpp"
 #include "Renderer.hpp"
 #include "Menu.hpp"
-#include "../Hid.hpp"
+#include "../Services/Hid.hpp"
 #include "../Services/Rnx.hpp"
 #include "../Services/Settings.hpp"
 #include "../Services/Apm.hpp"
@@ -65,7 +65,6 @@ class Dashboard
 		void DisengageMenu();
         Result OpenMenu(std::string name);
         Result CloseMenus();
-        Result LaunchGame(u64 tid);
         bool IsMenuOpen;
         SDL_Rect GameIconArea;
         

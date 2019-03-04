@@ -26,16 +26,17 @@
 #include <vector>
 #include <switch.h>
 
-#include "UI/Renderer.hpp"
-#include "UI/Draw.hpp"
-#include "UI/INI.hpp"
-#include "UI/Dashboard.hpp"
-#include "UI/Button.hpp"
-#include "UI/Game.hpp"
-#include "UI/Menu.hpp"
-#include "Hid.hpp"
-#include "Services/App.hpp"
-#include "Services/Power.hpp"
+#include "../UI/Renderer.hpp"
+#include "../UI/Draw.hpp"
+#include "../UI/INI.hpp"
+#include "../UI/Dashboard.hpp"
+#include "../UI/Button.hpp"
+#include "../UI/Game.hpp"
+#include "../UI/Menu.hpp"
+#include "../Services/Hid.hpp"
+#include "Threads.hpp"
+#include "../Services/App.hpp"
+#include "../Services/Power.hpp"
 
 #define BACKGROUND_LAYERS 99
 
@@ -59,6 +60,7 @@ class Engine
         Mix_Music *bgm;
         u32 lastPosX;
     private:
+        Thread thread;
         EngineState State;
         std::string baseThemeDir;
         u32 Width, Height;

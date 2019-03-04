@@ -16,34 +16,10 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <functional>
-#include <string>
-#include <ios>
-#include <sstream>
-#include <switch.h>
-#include "Draw.hpp"
-#include "../Services/App.hpp"
+#include "Threads.hpp"
 
-class Game
-{
-    public:
-		Game(u32 x, u32 y, u32 w, u32 h, u32 col);
-        ~Game();
-        void SetTitleId(u64 tid);
-        void SetFlag(u8 flag);
-        u64 GetTitleId() {return TitleId;}
-        void MountSaveData();
-        Result Play();
-
-		SDL_Texture *Icon;
-        SDL_Rect Pos;
-        SDL_Texture *Sprite;
-        u32 Color;
-        std::string Text;
-    private:
-        u64 TitleId;
-		u8 Flag;
-};
+void Threads::TestThread(void* arg) {
+    while(1){
+        //
+    }
+}

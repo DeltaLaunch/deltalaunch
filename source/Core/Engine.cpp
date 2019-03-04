@@ -69,7 +69,7 @@ Engine::Engine(u32 width, u32 height, void *heapAddr, size_t heapSize) {
     unsigned x = 230;       //padding on edges
     unsigned space = 100;   //space inbetween
     dash->AddButton(new Button(baseThemeDir + cfg.Get("WebButton", "sprite", ""), cfg.GetInteger("WebButton", "x", x+=space), cfg.GetInteger("WebButton", "y", 600), &mRender, std::bind(App::LaunchWebsite, "https://google.com/")));
-    dash->AddButton(new Button(baseThemeDir + cfg.Get("NewsButton", "sprite", ""), cfg.GetInteger("NewsButton", "x", x+=space), cfg.GetInteger("NewsButton", "y", 600), &mRender, std::bind(&Dashboard::LaunchGame, dash, (u64)0x0100000000010000)));
+    dash->AddButton(new Button(baseThemeDir + cfg.Get("NewsButton", "sprite", ""), cfg.GetInteger("NewsButton", "x", x+=space), cfg.GetInteger("NewsButton", "y", 600), &mRender, nullptr));
     dash->AddButton(new Button(baseThemeDir + cfg.Get("ShopButton", "sprite", ""), cfg.GetInteger("ShopButton", "x", x+=space), cfg.GetInteger("ShopButton", "y", 600), &mRender, App::LaunchShop));
     dash->AddButton(new Button(baseThemeDir + cfg.Get("AlbumButton", "sprite", ""), cfg.GetInteger("AlbumButton", "x", x+=space), cfg.GetInteger("AlbumButton", "y", 600), &mRender, App::LaunchAlbum));
     dash->AddButton(new Button(baseThemeDir + cfg.Get("HomebrewButton", "sprite", ""), cfg.GetInteger("HomebrewButton", "x", x+=space), cfg.GetInteger("HomebrewButton", "y", 600), &mRender, App::LaunchHbl));
@@ -88,14 +88,17 @@ Engine::Engine(u32 width, u32 height, void *heapAddr, size_t heapSize) {
     
     
     //Boundries: (120, 110), (1200, 560) .. 450px vert
-    int i, colums = 10, rows = 1;
-    for(i = 0; i < colums*rows; i++){
-		dash->AddGame(new Game(100+(i*270), 110+(225-(rows*135))+((i%rows)*270), 256, 256, 0x70));
+    int i, colums = 12;
+    for(i = 0; i < colums; i++){
+		dash->AddGame(new Game(100+(i*270), 200, 256, 256, 0x70));
 	}
     dash->SetGames();
     
     //Play BGM
     if(bgm) Mix_PlayMusic(bgm, -1);
+
+    if (R_SUCCEEDED(threadCreate(&thread, Threads::TestThread, NULL, 0x10000, 0x2C, -2)));
+        //threadStart(&thread);
 }
 
 Engine::~Engine() {
@@ -132,7 +135,7 @@ void Engine::GetInputs() {
         case DASHBOARD:
         {
             if(kDown & KEY_PLUS) dash->ToggleDebug();
-            if(kDown & KEY_MINUS) dash->SetGames();
+            if(kDown & KEY_MINUS) threadStart(&thread);
             if(Hid::IsTouched(dash->GameIconArea)) {
                 if(lastPosX != 0) 
                     dash->OffsetGameIcons(Hid::GetTouchPos().px - lastPosX);
