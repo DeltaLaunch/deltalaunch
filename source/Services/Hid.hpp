@@ -23,10 +23,15 @@
 #include "Power.hpp"
 #include "App.hpp"
 
+#define LONGPRESS_MS 1500
+#define SHORTPRESS_MS 200
+
 class Hid
 {
     public:
         static bool IsTouched();
-        static bool IsTouched(SDL_Rect pos);
+		static bool IsTouched(SDL_Rect pos);
+        static bool IsTapped(SDL_Rect pos);
         static touchPosition GetTouchPos();
+		static bool IsLongPress();
 };

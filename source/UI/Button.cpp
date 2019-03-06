@@ -18,7 +18,7 @@
 
 #include "Button.hpp"
 
-Button::Button(std::string sprite, u32 x, u32 y, Renderer *rend, std::function<Result()> callback) {
+Button::Button(std::string sprite, std::string spriteSel, u32 x, u32 y, Renderer *rend, std::function<Result()> callback) {
     Pos.x = x; Pos.y = y;
     Callback = callback;
     Sprite = nullptr;
@@ -31,6 +31,14 @@ Button::Button(std::string sprite, u32 x, u32 y, Renderer *rend, std::function<R
 			SDL_FreeSurface(img);
 		}
 	}
+	SpriteSelect = nullptr;
+	if(spriteSel != "") {
+		SDL_Surface *img = IMG_Load(spriteSel.c_str());
+		SpriteSelect = Draw::CreateTexFromSurf(img, rend);
+		if(img) {
+			SDL_FreeSurface(img);
+		}
+	}
 }
 
 Button::Button(std::string text, u32 x, u32 y, u32 w, u32 h, u32 col, std::function<Result()> callback) {
@@ -39,11 +47,13 @@ Button::Button(std::string text, u32 x, u32 y, u32 w, u32 h, u32 col, std::funct
     Callback = callback;
     Color = col;
 	Sprite = nullptr;
+	SpriteSelect = nullptr;
     Text = text;
 }
 
 Button::~Button() {
     SDL_DestroyTexture(Sprite);
+	SDL_DestroyTexture(SpriteSelect);
 }
 
 Result Button::Run() {

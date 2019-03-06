@@ -36,6 +36,9 @@
 #include "../Services/Time.hpp"
 #include "../Services/Power.hpp"
 #include "../Services/App.hpp"
+#include "../Types.h"
+
+#define AQUA 0xFFCEFF
 
 class Dashboard
 {
@@ -56,7 +59,6 @@ class Dashboard
         void DrawDebugText();
         void ToggleDebug(){ debugInfo = !debugInfo; }
         
-        
         //Interactions
         void OffsetGameIcons(u32 deltaX);
 		void IncrementMenuSel();
@@ -67,13 +69,20 @@ class Dashboard
         Result CloseMenus();
         bool IsMenuOpen;
         SDL_Rect GameIconArea;
+		u32 MaxColumns;
+		void IncrementDashSel();
+		void DecrementDashSel();
+        void ActivateDash();
         
         //Add elements
         void AddButton(Button *button);
 		void AddGame(Game *game);
         void AddMenu(Menu *menu);
+		
+		u8 selLayer;
     private:
-		u32 randomNumer;
+		SelectType selType;
+		u32 gameSelectInd, appletSelectInd;
         u32 Width, Height;
         bool debugInfo;
         Renderer *Rend;

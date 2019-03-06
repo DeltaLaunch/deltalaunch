@@ -18,8 +18,7 @@
 
 #include "Threads.hpp"
 
-void Threads::TestThread(void* arg) {
-    while(1){
-        //
-    }
+bool Threads::FriendThread() {
+	//
+	return true;
 }

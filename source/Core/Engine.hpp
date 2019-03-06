@@ -26,6 +26,8 @@
 #include <vector>
 #include <switch.h>
 
+#include "Threads.hpp"
+#include "ThreadManager.hpp"
 #include "../UI/Renderer.hpp"
 #include "../UI/Draw.hpp"
 #include "../UI/INI.hpp"
@@ -34,19 +36,14 @@
 #include "../UI/Game.hpp"
 #include "../UI/Menu.hpp"
 #include "../Services/Hid.hpp"
-#include "Threads.hpp"
 #include "../Services/App.hpp"
 #include "../Services/Power.hpp"
+#include "../Types.h"
 
 #define BACKGROUND_LAYERS 99
 
 class Engine
 {
-    enum EngineState {
-        LOCKSCREEN,
-        DASHBOARD,
-        SETTINGS
-    };
     public:
         Engine(u32 width, u32 height, void *heapAddr, size_t heapSize);
         ~Engine();
@@ -60,7 +57,7 @@ class Engine
         Mix_Music *bgm;
         u32 lastPosX;
     private:
-        Thread thread;
+        ThreadManager *frndThread;
         EngineState State;
         std::string baseThemeDir;
         u32 Width, Height;

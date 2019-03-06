@@ -18,7 +18,7 @@
 
 #pragma once
 
-class Threads  {
+class Threads {
     public:
-        static void TestThread(void* arg);
+        static bool FriendThread();
 };

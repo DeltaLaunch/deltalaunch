@@ -30,8 +30,30 @@ bool Hid::IsTouched(SDL_Rect pos){
     return (touchPos.px >= pos.x && touchPos.px <= (pos.x + pos.w) && touchPos.py >= pos.y && touchPos.py <= (pos.y + pos.h));
 }
 
+bool Hid::IsTapped(SDL_Rect pos){
+    touchPosition touchPos;
+    hidTouchRead(&touchPos, 0);
+	int i = svcGetSystemTick();
+    while(touchPos.px >= pos.x && touchPos.px <= (pos.x + pos.w) && touchPos.py >= pos.y && touchPos.py <= (pos.y + pos.h)) {
+		if(svcGetSystemTick() - i >= SHORTPRESS_MS) return false;
+		hidTouchRead(&touchPos, 0);
+	}
+    return true;
+}
+
 touchPosition Hid::GetTouchPos() {
     touchPosition touchPos;
     hidTouchRead(&touchPos, 0);
     return touchPos;
+}
+
+bool Hid::IsLongPress() {
+	touchPosition touchPos;
+    hidTouchRead(&touchPos, 0);
+	int i = svcGetSystemTick();
+    while(touchPos.px != 0 && touchPos.py != 0) {
+		if(svcGetSystemTick() - i >= LONGPRESS_MS) return true;
+		hidTouchRead(&touchPos, 0);
+	}
+	return false;
 }

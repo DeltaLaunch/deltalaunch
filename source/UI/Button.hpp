@@ -27,7 +27,7 @@
 class Button
 {
     public:
-        Button(std::string sprite, u32 x, u32 y, Renderer *rend, std::function<Result()> callback);
+        Button(std::string sprite, std::string spriteSel, u32 x, u32 y, Renderer *rend, std::function<Result()> callback);
         Button(std::string text, u32 x, u32 y, u32 w, u32 h, u32 col, std::function<Result()> callback);
         ~Button();
         Result Run();
@@ -35,6 +35,7 @@ class Button
         //vars
         SDL_Rect Pos;
         SDL_Texture *Sprite;
+		SDL_Texture *SpriteSelect;
         u32 Color;
         std::string Text;
     private:

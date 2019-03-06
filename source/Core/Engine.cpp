@@ -62,19 +62,47 @@ Engine::Engine(u32 width, u32 height, void *heapAddr, size_t heapSize) {
     dash->SetWallpaper(layers);
     dash->SetLockScreen(baseThemeDir + cfg.Get("Config", "lockscreen_image", ""));
     dash->SetOverlay(baseThemeDir + cfg.Get("BatteryOverlay", "battery", ""), batPos, clkPos);
-    State = (Settings::GetLockScreenFlag() ? LOCKSCREEN : DASHBOARD);
+    State = (Settings::GetLockScreenFlag() ? STATE_LOCKSCREEN : STATE_DASHBOARD);
 	layers.clear();
     
     //Create buttons to add to dash
     unsigned x = 230;       //padding on edges
     unsigned space = 100;   //space inbetween
-    dash->AddButton(new Button(baseThemeDir + cfg.Get("WebButton", "sprite", ""), cfg.GetInteger("WebButton", "x", x+=space), cfg.GetInteger("WebButton", "y", 600), &mRender, std::bind(App::LaunchWebsite, "https://google.com/")));
-    dash->AddButton(new Button(baseThemeDir + cfg.Get("NewsButton", "sprite", ""), cfg.GetInteger("NewsButton", "x", x+=space), cfg.GetInteger("NewsButton", "y", 600), &mRender, nullptr));
-    dash->AddButton(new Button(baseThemeDir + cfg.Get("ShopButton", "sprite", ""), cfg.GetInteger("ShopButton", "x", x+=space), cfg.GetInteger("ShopButton", "y", 600), &mRender, App::LaunchShop));
-    dash->AddButton(new Button(baseThemeDir + cfg.Get("AlbumButton", "sprite", ""), cfg.GetInteger("AlbumButton", "x", x+=space), cfg.GetInteger("AlbumButton", "y", 600), &mRender, App::LaunchAlbum));
-    dash->AddButton(new Button(baseThemeDir + cfg.Get("HomebrewButton", "sprite", ""), cfg.GetInteger("HomebrewButton", "x", x+=space), cfg.GetInteger("HomebrewButton", "y", 600), &mRender, App::LaunchHbl));
-    dash->AddButton(new Button(baseThemeDir + cfg.Get("SettingsButton", "sprite", ""), cfg.GetInteger("SettingsButton", "x", x+=space), cfg.GetInteger("SettingsButton", "y", 600), &mRender, std::bind(&Dashboard::OpenMenu, dash, "Settings")));
-    dash->AddButton(new Button(baseThemeDir + cfg.Get("PowerButton", "sprite", ""), cfg.GetInteger("PowerButton", "x", x+=space), cfg.GetInteger("PowerButton", "y", 600), &mRender, Power::Shutdown));
+    dash->AddButton(new Button(
+		baseThemeDir + cfg.Get("WebButton", "sprite", ""), baseThemeDir + cfg.Get("WebButton", "sprite_select", ""), 
+		cfg.GetInteger("WebButton", "x", x+=space), cfg.GetInteger("WebButton", "y", 600), 
+		&mRender, std::bind(App::LaunchWebsite, "https://google.com/")
+		));
+    dash->AddButton(new Button(
+		baseThemeDir + cfg.Get("NewsButton", "sprite", ""), baseThemeDir + cfg.Get("NewsButton", "sprite_select", ""), 
+		cfg.GetInteger("NewsButton", "x", x+=space), cfg.GetInteger("NewsButton", "y", 600), 
+		&mRender, nullptr
+	));
+    dash->AddButton(new Button(
+		baseThemeDir + cfg.Get("ShopButton", "sprite", ""), baseThemeDir + cfg.Get("ShopButton", "sprite_select", ""), 
+		cfg.GetInteger("ShopButton", "x", x+=space), cfg.GetInteger("ShopButton", "y", 600), 
+		&mRender, App::LaunchShop
+	));
+    dash->AddButton(new Button(
+		baseThemeDir + cfg.Get("AlbumButton", "sprite", ""), baseThemeDir + cfg.Get("AlbumButton", "sprite_select", ""), 
+		cfg.GetInteger("AlbumButton", "x", x+=space), cfg.GetInteger("AlbumButton", "y", 600), 
+		&mRender, App::LaunchAlbum
+	));
+    dash->AddButton(new Button(
+		baseThemeDir + cfg.Get("HomebrewButton", "sprite", ""), baseThemeDir + cfg.Get("HomebrewButton", "sprite_select", ""), 
+		cfg.GetInteger("HomebrewButton", "x", x+=space), cfg.GetInteger("HomebrewButton", "y", 600), 
+		&mRender, App::LaunchHbl
+	));
+    dash->AddButton(new Button(
+		baseThemeDir + cfg.Get("SettingsButton", "sprite", ""), baseThemeDir + cfg.Get("SettingsButton", "sprite_select", ""), 
+		cfg.GetInteger("SettingsButton", "x", x+=space), cfg.GetInteger("SettingsButton", "y", 600), 
+		&mRender, std::bind(&Dashboard::OpenMenu, dash, "Settings")
+	));
+    dash->AddButton(new Button(
+		baseThemeDir + cfg.Get("PowerButton", "sprite", ""), baseThemeDir + cfg.Get("PowerButton", "sprite_select", ""), 
+		cfg.GetInteger("PowerButton", "x", x+=space), cfg.GetInteger("PowerButton", "y", 600), 
+		&mRender, Power::Shutdown
+	));
 	
     //Settings
     Menu *settings = new Menu("Settings", "", 0, 0, baseThemeDir + cfg.Get("Menus", "settings", ""), &mRender);
@@ -88,8 +116,7 @@ Engine::Engine(u32 width, u32 height, void *heapAddr, size_t heapSize) {
     
     
     //Boundries: (120, 110), (1200, 560) .. 450px vert
-    int i, colums = 12;
-    for(i = 0; i < colums; i++){
+    for(int i = 0; i < dash->MaxColumns; i++){
 		dash->AddGame(new Game(100+(i*270), 200, 256, 256, 0x70));
 	}
     dash->SetGames();
@@ -97,11 +124,12 @@ Engine::Engine(u32 width, u32 height, void *heapAddr, size_t heapSize) {
     //Play BGM
     if(bgm) Mix_PlayMusic(bgm, -1);
 
-    if (R_SUCCEEDED(threadCreate(&thread, Threads::TestThread, NULL, 0x10000, 0x2C, -2)));
-        //threadStart(&thread);
+    frndThread = new ThreadManager(Threads::FriendThread);
+    frndThread->start();
 }
 
 Engine::~Engine() {
+	delete frndThread;
     delete dash;
     TTF_Quit();
     IMG_Quit();
@@ -127,16 +155,21 @@ void Engine::GetInputs() {
     u64 kDown = hidKeysDown(CONTROLLER_P1_AUTO);
     
     switch(State) {
-        case LOCKSCREEN:
+        case STATE_LOCKSCREEN:
         {
-            if(kDown & KEY_A) State = DASHBOARD;
+            if(kDown & KEY_A) State = STATE_DASHBOARD;
             break;
         }
-        case DASHBOARD:
+        case STATE_DASHBOARD:
         {
+            if(kDown & KEY_A) dash->ActivateDash();
             if(kDown & KEY_PLUS) dash->ToggleDebug();
-            if(kDown & KEY_MINUS) threadStart(&thread);
-            if(Hid::IsTouched(dash->GameIconArea)) {
+            if(kDown & KEY_MINUS) ;
+			if(kDown & KEY_DLEFT) dash->DecrementDashSel();
+			if(kDown & KEY_DRIGHT) dash->IncrementDashSel();
+			if(kDown & KEY_DUP) dash->selLayer = 0;
+			if(kDown & KEY_DDOWN) dash->selLayer = 1;
+            if(Hid::IsTouched(dash->GameIconArea) && !Hid::IsTapped(dash->GameIconArea)) {
                 if(lastPosX != 0) 
                     dash->OffsetGameIcons(Hid::GetTouchPos().px - lastPosX);
                 lastPosX = Hid::GetTouchPos().px;
@@ -145,7 +178,7 @@ void Engine::GetInputs() {
             }
             break;
         }
-        case SETTINGS:
+        case STATE_SETTINGS:
         {
             if(kDown & KEY_A) dash->ActivateMenu();
 			if(kDown & KEY_B) dash->DisengageMenu();
@@ -164,13 +197,13 @@ void Engine::GetInputs() {
 void Engine::Update() {
     
     //Lockscreen
-    while(State == LOCKSCREEN && !Hid::IsTouched()) {
+    while(State == STATE_LOCKSCREEN && !Hid::IsTouched()) {
         Clear();
         dash->DrawLockScreen();
         Render();
         GetInputs();
     }
-    State = dash->IsMenuOpen ? SETTINGS : DASHBOARD;
+    State = dash->IsMenuOpen ? STATE_SETTINGS : STATE_DASHBOARD;
     GetInputs();
     
     //Dash

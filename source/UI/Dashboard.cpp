@@ -36,12 +36,16 @@ Dashboard::Dashboard(Renderer *rend, u32 width, u32 height, std::string font) {
         smallFont = TTF_OpenFont(font.c_str(), 20);
     }
     lastErr = 0;
+	selLayer = 0;
+	gameSelectInd = 0;
     IsMenuOpen = false;
     debugInfo = false;
+	MaxColumns = 12;
     Wallpaper = SDL_CreateTexture(Rend->_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, Width, Height);
     LockScreen = SDL_CreateTexture(Rend->_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, Width, Height);
     GameIconArea.x = 120; GameIconArea.y = 110;
     GameIconArea.w = 1080; GameIconArea.h = 450;
+	selType == SELECT_OUTLINE;
 }
 
 Dashboard::~Dashboard() {
@@ -98,36 +102,63 @@ void Dashboard::SetLockScreen(std::string image) {
 }
 
 void Dashboard::DrawButtons() {
+	int ind = 0;
     for(auto button: Buttons) {
-        if(button->Sprite != nullptr)
-            Draw::RenderTexture(button->Sprite, button->Pos, Rend);
+		//Render icon/selected icon
+        if(button->Sprite != nullptr) {
+			if(ind == appletSelectInd && selLayer == 1)
+				Draw::RenderTexture(button->SpriteSelect, button->Pos, Rend);
+			else
+				Draw::RenderTexture(button->Sprite, button->Pos, Rend);
+		}
+		//Default to rendering rectangle
         else
             Draw::Rectangle(button->Pos, button->Color, Rend);
         
+		//Detect touch selection
         if(Hid::IsTouched(button->Pos) && !IsMenuOpen) {
             lastErr = button->Run();
 			if(lastErr) App::ShowError("An Error has occurred!", "Error code: " + std::to_string(lastErr), lastErr);
 		}
+		ind++;
     }
 }
 
 void Dashboard::DrawGames() {
+	int ind = 0;
 	for(auto game: Games) {
-		if(game->GetTitleId() != 0) {
+        //Draw selection outline
+        if(ind == gameSelectInd && selLayer == 0 && selType == SELECT_OUTLINE) {
+            SDL_Rect pos = game->Pos; 
+            pos.x -= 5; pos.y -= 5; pos.w += 10; pos.h += 10;
+            Draw::Rectangle(pos, AQUA, Rend);
+            if(pos.x < 0) OffsetGameIcons(1*(game->Pos.w + 14));
+            if(pos.x + pos.w >= GameIconArea.x + GameIconArea.w) OffsetGameIcons(-1*(game->Pos.w + 14));
+        }
+		//Or draw size diff mode
+		else if(ind == gameSelectInd && selLayer == 0 && selType == SELECT_SIZEDIFF) {
+			SDL_Rect pos = game->Pos; 
+            pos.x -= 10; pos.y -= 10; pos.w += 20; pos.h += 20;
+			Draw::RenderTexture(game->Icon, pos, Rend);
+            if(pos.x < 0) OffsetGameIcons(1*(game->Pos.w + 14));
+            if(pos.x + pos.w >= GameIconArea.x + GameIconArea.w) OffsetGameIcons(-1*(game->Pos.w + 14));
+		}
+        //Draw either game icon or backer
+		if(game->GetTitleId() != 0 && selType != SELECT_SIZEDIFF) {
 			Draw::RenderTexture(game->Icon, game->Pos, Rend);
 		} else {
 			Draw::Rectangle(game->Pos, game->Color, Rend);
 		}
-        
+        //Detect touch selection
         if(Hid::IsTouched(game->Pos) && !IsMenuOpen) {
             lastErr = game->Play();
 			if(lastErr) App::ShowError("An Error has occurred!", "Error code: " + std::to_string(lastErr), lastErr);
 		}
+		ind++;
 	}
 }
 
 void Dashboard::SetGames() {
-	randomNumer++;
     //Create game images
 	std::vector<u64> tids;
     App::GetTitleIds(tids);
@@ -139,9 +170,9 @@ void Dashboard::SetGames() {
         SDL_Surface *img = IMG_Load_RW(SDL_RWFromMem(data.icon, 0x20000), 1);
         if(game->Icon != nullptr)
             SDL_DestroyTexture(game->Icon);
-        game->Icon = SDL_CreateTexture(Rend->_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 256, 256);
         game->Pos.w = 256;
         game->Pos.h = 256;
+		game->Icon = SDL_CreateTexture(Rend->_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, game->Pos.w, game->Pos.h);
         if(img) 
             game->Icon = SDL_CreateTextureFromSurface(Rend->_renderer, img);
         SDL_FreeSurface(img);
@@ -182,7 +213,7 @@ void Dashboard::DrawMenus() {
 					SDL_Rect pos; 
 					pos.x = button->Pos.x-5; pos.y = button->Pos.y-5;
 					pos.w = button->Pos.w+10; pos.h = button->Pos.h+10;
-					Draw::Rectangle(pos, 0xFFCEFF, Rend);
+					Draw::Rectangle(pos, AQUA, Rend);
 					Draw::Rectangle(button->Pos, button->Color, Rend);
 				} else {
 					Draw::Rectangle(button->Pos, button->Color, Rend);
@@ -232,7 +263,6 @@ void Dashboard::DrawDebugText() {
         Draw::Text(Rend, debugFont, X, Y+=s, "Firmware: " + Settings::GetFirmwareVersion());
         Draw::Text(Rend, debugFont, X, Y+=s, "Serial: " + Settings::GetSerialNumber());
 		Draw::Text(Rend, debugFont, X, Y+=s, "Battery: " + std::to_string(Power::GetBatteryLife()) + "%");
-		Draw::Text(Rend, debugFont, X, Y+=s, "Random: " + std::to_string(randomNumer));
         Draw::Text(Rend, debugFont, X, Y+=s, "Touch: X=" + std::to_string(touchPos.px) + "; y=" + std::to_string(touchPos.py));
         Y = 0;
     }
@@ -330,6 +360,21 @@ void Dashboard::DisengageMenu() {
 			else menu->currLayer--;
 		}
 	}
+}
+
+void Dashboard::IncrementDashSel() {
+	if(selLayer == 0 && gameSelectInd < Games.size()-1) gameSelectInd++;
+	if(selLayer == 1 && appletSelectInd < Buttons.size()-1) appletSelectInd++;
+}
+
+void Dashboard::DecrementDashSel() {
+	if(selLayer == 0 && gameSelectInd > 0) gameSelectInd--;
+	if(selLayer == 1 && appletSelectInd > 0) appletSelectInd--;
+}
+
+void Dashboard::ActivateDash() {
+    if(selLayer == 0) Games[gameSelectInd]->Play();
+	if(selLayer == 1) Buttons[appletSelectInd]->Run();
 }
 
 /*
