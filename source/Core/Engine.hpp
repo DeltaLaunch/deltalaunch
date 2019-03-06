@@ -24,6 +24,7 @@
 #include <SDL2/SDL_ttf.h>
 #include <string>
 #include <vector>
+#include <tuple>
 #include <switch.h>
 
 #include "Threads.hpp"

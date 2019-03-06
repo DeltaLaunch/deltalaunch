@@ -68,41 +68,26 @@ Engine::Engine(u32 width, u32 height, void *heapAddr, size_t heapSize) {
     //Create buttons to add to dash
     unsigned x = 230;       //padding on edges
     unsigned space = 100;   //space inbetween
-    dash->AddButton(new Button(
-		baseThemeDir + cfg.Get("WebButton", "sprite", ""), baseThemeDir + cfg.Get("WebButton", "sprite_select", ""), 
-		cfg.GetInteger("WebButton", "x", x+=space), cfg.GetInteger("WebButton", "y", 600), 
-		&mRender, std::bind(App::LaunchWebsite, "https://google.com/")
-		));
-    dash->AddButton(new Button(
-		baseThemeDir + cfg.Get("NewsButton", "sprite", ""), baseThemeDir + cfg.Get("NewsButton", "sprite_select", ""), 
-		cfg.GetInteger("NewsButton", "x", x+=space), cfg.GetInteger("NewsButton", "y", 600), 
-		&mRender, nullptr
-	));
-    dash->AddButton(new Button(
-		baseThemeDir + cfg.Get("ShopButton", "sprite", ""), baseThemeDir + cfg.Get("ShopButton", "sprite_select", ""), 
-		cfg.GetInteger("ShopButton", "x", x+=space), cfg.GetInteger("ShopButton", "y", 600), 
-		&mRender, App::LaunchShop
-	));
-    dash->AddButton(new Button(
-		baseThemeDir + cfg.Get("AlbumButton", "sprite", ""), baseThemeDir + cfg.Get("AlbumButton", "sprite_select", ""), 
-		cfg.GetInteger("AlbumButton", "x", x+=space), cfg.GetInteger("AlbumButton", "y", 600), 
-		&mRender, App::LaunchAlbum
-	));
-    dash->AddButton(new Button(
-		baseThemeDir + cfg.Get("HomebrewButton", "sprite", ""), baseThemeDir + cfg.Get("HomebrewButton", "sprite_select", ""), 
-		cfg.GetInteger("HomebrewButton", "x", x+=space), cfg.GetInteger("HomebrewButton", "y", 600), 
-		&mRender, App::LaunchHbl
-	));
-    dash->AddButton(new Button(
-		baseThemeDir + cfg.Get("SettingsButton", "sprite", ""), baseThemeDir + cfg.Get("SettingsButton", "sprite_select", ""), 
-		cfg.GetInteger("SettingsButton", "x", x+=space), cfg.GetInteger("SettingsButton", "y", 600), 
-		&mRender, std::bind(&Dashboard::OpenMenu, dash, "Settings")
-	));
-    dash->AddButton(new Button(
-		baseThemeDir + cfg.Get("PowerButton", "sprite", ""), baseThemeDir + cfg.Get("PowerButton", "sprite_select", ""), 
-		cfg.GetInteger("PowerButton", "x", x+=space), cfg.GetInteger("PowerButton", "y", 600), 
-		&mRender, Power::Shutdown
-	));
+    std::vector<std::tuple<std::string, std::function<Result()>>> Buttons{
+        std::tuple<std::string, std::function<Result()>>{"WebButton", std::bind(App::LaunchWebsite, "https://google.com/")},
+        std::tuple<std::string, std::function<Result()>>{"NewsButton", nullptr},
+        std::tuple<std::string, std::function<Result()>>{"ShopButton", App::LaunchShop},
+        std::tuple<std::string, std::function<Result()>>{"AlbumButton", App::LaunchAlbum},
+        std::tuple<std::string, std::function<Result()>>{"HomebrewButton", App::LaunchHbl},
+        std::tuple<std::string, std::function<Result()>>{"SettingsButton", std::bind(&Dashboard::OpenMenu, dash, "Settings")},
+        std::tuple<std::string, std::function<Result()>>{"PowerButton", Power::Shutdown},
+    };
+    for(int but = 0; but < Buttons.size(); but++) {
+        dash->AddButton(
+            new Button(
+                baseThemeDir + cfg.Get(std::get<0>(Buttons.at(but)), "sprite", ""), 
+                baseThemeDir + cfg.Get(std::get<0>(Buttons.at(but)), "sprite_select", ""), 
+                cfg.GetInteger(std::get<0>(Buttons.at(but)), "x", x+=space), 
+                cfg.GetInteger(std::get<0>(Buttons.at(but)), "y", 600), 
+                &mRender, std::get<1>(Buttons.at(but))
+            )
+        );
+    }
 	
     //Settings
     Menu *settings = new Menu("Settings", "", 0, 0, baseThemeDir + cfg.Get("Menus", "settings", ""), &mRender);
