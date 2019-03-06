@@ -48,6 +48,7 @@ class Engine
     public:
         Engine(u32 width, u32 height, void *heapAddr, size_t heapSize);
         ~Engine();
+        void Initialize();
         void Render();
         void Clear();
         void Update();

@@ -94,6 +94,7 @@ int main(int argc, char* argv[]) {
     
     //Qlaunch loop
     Engine eng(1280, 720, heapAddr, heapSize);
+    eng.Initialize();
     while (true) {
         eng.Clear();
         eng.Update();

@@ -24,14 +24,6 @@ Engine::Engine(u32 width, u32 height, void *heapAddr, size_t heapSize) {
         fatalSimple(0xBADC0DE);
     }
     
-    //Read config file
-    baseThemeDir = "/Theme/";
-    INIReader cfg(baseThemeDir + "theme.cfg");
-    HeapAddr = heapAddr;
-    HeapSize = heapSize;
-    Width = width;
-    Height = height;
-    
     //Basic SDL init
     SDL_Init(SDL_INIT_EVERYTHING);
     SDL_CreateWindowAndRenderer(width, height, 0, &mRender._window, &mRender._renderer);
@@ -42,6 +34,31 @@ Engine::Engine(u32 width, u32 height, void *heapAddr, size_t heapSize) {
     TTF_Init();
     SDL_SetRenderDrawColor(mRender._renderer, 0xFF, 0xFF, 0xFF, 0xFF);
     Mix_Init(MIX_INIT_FLAC | MIX_INIT_MOD | MIX_INIT_MP3 | MIX_INIT_OGG);
+    HeapAddr = heapAddr;
+    HeapSize = heapSize;
+    Width = width;
+    Height = height;
+}
+
+Engine::~Engine() {
+	delete frndThread;
+    delete dash;
+    TTF_Quit();
+    IMG_Quit();
+    Mix_CloseAudio();
+    Mix_Quit();
+    SDL_DestroyRenderer(mRender._renderer);
+    SDL_FreeSurface(mRender._surface);
+    SDL_DestroyWindow(mRender._window);
+    SDL_Quit();
+	Power::Shutdown();
+}
+
+void Engine::Initialize() {
+    //Read config file
+    baseThemeDir = "/Theme/";
+    INIReader cfg(baseThemeDir + "theme.cfg");
+
     Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 4096);
     Mix_VolumeMusic(cfg.GetInteger("Background", "bgmVol", 64));
     
@@ -111,20 +128,6 @@ Engine::Engine(u32 width, u32 height, void *heapAddr, size_t heapSize) {
 
     frndThread = new ThreadManager(Threads::FriendThread);
     frndThread->start();
-}
-
-Engine::~Engine() {
-	delete frndThread;
-    delete dash;
-    TTF_Quit();
-    IMG_Quit();
-    Mix_CloseAudio();
-    Mix_Quit();
-    SDL_DestroyRenderer(mRender._renderer);
-    SDL_FreeSurface(mRender._surface);
-    SDL_DestroyWindow(mRender._window);
-    SDL_Quit();
-	Power::Shutdown();
 }
 
 void Engine::Render() {
