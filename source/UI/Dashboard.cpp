@@ -196,6 +196,34 @@ void Dashboard::SetOverlay(std::string battery, SDL_Rect batPos, SDL_Rect clkPos
     SDL_FreeSurface(img);
 }
 
+void Dashboard::DrawSettings(Menu *menu) {
+	u32 panX = 500, panY = 100;
+	switch(menu->GetSelection()){
+		case 0:
+		{
+			Draw::Text(Rend, smallFont, panX, panY, "Toggle the lock screen flag.");
+			break;
+		}
+		case 1:
+		{
+			Draw::Text(Rend, smallFont, panX, panY, "View internet settings.");
+			break;
+		}
+		case 2:
+		{
+			Draw::Text(Rend, smallFont, panX, panY, "Edit profile.");
+			break;
+		}
+		case 3:
+		{
+			Draw::Text(Rend, smallFont, panX, panY, "Special specific information.");
+			Draw::Text(Rend, smallFont, panX+5, panY+50, "Firmware: " + Settings::GetFirmwareVersion());
+			Draw::Text(Rend, smallFont, panX+5, panY+70, "Serial: " + Settings::GetSerialNumber());
+			break;
+		}
+	}
+}
+
 void Dashboard::DrawMenus() {
     for(auto menu: Menus) {
 		//Only draw menus that are open
@@ -221,32 +249,9 @@ void Dashboard::DrawMenus() {
 				
                 Draw::Text(Rend, smallFont, button->Pos.x + 12, button->Pos.y + (button->Pos.h/2) - 4, button->Text);
                 //Draw settings panel
-                u32 panX = 500, panY = 100;
+                
                 if(!menu->Title.compare("Settings")) {
-                    switch(menu->GetSelection()){
-                        case 0:
-                        {
-                            Draw::Text(Rend, smallFont, panX, panY, "Toggle the lock screen flag.");
-                            break;
-                        }
-                        case 1:
-                        {
-                            Draw::Text(Rend, smallFont, panX, panY, "View internet settings.");
-                            break;
-                        }
-                        case 2:
-                        {
-                            Draw::Text(Rend, smallFont, panX, panY, "Edit profile.");
-                            break;
-                        }
-                        case 3:
-                        {
-                            Draw::Text(Rend, smallFont, panX, panY, "Special specific information.");
-							Draw::Text(Rend, smallFont, panX+5, panY+50, "Firmware: " + Settings::GetFirmwareVersion());
-							Draw::Text(Rend, smallFont, panX+5, panY+70, "Serial: " + Settings::GetSerialNumber());
-                            break;
-                        }
-                    }
+					DrawSettings(menu);
                 }
 				i++;
             }

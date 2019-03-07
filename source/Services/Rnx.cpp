@@ -19,9 +19,9 @@
 #include "Rnx.hpp"
 
 bool Rnx::IsUsingReiNX() {
-    Handle srvHand;
-    if(R_FAILED(smRegisterService(&srvHand, "rnx", false, 1))) return false;
-    smUnregisterService("rnx");
+    Service srvHand;
+    if(R_FAILED(smGetService(&srvHand, "rnx"))) return false;
+    serviceClose(&srvHand);
     
     return true;
 }

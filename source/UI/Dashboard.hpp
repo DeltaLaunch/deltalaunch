@@ -81,6 +81,8 @@ class Dashboard
 		
 		u8 selLayer;
     private:
+		void DrawSettings(Menu *menu);
+		
 		SelectType selType;
 		u32 gameSelectInd, appletSelectInd;
         u32 Width, Height;
