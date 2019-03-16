@@ -47,7 +47,7 @@ void Game::MountSaveData() {
 }
 
 Result Game::Play() {
-    u128 userid = Account::GetFirstAccount();//App::LaunchPSelect();
+    u128 userid = App::LaunchPSelect();
     return App::LaunchGame(TitleId, userid);
     /*std::stringstream ss;
     ss << std::hex << "TitleID: " << TitleId;
