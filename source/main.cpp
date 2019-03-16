@@ -85,13 +85,6 @@ void __attribute__((weak)) __appExit(void) {
 int main(int argc, char* argv[]) {
     HeapInit();
     
-    AppletHolder h;
-    appletGetPopFromGeneralChannelEvent(&h);
-    appletHolderWaitInteractiveOut(&h);
-    appletRequestForeground();
-    
-    //appletSetHandlesRequestToDisplay(true);
-    
     //Qlaunch loop
     Engine eng(1280, 720, heapAddr, heapSize);
     eng.Initialize();

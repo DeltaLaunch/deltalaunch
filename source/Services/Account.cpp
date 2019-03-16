@@ -26,13 +26,15 @@ s32 Account::GetUserCount() {
     return cnt;
 }
 
-u128 *Account::GetListOfAccounts() {
-	u128 *userIDs = (u128*)malloc(20*sizeof(u128));
+u128 Account::GetFirstAccount() {
+	u128 *userIDs = (u128*)malloc(8*sizeof(u128));
 	size_t total;
 	accountInitialize();
-	accountListAllUsers(userIDs, 20, &total);
+	accountListAllUsers(userIDs, 8, &total);
 	accountExit();
-	return userIDs;
+	u128 id = userIDs[0];
+	free(userIDs);
+	return id;
 }
 
 Result Account::SetProfilePicture(u128 userId, u8 *jpg, size_t jpgSize) {

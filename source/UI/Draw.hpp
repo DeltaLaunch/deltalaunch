@@ -33,6 +33,7 @@ class Draw
         static void Rectangle(SDL_Rect pos, u32 scolor, Renderer *rend);
         static SDL_Texture *CreateTexFromSurf(SDL_Surface *surf, Renderer *rend);
         static void Text(Renderer *rend, TTF_Font *font, u32 x, u32 y, std::string str);
+        static void Text(Renderer *rend, TTF_Font *font, u32 x, u32 y, std::string str, u32 col);
         static void DrawTexture(std::string tex, u32 x, u32 y, Renderer *rend);
         static void RenderTexture(SDL_Texture *tex, SDL_Rect pos, Renderer *rend);
 };

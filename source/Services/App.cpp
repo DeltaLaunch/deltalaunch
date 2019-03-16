@@ -64,32 +64,48 @@ Result App::LaunchAlbum() {
 
 u128 App::LaunchPSelect() {
 	AppletHolder h;
-    AppletStorage storage;
-	u128 player;
+    AppletStorage storeIn, storeOut;
+	u128 player = 0;
     Result rc = 0;
+	LibAppletArgs args;
     
-	appletCreateLibraryApplet(&h, AppletId_playerSelect, LibAppletMode_AllForeground);
-    u8 argBuf[0xA0] = {0};
-    appletCreateStorage(&storage, sizeof(argBuf));
-    rc = appletStorageWrite(&storage, 0, argBuf, sizeof(argBuf));
+	rc = appletCreateLibraryApplet(&h, AppletId_playerSelect, LibAppletMode_AllForeground);
+	if(R_FAILED(rc)) {
+        ShowError("Error launching player select", "Error creating lib applet.", rc);
+    }
+	
+    libappletArgsCreate(&args, 0);
+    libappletArgsPush(&args, &h);
+        
+	u8 stindata[0xa0] = { 0 };
+	
+    rc = appletCreateStorage(&storeIn, sizeof(stindata));
+	if(R_FAILED(rc)) {
+        appletStorageClose(&storeIn);
+        ShowError("Error launching player select", "Error creating storage.", rc);
+    }
+	
+    rc = appletStorageWrite(&storeIn, 0, stindata, sizeof(stindata));
     if(R_FAILED(rc)) {
-        appletStorageClose(&storage);
+        appletStorageClose(&storeIn);
         ShowError("Error launching player select", "Error writing storage.", rc);
     }
-    appletHolderPushInData(&h, &storage);
+    appletHolderPushInData(&h, &storeIn);
+	
 	rc = appletHolderStart(&h);
-    appletHolderJoin(&h);
+	appletHolderJoin(&h);
     if(R_FAILED(rc)) {
         ShowError("Error launching player select", "Error starting applet.", rc);
     }
     else {
-        appletHolderPopOutData(&h, &storage);
+        appletHolderPopOutData(&h, &storeOut);
         u8 buf[0x18] = {0};
-        appletStorageRead(&storage, 0, buf, 0x18);
-        player = *(u128*)(buf+8);
+        appletStorageRead(&storeOut, 0, buf, 0x18);
+        player = *(u128*)&buf[8];
     }
+    appletStorageClose(&storeIn);
+    appletStorageClose(&storeOut);
     appletHolderClose(&h);
-    appletStorageClose(&storage);
     
     return player;
 }
@@ -131,7 +147,7 @@ Result App::LaunchShop() {
 
 Result App::LaunchSystemApplication(u64 tid) {
 	AppletHolder h;
-	appCreate(&h, tid, true, Create_SystemApp);
+	appCreate(&h, tid, Create_SystemApp);
     appRequestForApplicationToGetForeground(&h);
     appletHolderStart(&h);
     appletHolderJoin(&h);
@@ -192,39 +208,57 @@ Result App::LaunchGame(u64 tid, u128 userID) {
     AppletStorage aStore;
     Result rc = 0;
     
-	appCreate(&h, tid, true, Create_App);
-    appletUnlockForeground();
-    
-    rc = appletCreateStorage(&aStore, 0x88);
-    if(R_FAILED(rc)) {
-        ShowError("Error launching game", "Error initializing arg storage", rc);
+	rc = appCreate(&h, tid, Create_App);
+	if(R_FAILED(rc)) {
+        ShowError("Error launching game", "Error initializing handle", rc);
+    }
+	
+    rc = appletUnlockForeground();
+	if(R_FAILED(rc)) {
+        ShowError("Error launching game", "Error unlocking foreground", rc);
     }
     
-    struct InData{
+	struct InData{
         u32 code;
         u8 unk1;
         u8 pad[3];
         u128 id;
         u8 unk2[0x70];
-    };
+    } __attribute__((packed));
+    
     InData indata = {0};
     indata.code = 0xC79497CA;
     indata.unk1 = 1;
     indata.id = userID;
-    
-    rc = appletStorageWrite(&aStore, 0, &indata, 0x88);
+	
+    rc = appletCreateStorage(&aStore, sizeof(InData));
+    if(R_FAILED(rc)) {
+        ShowError("Error launching game", "Error initializing arg storage", rc);
+    }
+
+    rc = appletStorageWrite(&aStore, 0, &indata, sizeof(InData));
     if(R_FAILED(rc)) {
         ShowError("Error launching game", "Error writing arg storage", rc);
     }
-    appletHolderPushInData(&h, &aStore);
-    appRequestForApplicationToGetForeground(&h);
+	
+    rc = appletHolderPushInLaunchParam(&h, AppletLaunchParameterKind_PreselectedUser, &aStore);
+	if(R_FAILED(rc)) {
+        ShowError("Error launching game", "Error appletHolderPushInLaunchParam", rc);
+    }
+    
     rc = appletHolderStart(&h);
     if(R_FAILED(rc)) {
         ShowError("Error launching game", "Lookup errorcode for more info", rc);
     }
+	
+	rc = appRequestForApplicationToGetForeground(&h);
+	if(R_FAILED(rc)) {
+        ShowError("Error launching game", "Error appRequestForApplicationToGetForeground", rc);
+    }
+	
     appletHolderJoin(&h);
     appletHolderClose(&h);
-    appletStorageClose(&aStore);
+	appletStorageClose(&aStore);
     
     return rc;
 }

@@ -59,9 +59,13 @@ void Draw::RenderTexture(SDL_Texture *tex, SDL_Rect pos, Renderer *rend) {
 }
 
 void Draw::Text(Renderer *rend, TTF_Font *font, u32 x, u32 y, std::string str) {
+    Text(rend, font, x, y, str, 0xFFFFFFFF);
+}
+
+void Draw::Text(Renderer *rend, TTF_Font *font, u32 x, u32 y, std::string str, u32 col) {
 	if(!font) return;
     SDL_Color scolor;
-    scolor.r = scolor.g = scolor.b = scolor.a = 0xFF;
+    scolor.r = (col >> 24)&0xFF; scolor.g = (col >> 16)&0xFF; scolor.b = (col >> 8)&0xFF; scolor.a = col&0xFF;
     SDL_Surface *surface = TTF_RenderUTF8_Blended_Wrapped(font, str.c_str(), scolor, 1280);
     if (!surface) return;
 

@@ -46,6 +46,12 @@ Dashboard::Dashboard(Renderer *rend, u32 width, u32 height, std::string font) {
     GameIconArea.x = 120; GameIconArea.y = 110;
     GameIconArea.w = 1080; GameIconArea.h = 450;
 	selType == SELECT_OUTLINE;
+
+    //appletGetPopFromGeneralChannelEvent(&h);
+    //appletHolderWaitInteractiveOut(&h);
+    //appletRequestForeground();
+    
+    //appletSetHandlesRequestToDisplay(true);
 }
 
 Dashboard::~Dashboard() {
@@ -153,6 +159,7 @@ void Dashboard::DrawGames() {
         if(Hid::IsTouched(game->Pos) && !IsMenuOpen) {
             lastErr = game->Play();
 			if(lastErr) App::ShowError("An Error has occurred!", "Error code: " + std::to_string(lastErr), lastErr);
+            appletRequestForeground();
 		}
 		ind++;
 	}
@@ -242,14 +249,13 @@ void Dashboard::DrawMenus() {
 					pos.x = button->Pos.x-5; pos.y = button->Pos.y-5;
 					pos.w = button->Pos.w+10; pos.h = button->Pos.h+10;
 					Draw::Rectangle(pos, AQUA, Rend);
-					Draw::Rectangle(button->Pos, button->Color, Rend);
-				} else {
-					Draw::Rectangle(button->Pos, button->Color, Rend);
+                    Draw::Rectangle(button->Pos, GREY, Rend);
+                    Draw::Text(Rend, smallFont, button->Pos.x + 12, button->Pos.y + (button->Pos.h/2) - 4, button->Text, AQUA);
 				}
-				
-                Draw::Text(Rend, smallFont, button->Pos.x + 12, button->Pos.y + (button->Pos.h/2) - 4, button->Text);
+                else {
+                    Draw::Text(Rend, smallFont, button->Pos.x + 12, button->Pos.y + (button->Pos.h/2) - 4, button->Text);
+                }
                 //Draw settings panel
-                
                 if(!menu->Title.compare("Settings")) {
 					DrawSettings(menu);
                 }

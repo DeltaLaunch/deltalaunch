@@ -26,6 +26,7 @@
 #include <switch.h>
 #include "Draw.hpp"
 #include "../Services/App.hpp"
+#include "../Services/Account.hpp"
 
 class Game
 {
