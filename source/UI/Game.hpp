@@ -28,10 +28,12 @@
 #include "../Services/App.hpp"
 #include "../Services/Account.hpp"
 
+#define AQUA 0xFFCEFF
+
 class Game
 {
     public:
-		Game(u32 x, u32 y, u32 w, u32 h, u32 col);
+		Game(u32 x, u32 y, u32 w, u32 h);
         ~Game();
         void SetTitleId(u64 tid);
         void SetFlag(u8 flag);
@@ -42,7 +44,7 @@ class Game
 		SDL_Texture *Icon;
         SDL_Rect Pos;
         SDL_Texture *Sprite;
-        u32 Color;
+        u32 SelColor;
         std::string Text;
     private:
         u64 TitleId;

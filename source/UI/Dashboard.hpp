@@ -38,7 +38,6 @@
 #include "../Services/App.hpp"
 #include "../Types.h"
 
-#define AQUA 0xFFCEFF
 #define GREY 0x4C4C4CFF
 
 class Dashboard
@@ -83,7 +82,6 @@ class Dashboard
 		u8 selLayer;
     private:
 		void DrawSettings(Menu *menu);
-		AppletHolder h;
 		SelectType selType;
 		u32 gameSelectInd, appletSelectInd;
         u32 Width, Height;

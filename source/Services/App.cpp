@@ -106,6 +106,8 @@ u128 App::LaunchPSelect() {
     appletStorageClose(&storeIn);
     appletStorageClose(&storeOut);
     appletHolderClose(&h);
+	
+	appletRequestForeground();
     
     return player;
 }

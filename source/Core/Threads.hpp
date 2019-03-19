@@ -18,7 +18,13 @@
 
 #pragma once
 
+#include <switch.h>
+#include <string>
+#include "../Services/Power.hpp"
+
 class Threads {
     public:
         static bool FriendThread();
+		static bool SystemAppletMessage();
+		static void DumpFile(std::string name, void *buffer, size_t size);
 };

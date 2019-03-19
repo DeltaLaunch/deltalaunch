@@ -38,9 +38,17 @@ Engine::Engine(u32 width, u32 height, void *heapAddr, size_t heapSize) {
     HeapSize = heapSize;
     Width = width;
     Height = height;
+	
+	//Setup GPIO
+	Hid::InitGpioButton(&power, (GpioPadName)24);
+	Hid::InitGpioButton(&volup, GpioPadName_ButtonVolUp);
+	Hid::InitGpioButton(&voldown, GpioPadName_ButtonVolDown);
 }
 
 Engine::~Engine() {
+	Hid::CloseGpioButton(&power);
+	Hid::CloseGpioButton(&volup);
+	Hid::CloseGpioButton(&voldown);
 	delete frndThread;
     delete dash;
     TTF_Quit();
@@ -61,7 +69,7 @@ void Engine::Initialize() {
 
     Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 4096);
     Mix_VolumeMusic(cfg.GetInteger("Background", "bgmVol", 64));
-    
+
     //Setup background
     bgm = Mix_LoadMUS(cfg.Get("Background", "bgm", "").c_str());
     std::vector<std::string> layers;
@@ -92,7 +100,7 @@ void Engine::Initialize() {
         std::tuple<std::string, std::function<Result()>>{"AlbumButton", App::LaunchAlbum},
         std::tuple<std::string, std::function<Result()>>{"HomebrewButton", App::LaunchHbl},
         std::tuple<std::string, std::function<Result()>>{"SettingsButton", std::bind(&Dashboard::OpenMenu, dash, "Settings")},
-        std::tuple<std::string, std::function<Result()>>{"PowerButton", Power::Shutdown},
+        std::tuple<std::string, std::function<Result()>>{"PowerButton", Power::Reboot},
     };
     for(int but = 0; but < Buttons.size(); but++) {
         dash->AddButton(
@@ -113,13 +121,14 @@ void Engine::Initialize() {
     settings->AddButton(new Button("Lock Screen", 60, Y+=space, butW, butH, butCol, nullptr));
     settings->AddButton(new Button("Internet", 60, Y+=space, butW, butH, butCol, nullptr));
     settings->AddButton(new Button("Profile", 60, Y+=space, butW, butH, butCol, nullptr));
+    settings->AddButton(new Button("Select Mode", 60, Y+=space, butW, butH, butCol, nullptr));
     settings->AddButton(new Button("System Info", 60, Y+=space, butW, butH, butCol, nullptr));
 	dash->AddMenu(settings);
     
     
     //Boundries: (120, 110), (1200, 560) .. 450px vert
     for(int i = 0; i < dash->MaxColumns; i++){
-		dash->AddGame(new Game(100+(i*270), 200, 256, 256, 0x70));
+		dash->AddGame(new Game(100+(i*270), 200, 256, 256));
 	}
     dash->SetGames();
     
@@ -128,6 +137,9 @@ void Engine::Initialize() {
 
     frndThread = new ThreadManager(Threads::FriendThread);
     frndThread->start();
+	
+	samsThread = new ThreadManager(Threads::SystemAppletMessage);
+	samsThread->start();
 }
 
 void Engine::Render() {
@@ -175,7 +187,7 @@ void Engine::GetInputs() {
             break;
         }
     }
-    
+
     if(App::IsGamecardInserted() == GcState) {
         dash->SetGames();
         GcState = !GcState;

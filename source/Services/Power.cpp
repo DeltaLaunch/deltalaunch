@@ -19,15 +19,16 @@
 #include "Power.hpp"
 
 Result Power::Shutdown() {
-    bpcInitialize();
-	appletSetHandlesRequestToDisplay(false);
-    bpcShutdownSystem();
-    bpcExit();
+	appletStartShutdown();
     return 0;
 }
 
-Result Power::EnterSleepMode() {
-    appletRequestToEnterSleep();
+Result Power::Reboot() {
+	appletStartReboot();
+    return 0;
+}
+
+Result Power::Sleep() {
     appletStartSleepSequence();
     return 0;
 }

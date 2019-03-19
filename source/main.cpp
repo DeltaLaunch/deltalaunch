@@ -81,7 +81,6 @@ void __attribute__((weak)) __appExit(void) {
     fsdevUnmountAll();
 }
 
-//Main loop
 int main(int argc, char* argv[]) {
     HeapInit();
     

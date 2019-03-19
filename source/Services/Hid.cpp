@@ -57,3 +57,11 @@ bool Hid::IsLongPress() {
 	}
 	return false;
 }
+
+void Hid::InitGpioButton(GpioPadSession *but, GpioPadName name) {
+	gpioOpenSession(but, name);
+}
+
+void Hid::CloseGpioButton(GpioPadSession *but) {
+	gpioPadClose(but);
+}

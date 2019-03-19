@@ -45,13 +45,10 @@ Dashboard::Dashboard(Renderer *rend, u32 width, u32 height, std::string font) {
     LockScreen = SDL_CreateTexture(Rend->_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, Width, Height);
     GameIconArea.x = 120; GameIconArea.y = 110;
     GameIconArea.w = 1080; GameIconArea.h = 450;
-	selType == SELECT_OUTLINE;
+	selType = SELECT_OUTLINE;
 
-    //appletGetPopFromGeneralChannelEvent(&h);
-    //appletHolderWaitInteractiveOut(&h);
-    //appletRequestForeground();
-    
-    //appletSetHandlesRequestToDisplay(true);
+    appletRequestForeground();
+    appletSetHandlesRequestToDisplay(true);
 }
 
 Dashboard::~Dashboard() {
@@ -133,33 +130,47 @@ void Dashboard::DrawButtons() {
 void Dashboard::DrawGames() {
 	int ind = 0;
 	for(auto game: Games) {
-        //Draw selection outline
-        if(ind == gameSelectInd && selLayer == 0 && selType == SELECT_OUTLINE) {
-            SDL_Rect pos = game->Pos; 
-            pos.x -= 5; pos.y -= 5; pos.w += 10; pos.h += 10;
-            Draw::Rectangle(pos, AQUA, Rend);
-            if(pos.x < 0) OffsetGameIcons(1*(game->Pos.w + 14));
-            if(pos.x + pos.w >= GameIconArea.x + GameIconArea.w) OffsetGameIcons(-1*(game->Pos.w + 14));
+        //Classic outline format
+        if(selType == SELECT_OUTLINE) {
+            //Draw selection outline
+            if(ind == gameSelectInd && selLayer == 0) {
+                SDL_Rect pos = game->Pos; 
+                pos.x -= 5; pos.y -= 5; pos.w += 10; pos.h += 10;
+                Draw::Rectangle(pos, game->SelColor, Rend);
+                if(pos.x < 0) OffsetGameIcons(1*(game->Pos.w + 14));
+                if(pos.x + pos.w >= GameIconArea.x + GameIconArea.w) OffsetGameIcons(-1*(game->Pos.w + 14));
+            }
+            
+            //Draw either game icon or backer
+            if(game->GetTitleId() != 0) {
+                Draw::RenderTexture(game->Icon, game->Pos, Rend);
+            } else {
+                Draw::Rectangle(game->Pos, 0x70, Rend);
+            }
         }
 		//Or draw size diff mode
-		else if(ind == gameSelectInd && selLayer == 0 && selType == SELECT_SIZEDIFF) {
-			SDL_Rect pos = game->Pos; 
-            pos.x -= 10; pos.y -= 10; pos.w += 20; pos.h += 20;
-			Draw::RenderTexture(game->Icon, pos, Rend);
-            if(pos.x < 0) OffsetGameIcons(1*(game->Pos.w + 14));
-            if(pos.x + pos.w >= GameIconArea.x + GameIconArea.w) OffsetGameIcons(-1*(game->Pos.w + 14));
+		if(selType == SELECT_SIZEDIFF) {
+            //Draw game bigger
+            if(ind == gameSelectInd && selLayer == 0) {
+                SDL_Rect pos = game->Pos; 
+                pos.x -= 20; pos.y -= 20; pos.w += 40; pos.h += 40;
+                Draw::RenderTexture(game->Icon, pos, Rend);
+                if(pos.x < 0) OffsetGameIcons(1*(game->Pos.w + 14));
+                if(pos.x + pos.w >= GameIconArea.x + GameIconArea.w) OffsetGameIcons(-1*(game->Pos.w + 14));
+            }
+            else {
+                //Draw either game icon or backer
+                if(game->GetTitleId() != 0) {
+                    Draw::RenderTexture(game->Icon, game->Pos, Rend);
+                }
+                Draw::Rectangle(game->Pos, 0x70, Rend);
+            }
 		}
-        //Draw either game icon or backer
-		if(game->GetTitleId() != 0 && selType != SELECT_SIZEDIFF) {
-			Draw::RenderTexture(game->Icon, game->Pos, Rend);
-		} else {
-			Draw::Rectangle(game->Pos, game->Color, Rend);
-		}
+        
         //Detect touch selection
         if(Hid::IsTouched(game->Pos) && !IsMenuOpen) {
             lastErr = game->Play();
 			if(lastErr) App::ShowError("An Error has occurred!", "Error code: " + std::to_string(lastErr), lastErr);
-            appletRequestForeground();
 		}
 		ind++;
 	}
@@ -221,7 +232,13 @@ void Dashboard::DrawSettings(Menu *menu) {
 			Draw::Text(Rend, smallFont, panX, panY, "Edit profile.");
 			break;
 		}
-		case 3:
+        case 3:
+        {
+            Draw::Text(Rend, smallFont, panX, panY, "Change selection mode.");
+            Draw::Text(Rend, smallFont, panX+5, panY+50, (selType == SELECT_OUTLINE ? "Mode: Outline" : "Mode: Diff size"));
+            break;
+        }
+		case 4:
 		{
 			Draw::Text(Rend, smallFont, panX, panY, "Special specific information.");
 			Draw::Text(Rend, smallFont, panX+5, panY+50, "Firmware: " + Settings::GetFirmwareVersion());
@@ -353,7 +370,13 @@ void Dashboard::ActivateMenu() {
 							//Profile
 							break;
 						}
-						case 3:
+                        case 3:
+                        {
+                            //Selection type
+                            selType = (selType == SELECT_OUTLINE ? SELECT_SIZEDIFF : SELECT_OUTLINE);
+                            break;
+                        }
+						case 4:
 						{
 							//system info/update
 						}

@@ -18,11 +18,13 @@
 
 #pragma once
 #include <switch.h>
+#include <string>
 
 class Power
 {
     public:
         static Result Shutdown();
-        static Result EnterSleepMode();
+		static Result Reboot();
+        static Result Sleep();
 		static u32 GetBatteryLife();
 };

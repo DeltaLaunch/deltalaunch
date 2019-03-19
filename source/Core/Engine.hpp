@@ -59,7 +59,11 @@ class Engine
         Mix_Music *bgm;
         u32 lastPosX;
     private:
+		GpioPadSession power;
+		GpioPadSession volup;
+		GpioPadSession voldown;
         ThreadManager *frndThread;
+		ThreadManager *samsThread;
         EngineState State;
         std::string baseThemeDir;
         u32 Width, Height;

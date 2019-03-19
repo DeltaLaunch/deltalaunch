@@ -18,13 +18,14 @@
 
 #include "Game.hpp"
 
-Game::Game(u32 x, u32 y, u32 w, u32 h, u32 col) {
+Game::Game(u32 x, u32 y, u32 w, u32 h) {
     Pos.x = x; Pos.y = y;
     Pos.w = w; Pos.h = h;
     Sprite = nullptr;
     Icon = nullptr;
 	TitleId = 0;
 	Flag = 0;
+    SelColor = AQUA;
 }
 
 Game::~Game() {
@@ -48,8 +49,6 @@ void Game::MountSaveData() {
 
 Result Game::Play() {
     u128 userid = App::LaunchPSelect();
+	if(userid == 0) return 0;
     return App::LaunchGame(TitleId, userid);
-    /*std::stringstream ss;
-    ss << std::hex << "TitleID: " << TitleId;
-    return App::ShowError("An Error has occurred!", ss.str(), 0);*/
 }
