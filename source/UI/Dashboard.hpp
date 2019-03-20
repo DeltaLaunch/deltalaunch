@@ -80,6 +80,7 @@ class Dashboard
         void AddMenu(Menu *menu);
 		
 		u8 selLayer;
+		u8 gameRows;
     private:
 		void DrawSettings(Menu *menu);
 		SelectType selType;

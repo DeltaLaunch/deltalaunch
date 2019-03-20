@@ -33,20 +33,24 @@
 class Game
 {
     public:
-		Game(u32 x, u32 y, u32 w, u32 h);
+		Game();
         ~Game();
-        void SetTitleId(u64 tid);
-        void SetFlag(u8 flag);
-        u64 GetTitleId() {return TitleId;}
         void MountSaveData();
         Result Play();
+		
+		//Getters/setters
+		u64 GetTitleId() { return TitleId; }
+		void SetTitleId(u64 tid) { TitleId = tid; }
+        void SetFlag(u8 flag) { Flag = flag; }
+		u32 GetColor() { return SelColor; }
+        void SetColor(u32 col) { SelColor = col; }
 
 		SDL_Texture *Icon;
         SDL_Rect Pos;
         SDL_Texture *Sprite;
-        u32 SelColor;
         std::string Text;
     private:
         u64 TitleId;
 		u8 Flag;
+		u32 SelColor;
 };

@@ -50,6 +50,7 @@ Engine::~Engine() {
 	Hid::CloseGpioButton(&volup);
 	Hid::CloseGpioButton(&voldown);
 	delete frndThread;
+	delete samsThread;
     delete dash;
     TTF_Quit();
     IMG_Quit();
@@ -125,16 +126,16 @@ void Engine::Initialize() {
     settings->AddButton(new Button("System Info", 60, Y+=space, butW, butH, butCol, nullptr));
 	dash->AddMenu(settings);
     
-    
     //Boundries: (120, 110), (1200, 560) .. 450px vert
     for(int i = 0; i < dash->MaxColumns; i++){
-		dash->AddGame(new Game(100+(i*270), 200, 256, 256));
+		dash->AddGame(new Game());
 	}
     dash->SetGames();
     
     //Play BGM
     if(bgm) Mix_PlayMusic(bgm, -1);
 
+	//Start threads
     frndThread = new ThreadManager(Threads::FriendThread);
     frndThread->start();
 	

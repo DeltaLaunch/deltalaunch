@@ -35,9 +35,13 @@ Dashboard::Dashboard(Renderer *rend, u32 width, u32 height, std::string font) {
         hdrFont = TTF_OpenFont(font.c_str(), 28);
         smallFont = TTF_OpenFont(font.c_str(), 20);
     }
+	
+	//vars
     lastErr = 0;
 	selLayer = 0;
 	gameSelectInd = 0;
+	selType = SELECT_OUTLINE;
+	gameRows = 1;
     IsMenuOpen = false;
     debugInfo = false;
 	MaxColumns = 12;
@@ -45,7 +49,6 @@ Dashboard::Dashboard(Renderer *rend, u32 width, u32 height, std::string font) {
     LockScreen = SDL_CreateTexture(Rend->_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, Width, Height);
     GameIconArea.x = 120; GameIconArea.y = 110;
     GameIconArea.w = 1080; GameIconArea.h = 450;
-	selType = SELECT_OUTLINE;
 
     appletRequestForeground();
     appletSetHandlesRequestToDisplay(true);
@@ -136,9 +139,7 @@ void Dashboard::DrawGames() {
             if(ind == gameSelectInd && selLayer == 0) {
                 SDL_Rect pos = game->Pos; 
                 pos.x -= 5; pos.y -= 5; pos.w += 10; pos.h += 10;
-                Draw::Rectangle(pos, game->SelColor, Rend);
-                if(pos.x < 0) OffsetGameIcons(1*(game->Pos.w + 14));
-                if(pos.x + pos.w >= GameIconArea.x + GameIconArea.w) OffsetGameIcons(-1*(game->Pos.w + 14));
+                Draw::Rectangle(pos, game->GetColor(), Rend);
             }
             
             //Draw either game icon or backer
@@ -155,8 +156,6 @@ void Dashboard::DrawGames() {
                 SDL_Rect pos = game->Pos; 
                 pos.x -= 20; pos.y -= 20; pos.w += 40; pos.h += 40;
                 Draw::RenderTexture(game->Icon, pos, Rend);
-                if(pos.x < 0) OffsetGameIcons(1*(game->Pos.w + 14));
-                if(pos.x + pos.w >= GameIconArea.x + GameIconArea.w) OffsetGameIcons(-1*(game->Pos.w + 14));
             }
             else {
                 //Draw either game icon or backer
@@ -168,9 +167,10 @@ void Dashboard::DrawGames() {
 		}
         
         //Detect touch selection
-        if(Hid::IsTouched(game->Pos) && !IsMenuOpen) {
-            lastErr = game->Play();
-			if(lastErr) App::ShowError("An Error has occurred!", "Error code: " + std::to_string(lastErr), lastErr);
+        if(Hid::IsTouched(game->Pos) && !IsMenuOpen && game->GetTitleId()) {
+			lastErr = game->Play();
+			if(lastErr) 
+				App::ShowError("An Error has occurred!", "Error code: " + std::to_string(lastErr), lastErr);
 		}
 		ind++;
 	}
@@ -181,19 +181,25 @@ void Dashboard::SetGames() {
 	std::vector<u64> tids;
     App::GetTitleIds(tids);
     int i = 0;
+	size_t total = tids.size();
 	for(auto game: Games) {
+		u64 tid = i < total ? tids[i] : 0;
         game->SetFlag(0);
-        game->SetTitleId(tids[i]);
-        NsApplicationControlData data = App::GetGameControlData(tids[i], 0);
-        SDL_Surface *img = IMG_Load_RW(SDL_RWFromMem(data.icon, 0x20000), 1);
-        if(game->Icon != nullptr)
-            SDL_DestroyTexture(game->Icon);
-        game->Pos.w = 256;
-        game->Pos.h = 256;
-		game->Icon = SDL_CreateTexture(Rend->_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, game->Pos.w, game->Pos.h);
-        if(img) 
-            game->Icon = SDL_CreateTextureFromSurface(Rend->_renderer, img);
-        SDL_FreeSurface(img);
+        game->SetTitleId(tid);
+        game->Pos.w = 256/gameRows; 
+        game->Pos.h = 256/gameRows;
+		game->Pos.x = 100+((i%(MaxColumns/gameRows))*(game->Pos.w+(14/gameRows))); 
+        game->Pos.y = 200+((i/(MaxColumns/gameRows))*(game->Pos.h+(14/gameRows)));
+		if(tid) {
+			NsApplicationControlData data = App::GetGameControlData(tid, 0);
+			SDL_Surface *img = IMG_Load_RW(SDL_RWFromMem(data.icon, 0x20000), 1);
+			if(game->Icon != nullptr)
+				SDL_DestroyTexture(game->Icon);
+			game->Icon = SDL_CreateTexture(Rend->_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, game->Pos.w, game->Pos.h);
+			if(img) 
+				game->Icon = SDL_CreateTextureFromSurface(Rend->_renderer, img);
+			SDL_FreeSurface(img);
+		}
         i++;
 	}
     tids.clear();
@@ -322,7 +328,7 @@ Result Dashboard::CloseMenus() {
 void Dashboard::OffsetGameIcons(u32 deltaX) {
     int i = 0;
     for(auto game: Games) {
-		game->Pos.x = (game->Pos.x <= 100+(i*(game->Pos.w+14))) ? (game->Pos.x + deltaX) : 100+(i*(game->Pos.w+14));
+		game->Pos.x = (game->Pos.x <= 100+(i*(game->Pos.w+(14/gameRows)))) ? (game->Pos.x + deltaX) : 100+(i*(game->Pos.w+(14/gameRows)));
         i++;
 	}
 }
@@ -399,11 +405,15 @@ void Dashboard::DisengageMenu() {
 void Dashboard::IncrementDashSel() {
 	if(selLayer == 0 && gameSelectInd < Games.size()-1) gameSelectInd++;
 	if(selLayer == 1 && appletSelectInd < Buttons.size()-1) appletSelectInd++;
+    if(Games[gameSelectInd]->Pos.x < 0) OffsetGameIcons(1*(Games[gameSelectInd]->Pos.w + (14/gameRows)));
+    if(Games[gameSelectInd]->Pos.x + Games[gameSelectInd]->Pos.w >= GameIconArea.x + GameIconArea.w) OffsetGameIcons(-1*(Games[gameSelectInd]->Pos.w + (14/gameRows)));
 }
 
 void Dashboard::DecrementDashSel() {
 	if(selLayer == 0 && gameSelectInd > 0) gameSelectInd--;
 	if(selLayer == 1 && appletSelectInd > 0) appletSelectInd--;
+    if(Games[gameSelectInd]->Pos.x < 0) OffsetGameIcons(1*(Games[gameSelectInd]->Pos.w + (14/gameRows)));
+    if(Games[gameSelectInd]->Pos.x + Games[gameSelectInd]->Pos.w >= GameIconArea.x + GameIconArea.w) OffsetGameIcons(-1*(Games[gameSelectInd]->Pos.w + (14/gameRows)));
 }
 
 void Dashboard::ActivateDash() {

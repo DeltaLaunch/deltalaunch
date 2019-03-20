@@ -19,11 +19,13 @@
 #include "Power.hpp"
 
 Result Power::Shutdown() {
+    appletSetHandlesRequestToDisplay(false);
 	appletStartShutdown();
     return 0;
 }
 
 Result Power::Reboot() {
+    appletSetHandlesRequestToDisplay(false);
 	appletStartReboot();
     return 0;
 }

@@ -18,9 +18,7 @@
 
 #include "Game.hpp"
 
-Game::Game(u32 x, u32 y, u32 w, u32 h) {
-    Pos.x = x; Pos.y = y;
-    Pos.w = w; Pos.h = h;
+Game::Game() {
     Sprite = nullptr;
     Icon = nullptr;
 	TitleId = 0;
@@ -29,15 +27,8 @@ Game::Game(u32 x, u32 y, u32 w, u32 h) {
 }
 
 Game::~Game() {
-	
-}
-
-void Game::SetTitleId(u64 tid) {
-    TitleId = tid;
-}
-
-void Game::SetFlag(u8 flag) {
-    Flag = flag;
+	SDL_DestroyTexture(Icon);
+	SDL_DestroyTexture(Sprite);
 }
 
 void Game::MountSaveData() {
