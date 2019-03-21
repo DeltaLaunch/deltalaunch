@@ -405,15 +405,19 @@ void Dashboard::DisengageMenu() {
 void Dashboard::IncrementDashSel() {
 	if(selLayer == 0 && gameSelectInd < Games.size()-1) gameSelectInd++;
 	if(selLayer == 1 && appletSelectInd < Buttons.size()-1) appletSelectInd++;
-    if(Games[gameSelectInd]->Pos.x < 0) OffsetGameIcons(1*(Games[gameSelectInd]->Pos.w + (14/gameRows)));
-    if(Games[gameSelectInd]->Pos.x + Games[gameSelectInd]->Pos.w >= GameIconArea.x + GameIconArea.w) OffsetGameIcons(-1*(Games[gameSelectInd]->Pos.w + (14/gameRows)));
+    if(Games[gameSelectInd]->Pos.x < 0) 
+        OffsetGameIcons(100 - (Games[gameSelectInd]->Pos.x));
+    if(Games[gameSelectInd]->Pos.x + Games[gameSelectInd]->Pos.w >= GameIconArea.x + GameIconArea.w) 
+        OffsetGameIcons((GameIconArea.x + GameIconArea.w) - (Games[gameSelectInd]->Pos.x + Games[gameSelectInd]->Pos.w));
 }
 
 void Dashboard::DecrementDashSel() {
 	if(selLayer == 0 && gameSelectInd > 0) gameSelectInd--;
 	if(selLayer == 1 && appletSelectInd > 0) appletSelectInd--;
-    if(Games[gameSelectInd]->Pos.x < 0) OffsetGameIcons(1*(Games[gameSelectInd]->Pos.w + (14/gameRows)));
-    if(Games[gameSelectInd]->Pos.x + Games[gameSelectInd]->Pos.w >= GameIconArea.x + GameIconArea.w) OffsetGameIcons(-1*(Games[gameSelectInd]->Pos.w + (14/gameRows)));
+    if(Games[gameSelectInd]->Pos.x < 0) 
+        OffsetGameIcons(100 - (Games[gameSelectInd]->Pos.x));
+    if(Games[gameSelectInd]->Pos.x + Games[gameSelectInd]->Pos.w >= GameIconArea.x + GameIconArea.w) 
+        OffsetGameIcons((GameIconArea.x + GameIconArea.w) - (Games[gameSelectInd]->Pos.x + Games[gameSelectInd]->Pos.w));
 }
 
 void Dashboard::ActivateDash() {
