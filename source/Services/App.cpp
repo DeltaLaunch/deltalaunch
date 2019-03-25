@@ -53,7 +53,7 @@ Result App::LaunchAlbum() {
 	LibAppletArgs args;
 	
 	appletCreateLibraryApplet(&h, AppletId_photoViewer, LibAppletMode_AllForeground);
-	libappletArgsCreate(&args, 1);
+	libappletArgsCreate(&args, 0);
     libappletArgsSetPlayStartupSound(&args, true);
     libappletArgsPush(&args, &h);
 	appletHolderStart(&h);
@@ -76,7 +76,7 @@ u128 App::LaunchPSelect() {
 	
     libappletArgsCreate(&args, 0);
     libappletArgsPush(&args, &h);
-        
+    
 	u8 stindata[0xa0] = { 0 };
 	
     rc = appletCreateStorage(&storeIn, sizeof(stindata));
@@ -115,35 +115,42 @@ u128 App::LaunchPSelect() {
 Result App::LaunchShop() {
 	AppletHolder h;
 	LibAppletArgs args;
-    AppletStorage aStore;
+    AppletStorage storeIn, storeOut;
     Result rc = 0;
 	
 	appletCreateLibraryApplet(&h, AppletId_shop, LibAppletMode_AllForeground);
 	libappletArgsCreate(&args, 1);
     libappletArgsPush(&args, &h);
     
-    rc = appletCreateStorage(&aStore, 0x2000);
+    rc = appletCreateStorage(&storeIn, 0x2000);
     if(R_FAILED(rc)) {
-        ShowError("Error launching browser", "Error initializing arg storage", rc);
+        ShowError("Error launching eshop", "Error initializing arg storage", rc);
     }
 
-    u8 indata[0x2000] = {0};
-    strcpy((char*)&indata[0], "eshop://");
+    char indata[0x2000] = {0};
+	sprintf (indata, "eshop://%s", "success" );
 
-    rc = appletStorageWrite(&aStore, 0, indata, 0x2000);
+    rc = appletStorageWrite(&storeIn, 0, indata, 0x2000);
     if(R_FAILED(rc)) {
-        ShowError("Error launching browser", "Error writing arg storage", rc);
+        ShowError("Error launching eshop", "Error writing arg storage", rc);
     }
-    appletHolderPushInData(&h, &aStore);
-    rc = appletHolderStart(&h);
-    if(R_FAILED(rc)) {
-        ShowError("Error launching browser", "Lookup errorcode for more info", rc);
-    }
+    appletHolderPushInData(&h, &storeIn);
     
-	appletHolderStart(&h);
-    appletHolderJoin(&h);
+	rc = appletHolderStart(&h);
+	appletHolderJoin(&h);
+    if(R_FAILED(rc)) {
+        ShowError("Error launching eshop", "Error starting applet.", rc);
+    }
+    else {
+        appletHolderPopOutData(&h, &storeOut);
+        u8 buf[0x1010] = {0};
+        appletStorageRead(&storeOut, 0, buf, sizeof(buf));
+        //TODO
+    }
+    appletStorageClose(&storeIn);
+    appletStorageClose(&storeOut);
     appletHolderClose(&h);
-    appletStorageClose(&aStore);
+	
     return rc;
 }
 

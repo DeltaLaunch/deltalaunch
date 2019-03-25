@@ -40,6 +40,7 @@ Dashboard::Dashboard(Renderer *rend, u32 width, u32 height, std::string font) {
     lastErr = 0;
 	selLayer = 0;
 	gameSelectInd = 0;
+    msg = 0;
 	selType = SELECT_OUTLINE;
 	gameRows = 1;
     IsMenuOpen = false;
@@ -298,6 +299,7 @@ void Dashboard::DrawDebugText() {
         Draw::Text(Rend, debugFont, X, Y+=s, "Serial: " + Settings::GetSerialNumber());
 		Draw::Text(Rend, debugFont, X, Y+=s, "Battery: " + std::to_string(Power::GetBatteryLife()) + "%");
         Draw::Text(Rend, debugFont, X, Y+=s, "Touch: X=" + std::to_string(touchPos.px) + "; y=" + std::to_string(touchPos.py));
+        Draw::Text(Rend, debugFont, X, Y+=s, "Message: " + std::to_string(msg));
         Y = 0;
     }
 }
@@ -403,21 +405,25 @@ void Dashboard::DisengageMenu() {
 }
 
 void Dashboard::IncrementDashSel() {
-	if(selLayer == 0 && gameSelectInd < Games.size()-1) gameSelectInd++;
+	if(selLayer == 0 && gameSelectInd < Games.size()-1) {
+        gameSelectInd++;
+        if(Games[gameSelectInd]->Pos.x < 0) 
+            OffsetGameIcons(100 - (Games[gameSelectInd]->Pos.x));
+        if(Games[gameSelectInd]->Pos.x + Games[gameSelectInd]->Pos.w >= GameIconArea.x + GameIconArea.w) 
+            OffsetGameIcons((GameIconArea.x + GameIconArea.w) - (Games[gameSelectInd]->Pos.x + Games[gameSelectInd]->Pos.w));
+    }
 	if(selLayer == 1 && appletSelectInd < Buttons.size()-1) appletSelectInd++;
-    if(Games[gameSelectInd]->Pos.x < 0) 
-        OffsetGameIcons(100 - (Games[gameSelectInd]->Pos.x));
-    if(Games[gameSelectInd]->Pos.x + Games[gameSelectInd]->Pos.w >= GameIconArea.x + GameIconArea.w) 
-        OffsetGameIcons((GameIconArea.x + GameIconArea.w) - (Games[gameSelectInd]->Pos.x + Games[gameSelectInd]->Pos.w));
 }
 
 void Dashboard::DecrementDashSel() {
-	if(selLayer == 0 && gameSelectInd > 0) gameSelectInd--;
+	if(selLayer == 0 && gameSelectInd > 0) {
+        gameSelectInd--;
+        if(Games[gameSelectInd]->Pos.x < 0) 
+            OffsetGameIcons(100 - (Games[gameSelectInd]->Pos.x));
+        if(Games[gameSelectInd]->Pos.x + Games[gameSelectInd]->Pos.w >= GameIconArea.x + GameIconArea.w) 
+            OffsetGameIcons((GameIconArea.x + GameIconArea.w) - (Games[gameSelectInd]->Pos.x + Games[gameSelectInd]->Pos.w));
+    }
 	if(selLayer == 1 && appletSelectInd > 0) appletSelectInd--;
-    if(Games[gameSelectInd]->Pos.x < 0) 
-        OffsetGameIcons(100 - (Games[gameSelectInd]->Pos.x));
-    if(Games[gameSelectInd]->Pos.x + Games[gameSelectInd]->Pos.w >= GameIconArea.x + GameIconArea.w) 
-        OffsetGameIcons((GameIconArea.x + GameIconArea.w) - (Games[gameSelectInd]->Pos.x + Games[gameSelectInd]->Pos.w));
 }
 
 void Dashboard::ActivateDash() {

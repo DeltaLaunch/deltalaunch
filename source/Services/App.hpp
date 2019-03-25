@@ -21,6 +21,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <vector>
+#include <stdio.h>
 #include <switch.h>
 
 class App

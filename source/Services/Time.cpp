@@ -24,7 +24,7 @@ std::string Time::GetClock() {
     TimeCalendarAdditionalInfo info;
     timeGetCurrentTime(TimeType_Default, &time);
     timeToCalendarTimeWithMyRule(time, &calTime, &info);
-    char buff[100];
+    char buff[10];
     snprintf(buff, sizeof(buff), "%02d:%02d", calTime.hour, calTime.minute);
     return std::string(buff);
 }

@@ -64,6 +64,7 @@ class Engine
 		GpioPadSession voldown;
         ThreadManager *frndThread;
 		ThreadManager *samsThread;
+		ThreadManager *aemThread;
         EngineState State;
         std::string baseThemeDir;
         u32 Width, Height;

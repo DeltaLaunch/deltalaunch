@@ -178,5 +178,23 @@ bool Threads::SystemAppletMessage() {
 		}
     }
     eventClose(&epop);
+    
 	return true;
+}
+
+bool Threads::AeMessageThread() {
+	/*u32 msg = 0;
+	appletGetMessage(&msg);
+	switch(msg) {
+        case 20:    //HomeButton
+        {
+            Power::Shutdown();
+            break;
+        }
+        case 22:    //PowerButton
+        {
+            
+            break;
+        }
+	}*/
 }

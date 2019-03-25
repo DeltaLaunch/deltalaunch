@@ -81,6 +81,7 @@ class Dashboard
 		
 		u8 selLayer;
 		u8 gameRows;
+        u32 msg;
     private:
 		void DrawSettings(Menu *menu);
 		SelectType selType;

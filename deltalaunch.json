@@ -3,13 +3,13 @@
     "title_id": "0x0100000000001000",
     "title_id_range_min": "0x0100000000001000",
     "title_id_range_max": "0x0100000000001000",
-    "main_thread_stack_size": "0x100000",
+    "main_thread_stack_size": "0x60000",
     "main_thread_priority": 44,
     "default_cpu_id": 0,
     "process_category": 0,
-    "pool_partition": 0,
+    "pool_partition": 1,
     "is_64_bit": true,
-    "address_space_type": 1,
+    "address_space_type": 3,
     "is_retail": true,
     "filesystem_access":
     {
@@ -31,7 +31,7 @@
             {
                 "highest_thread_priority": 59,
                 "lowest_thread_priority": 28,
-                "highest_cpu_id": 2,
+                "highest_cpu_id": 3,
                 "lowest_cpu_id": 0
             }
         },

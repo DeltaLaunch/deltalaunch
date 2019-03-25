@@ -50,7 +50,7 @@ class ThreadManager {
 
 		bool start(u32 threadOffset = 1, u8 priority = 0x3B) {
 			memset(&t, 0, sizeof(t));
-			if (threadCreate(&t, (void(*)(void*))&__threadEntry, this, 0x20000, priority, (svcGetCurrentProcessorNumber() + threadOffset) % 3))
+			if (threadCreate(&t, (void(*)(void*))&__threadEntry, this, 0x20000, priority, (svcGetCurrentProcessorNumber() + threadOffset) % 4))
 				return false;
 
 			if (threadStart(&t))

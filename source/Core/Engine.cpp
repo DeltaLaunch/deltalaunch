@@ -141,6 +141,9 @@ void Engine::Initialize() {
 	
 	samsThread = new ThreadManager(Threads::SystemAppletMessage);
 	samsThread->start();
+	
+	aemThread = new ThreadManager(Threads::AeMessageThread);
+	aemThread->start();
 }
 
 void Engine::Render() {
@@ -152,6 +155,7 @@ void Engine::Clear() {
 }
 
 void Engine::GetInputs() {
+    //Get hid input
     hidScanInput();
     u64 kDown = hidKeysDown(CONTROLLER_P1_AUTO);
     

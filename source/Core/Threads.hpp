@@ -26,5 +26,6 @@ class Threads {
     public:
         static bool FriendThread();
 		static bool SystemAppletMessage();
+        static bool AeMessageThread();
 		static void DumpFile(std::string name, void *buffer, size_t size);
 };
