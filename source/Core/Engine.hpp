@@ -59,9 +59,6 @@ class Engine
         Mix_Music *bgm;
         u32 lastPosX;
     private:
-		GpioPadSession power;
-		GpioPadSession volup;
-		GpioPadSession voldown;
         ThreadManager *frndThread;
 		ThreadManager *samsThread;
 		ThreadManager *aemThread;

@@ -38,17 +38,9 @@ Engine::Engine(u32 width, u32 height, void *heapAddr, size_t heapSize) {
     HeapSize = heapSize;
     Width = width;
     Height = height;
-	
-	//Setup GPIO
-	Hid::InitGpioButton(&power, (GpioPadName)24);
-	Hid::InitGpioButton(&volup, GpioPadName_ButtonVolUp);
-	Hid::InitGpioButton(&voldown, GpioPadName_ButtonVolDown);
 }
 
 Engine::~Engine() {
-	Hid::CloseGpioButton(&power);
-	Hid::CloseGpioButton(&volup);
-	Hid::CloseGpioButton(&voldown);
 	delete frndThread;
 	delete samsThread;
     delete dash;
@@ -60,7 +52,6 @@ Engine::~Engine() {
     SDL_FreeSurface(mRender._surface);
     SDL_DestroyWindow(mRender._window);
     SDL_Quit();
-	Power::Shutdown();
 }
 
 void Engine::Initialize() {

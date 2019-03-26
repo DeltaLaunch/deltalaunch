@@ -54,123 +54,107 @@ bool Threads::SystemAppletMessage() {
 				switch(sams.cmdID) {
 					case 1:
 					{
-						DumpFile("/dump_1.bin", &sams, (size_t)sizeof(SAMS));//unk
-						Power::Shutdown();
+						//
 						break;
 					}
 					case 2:
 					{
-						DumpFile("/dump_2.bin", &sams, (size_t)sizeof(SAMS)); //homemenu
-						Power::Shutdown();
+						App::CommandHandler(CMD_Home);
 						break;
 					}
 					case 3:
 					{
-						Power::Sleep();
+						App::CommandHandler(CMD_Sleepmode);
 						break;
 					}
 					case 4:
 					{
-						DumpFile("/dump_4.bin", &sams, (size_t)sizeof(SAMS));//unk (launcher?)
-						Power::Shutdown();
+						//
 						break;
 					}
 					case 5:
 					{
-						Power::Shutdown();
+						App::CommandHandler(CMD_Shutdown);
 						break;
 					}
 					case 6:
 					{
-						Power::Reboot();
+						App::CommandHandler(CMD_Reboot);
 						break;
 					}
 					case 7:
 					{
-						DumpFile("/dump_7.bin", &sams, (size_t)sizeof(SAMS));//unk
-						Power::Shutdown();
+						App::CommandHandler(73);
 						break;
 					}
 					case 8:
 					{
-						DumpFile("/dump_8.bin", &sams, (size_t)sizeof(SAMS));//unk
-						Power::Shutdown();
+						App::CommandHandler(8);
 						break;
 					}
 					case 9:
 					{
-						DumpFile("/dump_9.bin", &sams, (size_t)sizeof(SAMS));//unk
-						Power::Shutdown();
+						App::CommandHandler(9);
 						break;
 					}
 					case 10:
 					{
-						DumpFile("/dump_10.bin", &sams, (size_t)sizeof(SAMS));//unk
-						Power::Shutdown();
+						App::CommandHandler(10);
 						break;
 					}
 					case 11:
 					{
-						//update
+						App::CommandHandler(91);
 						break;
 					}
 					case 12:
 					{
-						DumpFile("/dump_12.bin", &sams, (size_t)sizeof(SAMS));//unk
-						Power::Shutdown();
+						App::CommandHandler(92);
 						break;
 					}
 					case 13:
 					{
-						DumpFile("/dump_13.bin", &sams, (size_t)sizeof(SAMS));//unk
-						Power::Shutdown();
+						App::CommandHandler(51);
 						break;
 					}
 					case 14:
 					{
-						DumpFile("/dump_14.bin", &sams, (size_t)sizeof(SAMS));//unk
-						Power::Shutdown();
+						App::CommandHandler(52);
 						break;
 					}
 					case 15:
 					{
-						DumpFile("/dump_15.bin", &sams, (size_t)sizeof(SAMS));//unk
-						Power::Shutdown();
+						App::CommandHandler(53);
 						break;
 					}
 					case 16:
 					{
-						//homeSideMenu
+						App::CommandHandler(54);
 						break;
 					}
 					case 17:
 					{
-						DumpFile("/dump_17.bin", &sams, (size_t)sizeof(SAMS));//unk
-						Power::Shutdown();
+						App::CommandHandler(55);
 						break;
 					}
 					case 18:
 					{
-						DumpFile("/dump_18.bin", &sams, (size_t)sizeof(SAMS));//unk
-						Power::Shutdown();
+						//
 						break;
 					}
 					case 19:
 					{
-						DumpFile("/dump_19.bin", &sams, (size_t)sizeof(SAMS));//unk
-						Power::Shutdown();
+						//
 						break;
 					}
 					case 20:
 					{
-						DumpFile("/dump_20.bin", &sams, (size_t)sizeof(SAMS));//unk
-						Power::Shutdown();
+						//
 						break;
 					}
 					case 21:
 					{
-						DumpFile("/dump_21.bin", &sams, (size_t)sizeof(SAMS));//unk
-						Power::Shutdown();
+						//
 						break;
 					}
 				}
@@ -183,18 +167,21 @@ bool Threads::SystemAppletMessage() {
 }
 
 bool Threads::AeMessageThread() {
-	/*u32 msg = 0;
-	appletGetMessage(&msg);
-	switch(msg) {
-        case 20:    //HomeButton
-        {
-            Power::Shutdown();
-            break;
-        }
-        case 22:    //PowerButton
-        {
-            
-            break;
-        }
-	}*/
+	u32 msg = 0;
+	if(appletGetMessage(&msg)) {
+		switch(msg) {
+			case 20:    //HomeButton
+			{
+				App::CommandHandler(CMD_Home);
+				break;
+			}
+			case 22:    //PowerButton
+			{
+				App::CommandHandler(CMD_Sleepmode);
+				break;
+			}
+		}
+	}
+	
+	return true;
 }

@@ -296,3 +296,35 @@ Result App::ShowError(std::string errText, std::string details, Result rc) {
     
 	return 0;
 }
+
+Result App::CommandHandler(u32 cmd) {
+    switch(cmd) {
+        case CMD_Home:
+        {
+            libappletRequestHomeMenu();
+            break;
+        }
+        case 14:
+        {
+            //
+            break;
+        }
+        case CMD_Sleepmode:
+        {
+            Power::Sleep();
+            break;
+        }
+        case CMD_Shutdown:
+        {
+            Power::Shutdown();
+            break;
+        }
+        case CMD_Reboot:
+        {
+            Power::Reboot();
+            break;
+        }
+    }
+    
+    return 0;
+}

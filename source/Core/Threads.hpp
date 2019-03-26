@@ -20,7 +20,8 @@
 
 #include <switch.h>
 #include <string>
-#include "../Services/Power.hpp"
+#include "../Services/App.hpp"
+#include "../Types.h"
 
 class Threads {
     public:

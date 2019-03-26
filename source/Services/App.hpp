@@ -23,6 +23,8 @@
 #include <vector>
 #include <stdio.h>
 #include <switch.h>
+#include "Power.hpp"
+#include "../Types.h"
 
 class App
 {
@@ -38,4 +40,5 @@ class App
         static Result LaunchHbl();
         static Result LaunchGame(u64 tid, u128 userID);
 		static Result ShowError(std::string text1, std::string text2, Result rc);
+        static Result CommandHandler(u32 cmd);
 };
