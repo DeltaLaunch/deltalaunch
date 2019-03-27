@@ -18,8 +18,7 @@
 
 #include "Dashboard.hpp"
 
-Dashboard::Dashboard(Renderer *rend, u32 width, u32 height, std::string font) {
-    Rend = rend;
+Dashboard::Dashboard(u32 width, u32 height, std::string font) {
     Width = width;
     Height = height;
     plInitialize();
@@ -41,15 +40,25 @@ Dashboard::Dashboard(Renderer *rend, u32 width, u32 height, std::string font) {
 	selLayer = 0;
 	gameSelectInd = 0;
     msg = 0;
-	selType = SELECT_OUTLINE;
 	gameRows = 1;
-    IsMenuOpen = false;
     debugInfo = false;
 	MaxColumns = 12;
-    Wallpaper = SDL_CreateTexture(Rend->_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, Width, Height);
-    LockScreen = SDL_CreateTexture(Rend->_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, Width, Height);
+	IsMenuOpen = false;
+    Wallpaper = SDL_CreateTexture(Graphics::GetRenderer(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, Width, Height);
+    LockScreen = SDL_CreateTexture(Graphics::GetRenderer(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, Width, Height);
     GameIconArea.x = 120; GameIconArea.y = 110;
     GameIconArea.w = 1080; GameIconArea.h = 450;
+	
+	SetPos.x=SetPos.y=0; SetPos.w=Width; SetPos.h=Height;
+	settings = new SettingsMenu(hdrFont, smallFont, SetPos);
+	u32 Y = 20, butW = 200, butH = 60, butCol = 0x202020FF;
+    u32 space = 20+butH;
+    settings->AddButton(new Button("Lock Screen", 60, Y+=space, butW, butH, butCol, nullptr));
+    settings->AddButton(new Button("Internet", 60, Y+=space, butW, butH, butCol, nullptr));
+    settings->AddButton(new Button("Profile", 60, Y+=space, butW, butH, butCol, nullptr));
+    settings->AddButton(new Button("Select Mode", 60, Y+=space, butW, butH, butCol, nullptr));
+    settings->AddButton(new Button("System Info", 60, Y+=space, butW, butH, butCol, nullptr));
+	settings->gameSelectType = SELECT_OUTLINE;
 
     appletRequestForeground();
     appletSetHandlesRequestToDisplay(true);
@@ -60,11 +69,10 @@ Dashboard::~Dashboard() {
     TTF_CloseFont(debugFont);
 	TTF_CloseFont(hdrFont);
 	TTF_CloseFont(smallFont);
+	delete settings;
 	for(auto button: Buttons) delete button;
-	for(auto menu: Menus) delete menu;
 	for(auto game: Games) delete game;
     Buttons.clear();
-	Menus.clear();
 	Games.clear();
     SDL_DestroyTexture(Wallpaper);
     SDL_DestroyTexture(LockScreen);
@@ -74,11 +82,36 @@ Dashboard::~Dashboard() {
 /*
 *   Draw/Set Graphics
 */
+void Dashboard::UpdateDash(u32 kDown) {
+    IsMenuOpen = settings->IsOpen();
+    
+    if(kDown & KEY_A) ActivateDash();
+	if(kDown & KEY_PLUS) ToggleDebug();
+	if(kDown & KEY_MINUS) ;
+	if(kDown & KEY_DLEFT) DecrementDashSel();
+	if(kDown & KEY_DRIGHT) IncrementDashSel();
+	if(kDown & KEY_DUP) selLayer = 0;
+	if(kDown & KEY_DDOWN) selLayer = 1;
+	if(Hid::IsTouched(GameIconArea) && !Hid::IsTapped(GameIconArea)) {
+		if(lastPosX != 0) 
+			OffsetGameIcons(Hid::GetTouchPos().px - lastPosX);
+		lastPosX = Hid::GetTouchPos().px;
+	} else {
+		lastPosX = 0;
+	}
+    
+    if(App::IsGamecardInserted() == GcState) {
+        SetGames();
+        GcState = !GcState;
+    }
+}
+
 void Dashboard::DrawWallpaper() {
+	IsMenuOpen = settings->IsOpen();
     SDL_Rect pos;
     pos.x = 0; pos.y = 0;
     pos.w = Width; pos.h = Height;
-	Draw::RenderTexture(Wallpaper, pos, Rend);
+	Graphics::RenderTexture(Wallpaper, pos);
 }
 
 void Dashboard::SetWallpaper(std::vector<std::string> layers) {
@@ -91,7 +124,7 @@ void Dashboard::SetWallpaper(std::vector<std::string> layers) {
 		SDL_BlitSurface(lay, &pos, wall, NULL);
 		SDL_FreeSurface(lay);
 	}
-	Wallpaper = SDL_CreateTextureFromSurface(Rend->_renderer, wall);
+	Wallpaper = SDL_CreateTextureFromSurface(Graphics::GetRenderer(), wall);
     SDL_FreeSurface(wall);
 }
 
@@ -99,12 +132,12 @@ void Dashboard::DrawLockScreen() {
     SDL_Rect pos;
     pos.x = 0; pos.y = 0;
     pos.w = Width; pos.h = Height;
-	Draw::RenderTexture(LockScreen, pos, Rend);
+	Graphics::RenderTexture(LockScreen, pos);
 }
 
 void Dashboard::SetLockScreen(std::string image) {
     SDL_Surface *img = IMG_Load(image.c_str());
-    LockScreen = SDL_CreateTextureFromSurface(Rend->_renderer, img);
+    LockScreen = SDL_CreateTextureFromSurface(Graphics::GetRenderer(), img);
     SDL_FreeSurface(img);
 }
 
@@ -114,13 +147,13 @@ void Dashboard::DrawButtons() {
 		//Render icon/selected icon
         if(button->Sprite != nullptr) {
 			if(ind == appletSelectInd && selLayer == 1)
-				Draw::RenderTexture(button->SpriteSelect, button->Pos, Rend);
+				Graphics::RenderTexture(button->SpriteSelect, button->Pos);
 			else
-				Draw::RenderTexture(button->Sprite, button->Pos, Rend);
+				Graphics::RenderTexture(button->Sprite, button->Pos);
 		}
 		//Default to rendering rectangle
         else
-            Draw::Rectangle(button->Pos, button->Color, Rend);
+            Graphics::Rectangle(button->Pos, button->Color);
         
 		//Detect touch selection
         if(Hid::IsTouched(button->Pos) && !IsMenuOpen) {
@@ -135,35 +168,35 @@ void Dashboard::DrawGames() {
 	int ind = 0;
 	for(auto game: Games) {
         //Classic outline format
-        if(selType == SELECT_OUTLINE) {
+        if(settings->gameSelectType == SELECT_OUTLINE) {
             //Draw selection outline
             if(ind == gameSelectInd && selLayer == 0) {
                 SDL_Rect pos = game->Pos; 
                 pos.x -= 5; pos.y -= 5; pos.w += 10; pos.h += 10;
-                Draw::Rectangle(pos, game->GetColor(), Rend);
+                Graphics::Rectangle(pos, game->GetColor());
             }
             
             //Draw either game icon or backer
             if(game->GetTitleId() != 0) {
-                Draw::RenderTexture(game->Icon, game->Pos, Rend);
+                Graphics::RenderTexture(game->Icon, game->Pos);
             } else {
-                Draw::Rectangle(game->Pos, 0x70, Rend);
+                Graphics::Rectangle(game->Pos, 0x70);
             }
         }
 		//Or draw size diff mode
-		if(selType == SELECT_SIZEDIFF) {
+		if(settings->gameSelectType == SELECT_SIZEDIFF) {
             //Draw game bigger
             if(ind == gameSelectInd && selLayer == 0) {
                 SDL_Rect pos = game->Pos; 
                 pos.x -= 20; pos.y -= 20; pos.w += 40; pos.h += 40;
-                Draw::RenderTexture(game->Icon, pos, Rend);
+                Graphics::RenderTexture(game->Icon, pos);
             }
             else {
                 //Draw either game icon or backer
                 if(game->GetTitleId() != 0) {
-                    Draw::RenderTexture(game->Icon, game->Pos, Rend);
+                    Graphics::RenderTexture(game->Icon, game->Pos);
                 }
-                Draw::Rectangle(game->Pos, 0x70, Rend);
+                Graphics::Rectangle(game->Pos, 0x70);
             }
 		}
         
@@ -196,9 +229,9 @@ void Dashboard::SetGames() {
 			SDL_Surface *img = IMG_Load_RW(SDL_RWFromMem(data.icon, 0x20000), 1);
 			if(game->Icon != nullptr)
 				SDL_DestroyTexture(game->Icon);
-			game->Icon = SDL_CreateTexture(Rend->_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, game->Pos.w, game->Pos.h);
+			game->Icon = SDL_CreateTexture(Graphics::GetRenderer(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, game->Pos.w, game->Pos.h);
 			if(img) 
-				game->Icon = SDL_CreateTextureFromSurface(Rend->_renderer, img);
+				game->Icon = SDL_CreateTextureFromSurface(Graphics::GetRenderer(), img);
 			SDL_FreeSurface(img);
 		}
         i++;
@@ -207,8 +240,8 @@ void Dashboard::SetGames() {
 }
 
 void Dashboard::DrawOverlay() {
-	Draw::RenderTexture(Battery, BatPos, Rend);
-    Draw::Text(Rend, smallFont, ClkPos.x, ClkPos.y, Time::GetClock());
+	Graphics::RenderTexture(Battery, BatPos);
+    Graphics::DrawText(smallFont, ClkPos.x, ClkPos.y, Time::GetClock());
 }
 
 void Dashboard::SetOverlay(std::string battery, SDL_Rect batPos, SDL_Rect clkPos) {
@@ -216,77 +249,9 @@ void Dashboard::SetOverlay(std::string battery, SDL_Rect batPos, SDL_Rect clkPos
     BatPos = batPos;
 	BatPos.w = img->w; BatPos.h = img->h;
     ClkPos = clkPos;
-	Battery = SDL_CreateTexture(Rend->_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, img->w, img->h);
-    Battery = SDL_CreateTextureFromSurface(Rend->_renderer, img);
+	Battery = SDL_CreateTexture(Graphics::GetRenderer(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, img->w, img->h);
+    Battery = SDL_CreateTextureFromSurface(Graphics::GetRenderer(), img);
     SDL_FreeSurface(img);
-}
-
-void Dashboard::DrawSettings(Menu *menu) {
-	u32 panX = 500, panY = 100;
-	switch(menu->GetSelection()){
-		case 0:
-		{
-			Draw::Text(Rend, smallFont, panX, panY, "Toggle the lock screen flag.");
-			break;
-		}
-		case 1:
-		{
-			Draw::Text(Rend, smallFont, panX, panY, "View internet settings.");
-			break;
-		}
-		case 2:
-		{
-			Draw::Text(Rend, smallFont, panX, panY, "Edit profile.");
-			break;
-		}
-        case 3:
-        {
-            Draw::Text(Rend, smallFont, panX, panY, "Change selection mode.");
-            Draw::Text(Rend, smallFont, panX+5, panY+50, (selType == SELECT_OUTLINE ? "Mode: Outline" : "Mode: Diff size"));
-            break;
-        }
-		case 4:
-		{
-			Draw::Text(Rend, smallFont, panX, panY, "Special specific information.");
-			Draw::Text(Rend, smallFont, panX+5, panY+50, "Firmware: " + Settings::GetFirmwareVersion());
-			Draw::Text(Rend, smallFont, panX+5, panY+70, "Serial: " + Settings::GetSerialNumber());
-			break;
-		}
-	}
-}
-
-void Dashboard::DrawMenus() {
-    for(auto menu: Menus) {
-		//Only draw menus that are open
-        if(menu->IsOpen()) {
-            if(menu->Sprite != nullptr)
-				Draw::RenderTexture(menu->Sprite, menu->Pos, Rend);
-			else
-				Draw::Rectangle(menu->Pos, menu->Color, Rend);
-			
-			//Populate menu
-			Draw::Text(Rend, hdrFont, 30, 25, menu->Title);
-			int i = 0;
-            for(auto button: menu->Buttons) {
-				if(i == menu->GetSelection()) {
-					SDL_Rect pos; 
-					pos.x = button->Pos.x-5; pos.y = button->Pos.y-5;
-					pos.w = button->Pos.w+10; pos.h = button->Pos.h+10;
-					Draw::Rectangle(pos, AQUA, Rend);
-                    Draw::Rectangle(button->Pos, GREY, Rend);
-                    Draw::Text(Rend, smallFont, button->Pos.x + 12, button->Pos.y + (button->Pos.h/2) - 4, button->Text, AQUA);
-				}
-                else {
-                    Draw::Text(Rend, smallFont, button->Pos.x + 12, button->Pos.y + (button->Pos.h/2) - 4, button->Text);
-                }
-                //Draw settings panel
-                if(!menu->Title.compare("Settings")) {
-					DrawSettings(menu);
-                }
-				i++;
-            }
-        }
-    }
 }
 
 void Dashboard::DrawDebugText() {
@@ -294,12 +259,12 @@ void Dashboard::DrawDebugText() {
         touchPosition touchPos;
         hidTouchRead(&touchPos, 0);
         u32 X = 14,  Y = 0, s = 14;
-        Draw::Text(Rend, debugFont, X, Y+=s, "DeltaLaunch alpha!");
-        Draw::Text(Rend, debugFont, X, Y+=s, "Firmware: " + Settings::GetFirmwareVersion());
-        Draw::Text(Rend, debugFont, X, Y+=s, "Serial: " + Settings::GetSerialNumber());
-		Draw::Text(Rend, debugFont, X, Y+=s, "Battery: " + std::to_string(Power::GetBatteryLife()) + "%");
-        Draw::Text(Rend, debugFont, X, Y+=s, "Touch: X=" + std::to_string(touchPos.px) + "; y=" + std::to_string(touchPos.py));
-        Draw::Text(Rend, debugFont, X, Y+=s, "Message: " + std::to_string(msg));
+        Graphics::DrawText(debugFont, X, Y+=s, "DeltaLaunch alpha!");
+        Graphics::DrawText(debugFont, X, Y+=s, "Firmware: " + Settings::GetFirmwareVersion());
+        Graphics::DrawText(debugFont, X, Y+=s, "Serial: " + Settings::GetSerialNumber());
+		Graphics::DrawText(debugFont, X, Y+=s, "Battery: " + std::to_string(Power::GetBatteryLife()) + "%");
+        Graphics::DrawText(debugFont, X, Y+=s, "Touch: X=" + std::to_string(touchPos.px) + "; y=" + std::to_string(touchPos.py));
+        Graphics::DrawText(debugFont, X, Y+=s, "Message: " + std::to_string(msg));
         Y = 0;
     }
 }
@@ -307,100 +272,11 @@ void Dashboard::DrawDebugText() {
 /*
 *   Trigger events
 */
-Result Dashboard::OpenMenu(std::string name) {
-	for(auto menu: Menus) {
-        if(menu->GetTitle() == name) {
-			IsMenuOpen = true;;
-			menu->Show();
-		}
-    }
-    return 0;
-}
-
-Result Dashboard::CloseMenus() {
-	for(auto menu: Menus) {
-        if(menu->IsOpen()) {
-            IsMenuOpen = false;
-			menu->Hide();
-		}
-    }
-    return 0;
-}
-
 void Dashboard::OffsetGameIcons(u32 deltaX) {
     int i = 0;
     for(auto game: Games) {
 		game->Pos.x = (game->Pos.x <= 100+(i*(game->Pos.w+(14/gameRows)))) ? (game->Pos.x + deltaX) : 100+(i*(game->Pos.w+(14/gameRows)));
         i++;
-	}
-}
-
-void Dashboard::IncrementMenuSel() {
-	for(auto menu: Menus) {
-        if(menu->IsOpen()) {
-			if(menu->GetSelection() < menu->Buttons.size()-1)
-				menu->IncrementSelect();
-			else
-				menu->SetSelection(0);
-		}
-	}
-}
-
-void Dashboard::DecrementMenuSel() {
-	for(auto menu: Menus) {
-        if(menu->GetSelection() > 0)
-			menu->DecrementSelect();
-		else
-			menu->SetSelection(menu->Buttons.size()-1);
-	}
-}
-
-void Dashboard::ActivateMenu() {
-	for(auto menu: Menus) {
-		if(menu->IsOpen()){
-			if(menu->currLayer = 0) menu->currLayer++;
-			else {
-				//Settings
-				if(!menu->Title.compare("Settings")) {
-					switch(menu->GetSelection()){
-						case 0:
-						{
-							//toggle lock 
-							break;
-						}
-						case 1:
-						{
-							//Internet settings
-							break;
-						}
-						case 2:
-						{
-							//Profile
-							break;
-						}
-                        case 3:
-                        {
-                            //Selection type
-                            selType = (selType == SELECT_OUTLINE ? SELECT_SIZEDIFF : SELECT_OUTLINE);
-                            break;
-                        }
-						case 4:
-						{
-							//system info/update
-						}
-					}
-				}
-			}
-		}
-	}
-}
-
-void Dashboard::DisengageMenu() {
-	for(auto menu: Menus) {
-		if(menu->IsOpen()) {
-			if(menu->currLayer <= 0) CloseMenus();
-			else menu->currLayer--;
-		}
 	}
 }
 
@@ -431,6 +307,23 @@ void Dashboard::ActivateDash() {
 	if(selLayer == 1) Buttons[appletSelectInd]->Run();
 }
 
+Result Dashboard::OpenSettings() {
+	IsMenuOpen = true;
+	settings->Show();
+	return 0;
+}
+
+Result Dashboard::CloseSettings() {
+	IsMenuOpen = false;
+	settings->Hide();
+	return 0;
+}
+
+void Dashboard::UpdateSettings(u32 hid) {
+	settings->Update(hid);
+    IsMenuOpen = settings->IsOpen();
+}
+
 /*
 *   Add elements to form
 */
@@ -440,8 +333,4 @@ void Dashboard::AddButton(Button *button) {
 
 void Dashboard::AddGame(Game *game) {
 	Games.push_back(game);
-}
-
-void Dashboard::AddMenu(Menu *menu) {
-    Menus.push_back(menu);
 }

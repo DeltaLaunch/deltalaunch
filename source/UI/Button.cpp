@@ -18,13 +18,13 @@
 
 #include "Button.hpp"
 
-Button::Button(std::string sprite, std::string spriteSel, u32 x, u32 y, Renderer *rend, std::function<Result()> callback) {
+Button::Button(std::string sprite, std::string spriteSel, u32 x, u32 y, std::function<Result()> callback) {
     Pos.x = x; Pos.y = y;
     Callback = callback;
     Sprite = nullptr;
 	if(sprite != "") {
 		SDL_Surface *img = IMG_Load(sprite.c_str());
-		Sprite = Draw::CreateTexFromSurf(img, rend);
+		Sprite = Graphics::CreateTexFromSurf(img);
 		if(img) {
 			Pos.w = img->w;
 			Pos.h = img->h;
@@ -34,7 +34,7 @@ Button::Button(std::string sprite, std::string spriteSel, u32 x, u32 y, Renderer
 	SpriteSelect = nullptr;
 	if(spriteSel != "") {
 		SDL_Surface *img = IMG_Load(spriteSel.c_str());
-		SpriteSelect = Draw::CreateTexFromSurf(img, rend);
+		SpriteSelect = Graphics::CreateTexFromSurf(img);
 		if(img) {
 			SDL_FreeSurface(img);
 		}

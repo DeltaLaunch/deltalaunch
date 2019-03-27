@@ -20,20 +20,27 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL2_gfxPrimitives.h> 
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_mixer.h>
 #include <SDL2/SDL_ttf.h>
 #include <switch.h>
 #include <stdint.h>
 #include <string>
-#include "Renderer.hpp"
 
-class Draw
+class Graphics
 {
     public:
-        static void Rectangle(u32 x, u32 y, u32 w, u32 h, u32 scolor, Renderer *rend);
-        static void Rectangle(SDL_Rect pos, u32 scolor, Renderer *rend);
-        static SDL_Texture *CreateTexFromSurf(SDL_Surface *surf, Renderer *rend);
-        static void Text(Renderer *rend, TTF_Font *font, u32 x, u32 y, std::string str);
-        static void Text(Renderer *rend, TTF_Font *font, u32 x, u32 y, std::string str, u32 col);
-        static void DrawTexture(std::string tex, u32 x, u32 y, Renderer *rend);
-        static void RenderTexture(SDL_Texture *tex, SDL_Rect pos, Renderer *rend);
+        static SDL_Renderer *Rend;
+        static SDL_Window *Window;
+        static void Init(u32 width, u32 height);
+        static void Exit();
+        static void Rectangle(u32 x, u32 y, u32 w, u32 h, u32 scolor);
+        static void Rectangle(SDL_Rect pos, u32 scolor);
+        static SDL_Texture *CreateTexFromSurf(SDL_Surface *surf);
+        static void DrawText(TTF_Font *font, u32 x, u32 y, std::string str);
+        static void DrawText(TTF_Font *font, u32 x, u32 y, std::string str, u32 col);
+        static void DrawTexture(std::string tex, u32 x, u32 y);
+        static void RenderTexture(SDL_Texture *tex, SDL_Rect pos);
+        static SDL_Renderer *GetRenderer() { return Rend; }
+        static void Render();
+        static void Clear();
 };

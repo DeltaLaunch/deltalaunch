@@ -18,43 +18,46 @@
 
 #include "Menu.hpp"
 
-Menu::Menu(std::string title, std::string text, u32 x, u32 y, std::string texture, Renderer *rend) {
+Menu::Menu(std::string title, TTF_Font *fontHdr, TTF_Font *fontBdy, SDL_Rect pos) {
 	Title = title;
-	Text = text;
-	Visible = false;
-	currLayer = 0;
-	SelectPos = 0;
-	Pos.x = x; Pos.y = y;
-	Sprite = nullptr;
-	SDL_Surface *img = IMG_Load(texture.c_str());
-    Sprite = Draw::CreateTexFromSurf(img, rend);
+    Pos = pos;
+    FontHdr = fontHdr;
+    FontBdy = fontBdy;
+    Visible = false;
+    currLayer = 0;
+    menuOpt = 0;
+    Sprite = nullptr;
+    running = true;
+}
+
+Menu::~Menu() {
+    for(auto button: Buttons) {
+        delete button;
+    }
+    Buttons.clear();
+    SDL_DestroyTexture(Sprite);
+}
+
+void Menu::IncrementSelect() {
+    if(menuOpt < Buttons.size()-1)
+        menuOpt++;
+    else
+        menuOpt = 0;
+}
+
+void Menu::DecrementSelect() {
+    if(menuOpt > 0)
+        menuOpt--;
+    else
+        menuOpt = Buttons.size()-1;
+}
+
+void Menu::SetBackground(std::string tex) {
+    SDL_Surface *img = IMG_Load(tex.c_str());
+    Sprite = Graphics::CreateTexFromSurf(img);
     if(img) {
         Pos.w = img->w;
         Pos.h = img->h;
         SDL_FreeSurface(img);
     }
-}
-
-Menu::~Menu() {
-	for(auto button: Buttons) {
-        delete button;
-    }
-    Buttons.clear();
-	SDL_DestroyTexture(Sprite);
-}
-
-void Menu::AddButton(Button *button) {
-	Buttons.push_back(button);
-}
-
-void Menu::Show() {
-	Visible = true;
-}
-
-void Menu::Hide() {
-	Visible = false;
-}
-
-void Menu::Run(u32 index) {
-	
 }

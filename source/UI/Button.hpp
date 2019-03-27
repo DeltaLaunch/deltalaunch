@@ -22,12 +22,12 @@
 #include <functional>
 #include <string>
 #include <switch.h>
-#include "Draw.hpp"
+#include "../Core/Graphics.hpp"
 
 class Button
 {
     public:
-        Button(std::string sprite, std::string spriteSel, u32 x, u32 y, Renderer *rend, std::function<Result()> callback);
+        Button(std::string sprite, std::string spriteSel, u32 x, u32 y, std::function<Result()> callback);
         Button(std::string text, u32 x, u32 y, u32 w, u32 h, u32 col, std::function<Result()> callback);
         ~Button();
         Result Run();

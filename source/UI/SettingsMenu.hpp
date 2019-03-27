@@ -20,47 +20,41 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL2_gfxPrimitives.h> 
 #include <SDL2/SDL_image.h>
-#include <SDL2/SDL_mixer.h>
 #include <SDL2/SDL_ttf.h>
-#include <string>
 #include <vector>
-#include <tuple>
 #include <switch.h>
-
-#include "Threads.hpp"
-#include "ThreadManager.hpp"
+#include "Button.hpp"
+#include "Game.hpp"
 #include "../Core/Graphics.hpp"
-#include "../UI/INI.hpp"
-#include "../UI/Dashboard.hpp"
-#include "../UI/Button.hpp"
-#include "../UI/Game.hpp"
-#include "../UI/Menu.hpp"
-#include "../Services/Hid.hpp"
-#include "../Services/App.hpp"
+#include "Menu.hpp"
+#include "../Services/Time.hpp"
 #include "../Services/Power.hpp"
+#include "../Services/Settings.hpp"
 #include "../Types.h"
 
-#define BACKGROUND_LAYERS 99
+#define GREY 0x4C4C4CFF
+#define AQUA 0xFFCEFF
 
-class Engine
+class SettingsMenu: public Menu
 {
     public:
-        Engine(u32 width, u32 height, void *heapAddr, size_t heapSize);
-        ~Engine();
-        void Initialize();
-        void Render();
-        void Clear();
-        void Update();
+        SettingsMenu(TTF_Font *fontHdr, TTF_Font *fontBdy, SDL_Rect pos);
+        ~SettingsMenu();
+        //Draw/set
+        void DrawPanel();
+        void DrawButtons();
 		
-        Dashboard *dash;
-        Mix_Music *bgm;
+		//Overrides
+		void Update(u32 kDown);
+		void Activate();
+		void Back();
+		
+		u8 gameRows;
+		SelectType gameSelectType;
     private:
-        ThreadManager *frndThread;
-		ThreadManager *samsThread;
-		ThreadManager *aemThread;
-        EngineState State;
-        std::string baseThemeDir;
         u32 Width, Height;
-        void *HeapAddr;
-        size_t HeapSize;
+        TTF_Font *debugFont;
+		TTF_Font *hdrFont;
+		TTF_Font *smallFont;
+        SDL_Texture *bg;
 };

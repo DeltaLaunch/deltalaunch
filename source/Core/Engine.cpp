@@ -23,17 +23,8 @@ Engine::Engine(u32 width, u32 height, void *heapAddr, size_t heapSize) {
     if(!Rnx::IsUsingReiNX()) {
         fatalSimple(0xBADC0DE);
     }
-    
-    //Basic SDL init
-    SDL_Init(SDL_INIT_EVERYTHING);
-    SDL_CreateWindowAndRenderer(width, height, 0, &mRender._window, &mRender._renderer);
-    mRender._surface = SDL_GetWindowSurface(mRender._window);
-    SDL_SetRenderDrawBlendMode(mRender._renderer, SDL_BLENDMODE_BLEND);
-    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "2");
-    IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG);
-    TTF_Init();
-    SDL_SetRenderDrawColor(mRender._renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-    Mix_Init(MIX_INIT_FLAC | MIX_INIT_MOD | MIX_INIT_MP3 | MIX_INIT_OGG);
+
+    Graphics::Init(width, height);
     HeapAddr = heapAddr;
     HeapSize = heapSize;
     Width = width;
@@ -44,14 +35,7 @@ Engine::~Engine() {
 	delete frndThread;
 	delete samsThread;
     delete dash;
-    TTF_Quit();
-    IMG_Quit();
-    Mix_CloseAudio();
-    Mix_Quit();
-    SDL_DestroyRenderer(mRender._renderer);
-    SDL_FreeSurface(mRender._surface);
-    SDL_DestroyWindow(mRender._window);
-    SDL_Quit();
+    Graphics::Exit();
 }
 
 void Engine::Initialize() {
@@ -75,10 +59,11 @@ void Engine::Initialize() {
     //Init dashboard
     SDL_Rect batPos; batPos.x = cfg.GetInteger("BatteryOverlay", "x", 1180); batPos.y = cfg.GetInteger("BatteryOverlay", "y", 14);
     SDL_Rect clkPos; clkPos.x = cfg.GetInteger("ClockOverlay", "x", 1110); clkPos.y = cfg.GetInteger("ClockOverlay", "y", 14);
-    dash = new Dashboard(&mRender, Width, Height, (baseThemeDir+cfg.Get("Config", "font", "")).c_str());
+    dash = new Dashboard(Width, Height, (baseThemeDir+cfg.Get("Config", "font", "")).c_str());
     dash->SetWallpaper(layers);
     dash->SetLockScreen(baseThemeDir + cfg.Get("Config", "lockscreen_image", ""));
     dash->SetOverlay(baseThemeDir + cfg.Get("BatteryOverlay", "battery", ""), batPos, clkPos);
+	dash->settings->SetBackground(baseThemeDir + cfg.Get("Menus", "settings", ""));
     State = (Settings::GetLockScreenFlag() ? STATE_LOCKSCREEN : STATE_DASHBOARD);
 	layers.clear();
     
@@ -91,7 +76,7 @@ void Engine::Initialize() {
         std::tuple<std::string, std::function<Result()>>{"ShopButton", App::LaunchShop},
         std::tuple<std::string, std::function<Result()>>{"AlbumButton", App::LaunchAlbum},
         std::tuple<std::string, std::function<Result()>>{"HomebrewButton", App::LaunchHbl},
-        std::tuple<std::string, std::function<Result()>>{"SettingsButton", std::bind(&Dashboard::OpenMenu, dash, "Settings")},
+        std::tuple<std::string, std::function<Result()>>{"SettingsButton", std::bind(&Dashboard::OpenSettings, dash)},
         std::tuple<std::string, std::function<Result()>>{"PowerButton", Power::Reboot},
     };
     for(int but = 0; but < Buttons.size(); but++) {
@@ -101,21 +86,10 @@ void Engine::Initialize() {
                 baseThemeDir + cfg.Get(std::get<0>(Buttons.at(but)), "sprite_select", ""), 
                 cfg.GetInteger(std::get<0>(Buttons.at(but)), "x", x+=space), 
                 cfg.GetInteger(std::get<0>(Buttons.at(but)), "y", 600), 
-                &mRender, std::get<1>(Buttons.at(but))
+                std::get<1>(Buttons.at(but))
             )
         );
     }
-	
-    //Settings
-    Menu *settings = new Menu("Settings", "", 0, 0, baseThemeDir + cfg.Get("Menus", "settings", ""), &mRender);
-    u32 Y = 20, butW = 200, butH = 60, butCol = 0x202020FF;
-    space = 20+butH;
-    settings->AddButton(new Button("Lock Screen", 60, Y+=space, butW, butH, butCol, nullptr));
-    settings->AddButton(new Button("Internet", 60, Y+=space, butW, butH, butCol, nullptr));
-    settings->AddButton(new Button("Profile", 60, Y+=space, butW, butH, butCol, nullptr));
-    settings->AddButton(new Button("Select Mode", 60, Y+=space, butW, butH, butCol, nullptr));
-    settings->AddButton(new Button("System Info", 60, Y+=space, butW, butH, butCol, nullptr));
-	dash->AddMenu(settings);
     
     //Boundries: (120, 110), (1200, 560) .. 450px vert
     for(int i = 0; i < dash->MaxColumns; i++){
@@ -138,75 +112,36 @@ void Engine::Initialize() {
 }
 
 void Engine::Render() {
-    SDL_RenderPresent(mRender._renderer);
+    Graphics::Render();
 }
 
 void Engine::Clear() {
-    SDL_RenderClear(mRender._renderer);
-}
-
-void Engine::GetInputs() {
-    //Get hid input
-    hidScanInput();
-    u64 kDown = hidKeysDown(CONTROLLER_P1_AUTO);
-    
-    switch(State) {
-        case STATE_LOCKSCREEN:
-        {
-            if(kDown & KEY_A) State = STATE_DASHBOARD;
-            break;
-        }
-        case STATE_DASHBOARD:
-        {
-            if(kDown & KEY_A) dash->ActivateDash();
-            if(kDown & KEY_PLUS) dash->ToggleDebug();
-            if(kDown & KEY_MINUS) ;
-			if(kDown & KEY_DLEFT) dash->DecrementDashSel();
-			if(kDown & KEY_DRIGHT) dash->IncrementDashSel();
-			if(kDown & KEY_DUP) dash->selLayer = 0;
-			if(kDown & KEY_DDOWN) dash->selLayer = 1;
-            if(Hid::IsTouched(dash->GameIconArea) && !Hid::IsTapped(dash->GameIconArea)) {
-                if(lastPosX != 0) 
-                    dash->OffsetGameIcons(Hid::GetTouchPos().px - lastPosX);
-                lastPosX = Hid::GetTouchPos().px;
-            } else {
-                lastPosX = 0;
-            }
-            break;
-        }
-        case STATE_SETTINGS:
-        {
-            if(kDown & KEY_A) dash->ActivateMenu();
-			if(kDown & KEY_B) dash->DisengageMenu();
-			if(kDown & KEY_DUP) dash->DecrementMenuSel();
-			if(kDown & KEY_DDOWN) dash->IncrementMenuSel();
-            break;
-        }
-    }
-
-    if(App::IsGamecardInserted() == GcState) {
-        dash->SetGames();
-        GcState = !GcState;
-    }
+    Graphics::Clear();
 }
 
 void Engine::Update() {
+	//Get hid input
+    hidScanInput();
+    u64 kDown = hidKeysDown(CONTROLLER_P1_AUTO);
     
     //Lockscreen
     while(State == STATE_LOCKSCREEN && !Hid::IsTouched()) {
         Clear();
         dash->DrawLockScreen();
         Render();
-        GetInputs();
+        if(kDown & KEY_A) State = STATE_DASHBOARD;
     }
     State = dash->IsMenuOpen ? STATE_SETTINGS : STATE_DASHBOARD;
-    GetInputs();
     
     //Dash
-    dash->DrawWallpaper();
-    dash->DrawButtons();
-	dash->DrawGames();
-    dash->DrawOverlay();
-    dash->DrawMenus();
-    dash->DrawDebugText();
+	if(State == STATE_DASHBOARD) {
+        dash->UpdateDash(kDown);
+		dash->DrawWallpaper();
+		dash->DrawButtons();
+		dash->DrawGames();
+		dash->DrawOverlay();
+		dash->DrawDebugText();
+	}
+	if(State == STATE_SETTINGS)
+		dash->UpdateSettings(kDown);
 }

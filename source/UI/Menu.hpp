@@ -19,36 +19,46 @@
 #pragma once
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 #include <string>
 #include <switch.h>
 #include "INI.hpp"
 #include "Button.hpp"
-#include "Draw.hpp"
+#include "../Core/Graphics.hpp"
 
 class Menu
 {
     public:
-		Menu(std::string title, std::string text, u32 x, u32 y, std::string texture, Renderer *rend);
+		Menu(std::string title, TTF_Font *fontHdr, TTF_Font *fontBdy, SDL_Rect pos);
 		~Menu();
 		
-		void Show();
-		void Hide();
+		//Getters/Setters
         bool IsOpen() { return Visible; }
-		void AddButton(Button *button);
-        void IncrementSelect() {SelectPos++;}
-		void DecrementSelect() {SelectPos--;}
-		u32 GetSelection() {return SelectPos;}
-		void SetSelection(u32 sel) {SelectPos = sel;}
+        void IncrementSelect();
+		void DecrementSelect();
+		u32 GetSelection() {return menuOpt;}
+		void SetSelection(u16 sel) {menuOpt = sel;}
 		std::string GetTitle() { return Title; }
-		void Run(u32 index);
+		void AddButton(Button *button) { Buttons.push_back(button); }
+		void Show() { Visible = true; }
+		void Hide() { Visible = false; }
+		void SetBackground(std::string tex);
+		
+		//Overrides
+		virtual void Update(u32 kDown) {}
+		virtual void Activate() {}
+		virtual void Back() {}
         
         SDL_Rect Pos;
 		u32 Color;
-		std::string Title, Text;
-		std::vector<Button*> Buttons;
 		SDL_Texture *Sprite;
-		u8 currLayer;
+		TTF_Font *FontHdr;
+        TTF_Font *FontBdy;
+		u16 menuOpt, currLayer;
+		bool running;
 	private:
+		std::string Title;
         bool Visible;
-        u32 SelectPos;
+    protected:
+        std::vector<Button*> Buttons;
 };

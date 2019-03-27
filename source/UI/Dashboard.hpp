@@ -26,9 +26,7 @@
 #include <switch.h>
 #include "Button.hpp"
 #include "Game.hpp"
-#include "Draw.hpp"
-#include "Renderer.hpp"
-#include "Menu.hpp"
+#include "SettingsMenu.hpp"
 #include "../Services/Hid.hpp"
 #include "../Services/Rnx.hpp"
 #include "../Services/Settings.hpp"
@@ -36,14 +34,13 @@
 #include "../Services/Time.hpp"
 #include "../Services/Power.hpp"
 #include "../Services/App.hpp"
+#include "../Core/Graphics.hpp"
 #include "../Types.h"
-
-#define GREY 0x4C4C4CFF
 
 class Dashboard
 {
     public:
-        Dashboard(Renderer *rend, u32 width, u32 height, std::string font);
+        Dashboard(u32 width, u32 height, std::string font);
         ~Dashboard();
         //Draw/set
         void DrawWallpaper();
@@ -55,49 +52,46 @@ class Dashboard
         void SetGames();
         void DrawOverlay();
         void SetOverlay(std::string battery, SDL_Rect batPos, SDL_Rect clkPos);
-        void DrawMenus();
+        void UpdateSettings(u32 hid);
         void DrawDebugText();
         void ToggleDebug(){ debugInfo = !debugInfo; }
         
         //Interactions
         void OffsetGameIcons(u32 deltaX);
-		void IncrementMenuSel();
-		void DecrementMenuSel();
-		void ActivateMenu();
-		void DisengageMenu();
-        Result OpenMenu(std::string name);
-        Result CloseMenus();
-        bool IsMenuOpen;
         SDL_Rect GameIconArea;
 		u32 MaxColumns;
 		void IncrementDashSel();
 		void DecrementDashSel();
         void ActivateDash();
+        void UpdateDash(u32 kDown);
+		
+		//Menus
+		Result OpenSettings();
+		Result CloseSettings();
         
         //Add elements
         void AddButton(Button *button);
 		void AddGame(Game *game);
-        void AddMenu(Menu *menu);
 		
 		u8 selLayer;
 		u8 gameRows;
         u32 msg;
+		bool IsMenuOpen;
+		SettingsMenu *settings;
     private:
-		void DrawSettings(Menu *menu);
-		SelectType selType;
 		u32 gameSelectInd, appletSelectInd;
         u32 Width, Height;
+        u32 lastPosX;
         bool debugInfo;
-        Renderer *Rend;
+        bool GcState;
         TTF_Font *debugFont;
 		TTF_Font *hdrFont;
 		TTF_Font *smallFont;
 		Result lastErr;
-        SDL_Rect BatPos, ClkPos;
+        SDL_Rect BatPos, ClkPos, SetPos;
         SDL_Texture *Wallpaper;
         SDL_Texture *LockScreen;
         SDL_Texture *Battery;
         std::vector<Button*> Buttons;
 		std::vector<Game*> Games;
-		std::vector<Menu*> Menus;
 };
