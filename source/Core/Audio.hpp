@@ -20,31 +20,13 @@
 #include <string>
 #include <string.h>
 #include <stdlib.h>
-#include <vector>
 #include <stdio.h>
 #include <switch.h>
-#include "Power.hpp"
-#include "../Types.h"
 
-class App
+class Audio
 {
     public:
-		static Result LaunchGame(u64 tid, u128 userID);
-        static Result GetTitleIds(std::vector<u64> &tids);
-		static NsApplicationControlData GetGameControlData(u64 tid, u8 flag);
-        static bool IsGamecardInserted();
-		static Result LaunchAlbum(u8 arg, bool startupSound);
-        static u128 LaunchPSelect();
-		static Result LaunchShop();
-        static Result LaunchWebsite(std::string url);
-		static Result ShowError(std::string text1, std::string text2, Result rc);
-		static Result LaunchHbl();
-        static Result CommandHandler(u32 cmd);
-		
-		static AppletHolder currentApplication;
-        static u32 gameSelectInd;
-        static u32 appletSelectInd;
-        static u8 dashLayer;
-        
-        static u32 lastAeCmd;
+        static void Init();
+		static void Exit();
+		static void Load(std::string file, bool loop);
 };

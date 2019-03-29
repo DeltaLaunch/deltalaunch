@@ -18,13 +18,82 @@
 
 #include "App.hpp"
 
+AppletHolder App::currentApplication;
+u32 App::appletSelectInd;
+u32 App::gameSelectInd;
+u8 App::dashLayer;
+
+u32 App::lastAeCmd;
+
+/*
+*	Application
+*/
+Result App::LaunchGame(u64 tid, u128 userID) {
+    AppletStorage aStore;
+    Result rc = 0;
+    
+	rc = appCreate(&currentApplication, tid, Create_App);
+	if(R_FAILED(rc)) {
+        ShowError("Error launching game", "Error initializing handle", rc);
+    }
+	
+    rc = appletUnlockForeground();
+	if(R_FAILED(rc)) {
+        ShowError("Error launching game", "Error unlocking foreground", rc);
+    }
+    
+	struct InData{
+        u32 code;
+        u8 unk1;
+        u8 pad[3];
+        u128 id;
+        u8 unk2[0x70];
+    } __attribute__((packed));
+    
+    InData indata = {0};
+    indata.code = 0xC79497CA;
+    indata.unk1 = 1;
+    indata.id = userID;
+	
+    rc = appletCreateStorage(&aStore, sizeof(InData));
+    if(R_FAILED(rc)) {
+        ShowError("Error launching game", "Error initializing arg storage", rc);
+    }
+
+    rc = appletStorageWrite(&aStore, 0, &indata, sizeof(InData));
+    if(R_FAILED(rc)) {
+        ShowError("Error launching game", "Error writing arg storage", rc);
+    }
+	
+    rc = appletHolderPushInLaunchParam(&currentApplication, AppletLaunchParameterKind_PreselectedUser, &aStore);
+	if(R_FAILED(rc)) {
+        ShowError("Error launching game", "Error appletHolderPushInLaunchParam", rc);
+    }
+    
+    rc = appletHolderStart(&currentApplication);
+    if(R_FAILED(rc)) {
+        ShowError("Error launching game", "Lookup errorcode for more info", rc);
+    }
+	
+	rc = appRequestForApplicationToGetForeground(&currentApplication);
+	if(R_FAILED(rc)) {
+        ShowError("Error launching game", "Error appRequestForApplicationToGetForeground", rc);
+    }
+	currentApplication.active = true;
+    appletHolderJoin(&currentApplication);
+    appletHolderClose(&currentApplication);
+	appletStorageClose(&aStore);
+    
+    return rc;
+}
+
 Result App::GetTitleIds(std::vector<u64> &tids) {
     Result rc;
     size_t size = 0;
     NsApplicationRecord rec[2000];
     rc = nsInitialize();
     rc = nsListApplicationRecord(rec, 2000, 0, &size);
-    for(int i = 0; i < size; i++) {
+    for(int i = 0; i < (int)size; i++) {
         tids.push_back(rec[i].titleID);
     }
     nsExit();
@@ -48,18 +117,41 @@ bool App::IsGamecardInserted() {
     return b;
 }
 
-Result App::LaunchAlbum() {
+/*
+*	Applet
+*/
+Result App::LaunchAlbum(u8 arg, bool startupSound) {
 	AppletHolder h;
 	LibAppletArgs args;
+	AppletStorage storeIn;
+	Result rc = 0;
 	
 	appletCreateLibraryApplet(&h, AppletId_photoViewer, LibAppletMode_AllForeground);
 	libappletArgsCreate(&args, 0);
-    libappletArgsSetPlayStartupSound(&args, true);
+    libappletArgsSetPlayStartupSound(&args, startupSound);
     libappletArgsPush(&args, &h);
-	appletHolderStart(&h);
+	
+	u8 stindata = arg;
+	rc = appletCreateStorage(&storeIn, sizeof(stindata));
+	if(R_FAILED(rc)) {
+        appletStorageClose(&storeIn);
+        ShowError("Error launching player select", "Error creating storage.", rc);
+    }
+	
+    rc = appletStorageWrite(&storeIn, 0, &stindata, sizeof(stindata));
+    if(R_FAILED(rc)) {
+        appletStorageClose(&storeIn);
+        ShowError("Error launching player select", "Error writing storage.", rc);
+    }
+    appletHolderPushInData(&h, &storeIn);
+	
+	rc = appletHolderStart(&h);
     appletHolderJoin(&h);
+	
+	appletStorageClose(&storeIn);
     appletHolderClose(&h);
-    return 0;
+	
+    return rc;
 }
 
 u128 App::LaunchPSelect() {
@@ -154,16 +246,6 @@ Result App::LaunchShop() {
     return rc;
 }
 
-Result App::LaunchSystemApplication(u64 tid) {
-	AppletHolder h;
-	appCreate(&h, tid, Create_SystemApp);
-    appRequestForApplicationToGetForeground(&h);
-    appletHolderStart(&h);
-    appletHolderJoin(&h);
-    appletHolderClose(&h);
-	return 0;
-}
-
 Result App::LaunchWebsite(std::string url) {
     AppletHolder h;
     AppletStorage aStore;
@@ -207,71 +289,6 @@ Result App::LaunchWebsite(std::string url) {
     return rc;
 }
 
-Result App::LaunchHbl() {
-    //TODO
-    return 0;
-}
-
-Result App::LaunchGame(u64 tid, u128 userID) {
-    AppletHolder h;
-    AppletStorage aStore;
-    Result rc = 0;
-    
-	rc = appCreate(&h, tid, Create_App);
-	if(R_FAILED(rc)) {
-        ShowError("Error launching game", "Error initializing handle", rc);
-    }
-	
-    rc = appletUnlockForeground();
-	if(R_FAILED(rc)) {
-        ShowError("Error launching game", "Error unlocking foreground", rc);
-    }
-    
-	struct InData{
-        u32 code;
-        u8 unk1;
-        u8 pad[3];
-        u128 id;
-        u8 unk2[0x70];
-    } __attribute__((packed));
-    
-    InData indata = {0};
-    indata.code = 0xC79497CA;
-    indata.unk1 = 1;
-    indata.id = userID;
-	
-    rc = appletCreateStorage(&aStore, sizeof(InData));
-    if(R_FAILED(rc)) {
-        ShowError("Error launching game", "Error initializing arg storage", rc);
-    }
-
-    rc = appletStorageWrite(&aStore, 0, &indata, sizeof(InData));
-    if(R_FAILED(rc)) {
-        ShowError("Error launching game", "Error writing arg storage", rc);
-    }
-	
-    rc = appletHolderPushInLaunchParam(&h, AppletLaunchParameterKind_PreselectedUser, &aStore);
-	if(R_FAILED(rc)) {
-        ShowError("Error launching game", "Error appletHolderPushInLaunchParam", rc);
-    }
-    
-    rc = appletHolderStart(&h);
-    if(R_FAILED(rc)) {
-        ShowError("Error launching game", "Lookup errorcode for more info", rc);
-    }
-	
-	rc = appRequestForApplicationToGetForeground(&h);
-	if(R_FAILED(rc)) {
-        ShowError("Error launching game", "Error appRequestForApplicationToGetForeground", rc);
-    }
-	
-    appletHolderJoin(&h);
-    appletHolderClose(&h);
-	appletStorageClose(&aStore);
-    
-    return rc;
-}
-
 Result App::ShowError(std::string errText, std::string details, Result rc) {
 	AppletHolder h;
     AppletStorage errStor;
@@ -297,11 +314,27 @@ Result App::ShowError(std::string errText, std::string details, Result rc) {
 	return 0;
 }
 
+Result App::LaunchHbl() {
+    //TODO
+    return 0;
+}
+
+/*
+*	Misc
+*/
 Result App::CommandHandler(u32 cmd) {
     switch(cmd) {
         case CMD_Home:
         {
-            libappletRequestHomeMenu();
+            if(currentApplication.active) {
+                appRequestExit(&currentApplication);
+                currentApplication.active = false;
+            }
+            else {
+                gameSelectInd = 0;
+                appletSelectInd = 0;
+                dashLayer = 0;
+            }
             break;
         }
         case 14:

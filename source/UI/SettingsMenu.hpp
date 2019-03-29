@@ -51,6 +51,7 @@ class SettingsMenu: public Menu
 		
 		u8 gameRows;
 		SelectType gameSelectType;
+        GameAreaType gameAreaType;
     private:
         u32 Width, Height;
         TTF_Font *debugFont;

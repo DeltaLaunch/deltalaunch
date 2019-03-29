@@ -33,6 +33,7 @@ class Graphics
         static SDL_Window *Window;
         static void Init(u32 width, u32 height);
         static void Exit();
+		static void ClearScreen();
         static void Rectangle(u32 x, u32 y, u32 w, u32 h, u32 scolor);
         static void Rectangle(SDL_Rect pos, u32 scolor);
         static SDL_Texture *CreateTexFromSurf(SDL_Surface *surf);

@@ -30,7 +30,7 @@ class Menu
 {
     public:
 		Menu(std::string title, TTF_Font *fontHdr, TTF_Font *fontBdy, SDL_Rect pos);
-		~Menu();
+		virtual ~Menu();
 		
 		//Getters/Setters
         bool IsOpen() { return Visible; }

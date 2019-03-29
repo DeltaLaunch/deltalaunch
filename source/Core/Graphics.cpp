@@ -44,6 +44,10 @@ void Graphics::Exit() {
     SDL_Quit();
 }
 
+void Graphics::ClearScreen() {
+	Rectangle(0, 0, 1280, 720, 0xFFFFFFFF);
+}
+
 void Graphics::Rectangle(u32 x, u32 y, u32 w, u32 h, u32 scolor) {
     SDL_Rect pos;
     pos.x = x;

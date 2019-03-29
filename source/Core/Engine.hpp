@@ -30,6 +30,7 @@
 #include "Threads.hpp"
 #include "ThreadManager.hpp"
 #include "../Core/Graphics.hpp"
+#include "../Core/Audio.hpp"
 #include "../UI/INI.hpp"
 #include "../UI/Dashboard.hpp"
 #include "../UI/Button.hpp"

@@ -16,6 +16,8 @@ https://github.com/benhoyt/inih
 #ifndef __INI_H__
 #define __INI_H__
 
+#pragma GCC diagnostic ignored "-Wstringop-truncation"
+
 /* Make this header file easier to include in C++ code */
 #ifdef __cplusplus
 extern "C" {
@@ -166,8 +168,7 @@ inline static char* strncpy0(char* dest, const char* src, size_t size)
 }
 
 /* See documentation in header file. */
-inline int ini_parse_stream(ini_reader reader, void* stream, ini_handler handler,
-                     void* user)
+inline int ini_parse_stream(ini_reader reader, void* stream, ini_handler handler, void* user)
 {
     /* Uses a fair bit of stack (use heap instead if you need to) */
 #if INI_USE_STACK

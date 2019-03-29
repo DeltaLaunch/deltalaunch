@@ -11,6 +11,11 @@ enum SelectType{
 	SELECT_SIZEDIFF
 };
 
+enum GameAreaType{
+    GAMEAREA_FULL,
+    GAMEAREA_MINI
+};
+
 enum Command {
     CMD_Home = 12,
     CMD_Sleepmode = 16,

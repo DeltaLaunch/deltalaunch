@@ -74,12 +74,12 @@ void Engine::Initialize() {
         std::tuple<std::string, std::function<Result()>>{"WebButton", std::bind(App::LaunchWebsite, "https://google.com/")},
         std::tuple<std::string, std::function<Result()>>{"NewsButton", nullptr},
         std::tuple<std::string, std::function<Result()>>{"ShopButton", App::LaunchShop},
-        std::tuple<std::string, std::function<Result()>>{"AlbumButton", App::LaunchAlbum},
+        std::tuple<std::string, std::function<Result()>>{"AlbumButton", std::bind(App::LaunchAlbum, 1, false)}, //1,false | 2,true
         std::tuple<std::string, std::function<Result()>>{"HomebrewButton", App::LaunchHbl},
         std::tuple<std::string, std::function<Result()>>{"SettingsButton", std::bind(&Dashboard::OpenSettings, dash)},
         std::tuple<std::string, std::function<Result()>>{"PowerButton", Power::Reboot},
     };
-    for(int but = 0; but < Buttons.size(); but++) {
+    for(int but = 0; but < (int)Buttons.size(); but++) {
         dash->AddButton(
             new Button(
                 baseThemeDir + cfg.Get(std::get<0>(Buttons.at(but)), "sprite", ""), 
@@ -92,7 +92,7 @@ void Engine::Initialize() {
     }
     
     //Boundries: (120, 110), (1200, 560) .. 450px vert
-    for(int i = 0; i < dash->MaxColumns; i++){
+    for(int i = 0; i < (int)dash->MaxColumns; i++){
 		dash->AddGame(new Game());
 	}
     dash->SetGames();

@@ -72,14 +72,11 @@ class Dashboard
         //Add elements
         void AddButton(Button *button);
 		void AddGame(Game *game);
-		
-		u8 selLayer;
+
 		u8 gameRows;
-        u32 msg;
 		bool IsMenuOpen;
 		SettingsMenu *settings;
     private:
-		u32 gameSelectInd, appletSelectInd;
         u32 Width, Height;
         u32 lastPosX;
         bool debugInfo;

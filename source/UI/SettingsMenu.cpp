@@ -23,6 +23,8 @@ SettingsMenu::SettingsMenu(TTF_Font *fontHdr, TTF_Font *fontBdy, SDL_Rect pos) :
 	
 	//vars
 	menuOpt = 0;
+    gameAreaType = GAMEAREA_MINI;
+    gameSelectType = SELECT_OUTLINE;
 }
 
 SettingsMenu::~SettingsMenu() {

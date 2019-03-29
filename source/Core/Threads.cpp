@@ -169,6 +169,7 @@ bool Threads::SystemAppletMessage() {
 bool Threads::AeMessageThread() {
 	u32 msg = 0;
 	if(appletGetMessage(&msg)) {
+        App::lastAeCmd = msg;
 		switch(msg) {
 			case 20:    //HomeButton
 			{
