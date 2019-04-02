@@ -27,6 +27,7 @@
 #include "Button.hpp"
 #include "Game.hpp"
 #include "SettingsMenu.hpp"
+#include "../Core/Graphics.hpp"
 #include "../Services/Hid.hpp"
 #include "../Services/Rnx.hpp"
 #include "../Services/Settings.hpp"
@@ -34,7 +35,6 @@
 #include "../Services/Time.hpp"
 #include "../Services/Power.hpp"
 #include "../Services/App.hpp"
-#include "../Core/Graphics.hpp"
 #include "../Types.h"
 
 class Dashboard
@@ -54,7 +54,6 @@ class Dashboard
         void SetOverlay(std::string battery, SDL_Rect batPos, SDL_Rect clkPos);
         void UpdateSettings(u32 hid);
         void DrawDebugText();
-        void ToggleDebug(){ debugInfo = !debugInfo; }
         
         //Interactions
         void OffsetGameIcons(u32 deltaX);

@@ -39,7 +39,18 @@ void Game::MountSaveData() {
 }
 
 Result Game::Play() {
-    u128 userid = App::LaunchPSelect();
-	if(userid == 0) return 0;
-    return App::LaunchGame(TitleId, userid);
+    Result rc = 0;
+    if(!App::currentApplication.active) {
+        u128 userid = App::LaunchPSelect();
+        if(userid == 0) return 0;
+        rc = App::LaunchGame(TitleId, userid);
+        rc = appletRequestForeground();
+        //leet hax
+        appletSetHandlesRequestToDisplay(false);
+        appletSetHandlesRequestToDisplay(true);
+    }
+    else {
+        rc = appRequestForApplicationToGetForeground(&App::currentApplication);
+    }
+    return rc;
 }

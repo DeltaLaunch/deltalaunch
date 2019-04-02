@@ -31,7 +31,7 @@
 #include "ThreadManager.hpp"
 #include "../Core/Graphics.hpp"
 #include "../Core/Audio.hpp"
-#include "../UI/INI.hpp"
+#include "../Core/INI.hpp"
 #include "../UI/Dashboard.hpp"
 #include "../UI/Button.hpp"
 #include "../UI/Game.hpp"

@@ -21,10 +21,10 @@
 SDL_Renderer *Graphics::Rend;
 SDL_Window *Graphics::Window;
 
-void Graphics::Init(u32 width, u32 height) {
+void Graphics::Init(std::string name, u32 width, u32 height) {
     //Basic SDL init
     SDL_Init(SDL_INIT_EVERYTHING);
-    Window = SDL_CreateWindow("DeltaLaunch", 0, 0, width, height, 0);
+    Window = SDL_CreateWindow(name.c_str(), 0, 0, width, height, 0);
     Rend = SDL_CreateRenderer(Window, -1, SDL_RENDERER_ACCELERATED);
     SDL_SetRenderDrawBlendMode(Rend, SDL_BLENDMODE_BLEND);
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "2");
@@ -32,9 +32,13 @@ void Graphics::Init(u32 width, u32 height) {
     TTF_Init();
     SDL_SetRenderDrawColor(Rend, 0xFF, 0xFF, 0xFF, 0xFF);
     Mix_Init(MIX_INIT_FLAC | MIX_INIT_MOD | MIX_INIT_MP3 | MIX_INIT_OGG);
+    
+    appletRequestForeground();
+    appletSetHandlesRequestToDisplay(true);
 }
 
 void Graphics::Exit() {
+    appletSetHandlesRequestToDisplay(false);
     TTF_Quit();
     IMG_Quit();
     Mix_CloseAudio();

@@ -54,8 +54,8 @@ void SettingsMenu::DrawPanel() {
 		}
         case 3:
         {
-            Graphics::DrawText(FontBdy, panX, panY, "Change selection mode.");
-            Graphics::DrawText(FontBdy, panX+5, panY+50, (gameSelectType == SELECT_OUTLINE ? "Mode: Outline" : "Mode: Diff size"));
+            Graphics::DrawText(FontBdy, panX, panY, "Change look and feel.");
+            Graphics::DrawText(FontBdy, panX+5, panY+50, (gameSelectType == SELECT_OUTLINE ? "Outline Mode: Outline" : "Outline Mode: Diff size"));
             break;
         }
 		case 4:

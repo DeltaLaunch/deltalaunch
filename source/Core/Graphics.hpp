@@ -31,7 +31,7 @@ class Graphics
     public:
         static SDL_Renderer *Rend;
         static SDL_Window *Window;
-        static void Init(u32 width, u32 height);
+        static void Init(std::string name, u32 width, u32 height);
         static void Exit();
 		static void ClearScreen();
         static void Rectangle(u32 x, u32 y, u32 w, u32 h, u32 scolor);

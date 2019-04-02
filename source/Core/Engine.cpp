@@ -24,7 +24,7 @@ Engine::Engine(u32 width, u32 height, void *heapAddr, size_t heapSize) {
         fatalSimple(0xBADC0DE);
     }
 
-    Graphics::Init(width, height);
+    Graphics::Init(TITLE, width, height);
     HeapAddr = heapAddr;
     HeapSize = heapSize;
     Width = width;
@@ -125,13 +125,16 @@ void Engine::Update() {
     u64 kDown = hidKeysDown(CONTROLLER_P1_AUTO);
     
     //Lockscreen
-    while(State == STATE_LOCKSCREEN && !Hid::IsTouched()) {
+    if(State == STATE_LOCKSCREEN) {
         Clear();
         dash->DrawLockScreen();
         Render();
-        if(kDown & KEY_A) State = STATE_DASHBOARD;
+        if((kDown & KEY_A) || Hid::IsTouched()) 
+            State = STATE_DASHBOARD;
     }
-    State = dash->IsMenuOpen ? STATE_SETTINGS : STATE_DASHBOARD;
+    else {
+        State = dash->IsMenuOpen ? STATE_SETTINGS : STATE_DASHBOARD;
+    }
     
     //Dash
 	if(State == STATE_DASHBOARD) {

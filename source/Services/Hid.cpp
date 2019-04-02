@@ -19,26 +19,17 @@
 #include "Hid.hpp"
 
 bool Hid::IsTouched(){
+    if(hidTouchCount() < 1) return false;
     touchPosition touchPos;
     hidTouchRead(&touchPos, 0);
     return (touchPos.px != 0 && touchPos.py != 0);
 }
 
 bool Hid::IsTouched(SDL_Rect pos){
+    if(hidTouchCount() < 1) return false;
     touchPosition touchPos;
     hidTouchRead(&touchPos, 0);
     return ((int)touchPos.px >= pos.x && (int)touchPos.px <= (pos.x + pos.w) && (int)touchPos.py >= pos.y && (int)touchPos.py <= (pos.y + pos.h));
-}
-
-bool Hid::IsTapped(SDL_Rect pos){
-    touchPosition touchPos;
-    hidTouchRead(&touchPos, 0);
-	int i = svcGetSystemTick();
-    while((int)touchPos.px >= pos.x && (int)touchPos.px <= (pos.x + pos.w) && (int)touchPos.py >= pos.y && (int)touchPos.py <= (pos.y + pos.h)) {
-		if(svcGetSystemTick() - i >= SHORTPRESS_MS) return false;
-		hidTouchRead(&touchPos, 0);
-	}
-    return true;
 }
 
 touchPosition Hid::GetTouchPos() {

@@ -17,14 +17,15 @@ include $(DEVKITPRO)/libnx/switch_rules
 # INCLUDES is a list of directories containing header files
 # EXEFS_SRC is the optional input directory containing data copied into exefs, if anything this normally should only contain "main.npdm".
 #---------------------------------------------------------------------------------
+TITLE       :=  Delta Launch
 TARGET		:=	$(notdir $(CURDIR))
 BUILD		:=	build
 SOURCES		:=	source source/UI source/Services source/Core
 DATA		:=	data
 INCLUDES	:=	include
-ROMFS	:=	romfs
-DEFINES	:=	
-EXEFS_SRC := exefs
+ROMFS	    :=	romfs
+DEFINES	    :=	
+EXEFS_SRC   :=  exefs
 
 #---------------------------------------------------------------------------------
 # options for code generation
@@ -34,7 +35,7 @@ ARCH	:=	-march=armv8-a -mtune=cortex-a57 -mtp=soft -fPIE
 CFLAGS	:=	-g -Wall -ffunction-sections \
 			$(ARCH) $(DEFINES)
 
-CFLAGS	+=	$(INCLUDE) -D__SWITCH__
+CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -DTITLE='"$(TITLE)"'
 
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -O2 -s -fno-exceptions -std=gnu++17
 

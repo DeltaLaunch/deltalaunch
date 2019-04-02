@@ -25,6 +25,7 @@
 #include <switch.h>
 #include "Power.hpp"
 #include "../Types.h"
+#include "../Core/Graphics.hpp"
 
 class App
 {
@@ -47,4 +48,5 @@ class App
         static u8 dashLayer;
         
         static u32 lastAeCmd;
+		static u32 lastSamsCmd;
 };

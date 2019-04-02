@@ -53,11 +53,8 @@ Dashboard::Dashboard(u32 width, u32 height, std::string font) {
     settings->AddButton(new Button("Lock Screen", 60, Y+=space, butW, butH, butCol, nullptr));
     settings->AddButton(new Button("Internet", 60, Y+=space, butW, butH, butCol, nullptr));
     settings->AddButton(new Button("Profile", 60, Y+=space, butW, butH, butCol, nullptr));
-    settings->AddButton(new Button("Select Mode", 60, Y+=space, butW, butH, butCol, nullptr));
+    settings->AddButton(new Button("Look and Feel", 60, Y+=space, butW, butH, butCol, nullptr));
     settings->AddButton(new Button("System Info", 60, Y+=space, butW, butH, butCol, nullptr));
-
-    appletRequestForeground();
-    //appletSetHandlesRequestToDisplay(true);
 }
 
 Dashboard::~Dashboard() {
@@ -82,13 +79,13 @@ void Dashboard::UpdateDash(u32 kDown) {
     IsMenuOpen = settings->IsOpen();
     
     if(kDown & KEY_A) ActivateDash();
-	if(kDown & KEY_PLUS) ToggleDebug();
+	if(kDown & KEY_PLUS)  debugInfo = !debugInfo;
 	if(kDown & KEY_MINUS) ;
 	if(kDown & KEY_DLEFT) DecrementDashSel();
 	if(kDown & KEY_DRIGHT) IncrementDashSel();
 	if(kDown & KEY_DUP) App::dashLayer = 0;
 	if(kDown & KEY_DDOWN) App::dashLayer = 1;
-	if(Hid::IsTouched(GameIconArea) && !Hid::IsTapped(GameIconArea)) {
+	if(Hid::IsTouched(GameIconArea)) {
 		if(lastPosX != 0) 
 			OffsetGameIcons(Hid::GetTouchPos().px - lastPosX);
 		lastPosX = Hid::GetTouchPos().px;
@@ -197,10 +194,14 @@ void Dashboard::DrawGames() {
 		}
         
         //Detect touch selection
-        if(Hid::IsTouched(game->Pos) && !IsMenuOpen && game->GetTitleId()) {
-			lastErr = game->Play();
-			if(lastErr) 
-				App::ShowError("An Error has occurred!", "Error code: " + std::to_string(lastErr), lastErr);
+        if(!IsMenuOpen && game->GetTitleId() && Hid::IsTouched(game->Pos)) {
+            if (ind == App::gameSelectInd) {
+                lastErr = game->Play();
+                if(lastErr) 
+                    App::ShowError("An Error has occurred!", "Error code: " + std::to_string(lastErr), lastErr);
+            } else {
+                App::gameSelectInd = ind;
+            }
 		}
 		ind++;
 	}
@@ -264,7 +265,9 @@ void Dashboard::DrawDebugText() {
         Graphics::DrawText(debugFont, X, Y+=s, "Serial: " + Settings::GetSerialNumber());
 		Graphics::DrawText(debugFont, X, Y+=s, "Battery: " + std::to_string(Power::GetBatteryLife()) + "%");
         Graphics::DrawText(debugFont, X, Y+=s, "Touch: X=" + std::to_string(touchPos.px) + "; y=" + std::to_string(touchPos.py));
-        Graphics::DrawText(debugFont, X, Y+=s, "Message: " + std::to_string(App::lastAeCmd));
+        Graphics::DrawText(debugFont, X, Y+=s, "Ae Message: " + std::to_string(App::lastAeCmd));
+		Graphics::DrawText(debugFont, X, Y+=s, "Sams Message: " + std::to_string(App::lastSamsCmd));
+        Graphics::DrawText(debugFont, X, Y+=s, "Last Error: " + std::to_string(lastErr));
         Y = 0;
     }
 }

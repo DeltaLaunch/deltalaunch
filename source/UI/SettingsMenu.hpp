@@ -25,8 +25,8 @@
 #include <switch.h>
 #include "Button.hpp"
 #include "Game.hpp"
-#include "../Core/Graphics.hpp"
 #include "Menu.hpp"
+#include "../Core/Graphics.hpp"
 #include "../Services/Time.hpp"
 #include "../Services/Power.hpp"
 #include "../Services/Settings.hpp"
