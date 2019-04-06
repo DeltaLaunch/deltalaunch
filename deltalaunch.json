@@ -5,7 +5,7 @@
     "title_id_range_max": "0x0100000000001000",
     "main_thread_stack_size": "0x60000",
     "main_thread_priority": 44,
-    "default_cpu_id": 0,
+    "default_cpu_id": 3,
     "process_category": 0,
     "pool_partition": 1,
     "is_64_bit": true,

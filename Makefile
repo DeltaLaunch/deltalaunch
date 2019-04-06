@@ -23,9 +23,9 @@ BUILD		:=	build
 SOURCES		:=	source source/UI source/Services source/Core
 DATA		:=	data
 INCLUDES	:=	include
-ROMFS	    :=	romfs
-DEFINES	    :=	
-EXEFS_SRC   :=  exefs
+ROMFS	:=	romfs
+DEFINES	:=	
+EXEFS_SRC := exefs
 
 #---------------------------------------------------------------------------------
 # options for code generation
@@ -37,12 +37,12 @@ CFLAGS	:=	-g -Wall -ffunction-sections \
 
 CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -DTITLE='"$(TITLE)"'
 
-CXXFLAGS	:= $(CFLAGS) -fno-rtti -O2 -s -fno-exceptions -std=gnu++17
+CXXFLAGS	:= $(CFLAGS) -fno-rtti -O2 -s -fno-exceptions -std=gnu++17 -lstdc++fs
 
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS	:= -lfreetype -lSDL2_mixer -lmodplug -lmpg123 -lvorbisidec -logg -lSDL2_ttf -lSDL2_gfx -lSDL2_image -lpng -ljpeg `sdl2-config --libs` `freetype-config --libs` -lcurl -lz -lnx
+LIBS	:= -lfreetype -lSDL2_mixer -lmodplug -lmpg123 -lvorbisidec -logg -lSDL2_ttf -lSDL2_gfx -lSDL2_image -lpng -ljpeg `sdl2-config --libs` `freetype-config --libs` -lcurl -lz -lnx -lstdc++fs
 
 
 #---------------------------------------------------------------------------------
@@ -124,8 +124,8 @@ $(BUILD):
 	@mkdir -p ./0100000000001000
 	@mv $(OUTPUT).nso ./exefs/main
 	@mv $(OUTPUT).npdm ./exefs/main.npdm
-	@echo '' > ./exefs/rtld.stub
 	@build_pfs0 exefs ./0100000000001000/exefs.nsp
+	@build_romfs romfs ./0100000000001000/romfs.bin
 	@rm -rf ./exefs
 	@rm -rf F:/ReiNX/titles/0100000000001000
 	@mv  ./0100000000001000/ F:/ReiNX/titles/

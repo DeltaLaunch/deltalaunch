@@ -25,6 +25,8 @@
 #include <string>
 #include <vector>
 #include <tuple>
+#include <experimental/filesystem>
+#include <dirent.h>
 #include <switch.h>
 
 #include "Threads.hpp"
@@ -55,6 +57,7 @@ class Engine
 		
         Dashboard *dash;
         Mix_Music *bgm;
+        FsStorage romfs;
     private:
         ThreadManager *frndThread;
 		ThreadManager *samsThread;

@@ -43,6 +43,7 @@ class App
         static Result CommandHandler(u32 cmd);
 		
 		static AppletHolder currentApplication;
+        static AppletHolder currentApplet;
         static u32 gameSelectInd;
         static u32 appletSelectInd;
         static u8 dashLayer;

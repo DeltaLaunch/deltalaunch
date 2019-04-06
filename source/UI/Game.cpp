@@ -44,10 +44,11 @@ Result Game::Play() {
         u128 userid = App::LaunchPSelect();
         if(userid == 0) return 0;
         rc = App::LaunchGame(TitleId, userid);
-        rc = appletRequestForeground();
         //leet hax
-        appletSetHandlesRequestToDisplay(false);
-        appletSetHandlesRequestToDisplay(true);
+        //appletSetHandlesRequestToDisplay(false);
+        //appletSetHandlesRequestToDisplay(true);
+        appletRequestForeground();
+        appletUnlockForeground();
     }
     else {
         rc = appRequestForApplicationToGetForeground(&App::currentApplication);

@@ -168,73 +168,72 @@ bool Threads::SystemAppletMessage() {
 
 bool Threads::AeMessageThread() {
 	u32 msg = 0;
-	if(appletGetMessage(&msg)) {
-        App::lastAeCmd = msg;
-		switch(msg) {
-            case 6:
-            {
-                //
-                break;
-            }
-			case 20:    //HomeButton
-			{
-				App::CommandHandler(CMD_Home);
-				break;
-			}
-            case 21:
-            {
-                App::CommandHandler(13);
-                break;
-            }
-			case 22:    //PowerButton
-            case 29:
-            case 32:
-			{
-				App::CommandHandler(CMD_Sleepmode);
-				break;
-			}
-            case 23:
-            {
-                App::CommandHandler(17);
-                break;
-            }
-            case 25:
-            {
-                App::CommandHandler(0);
-                break;
-            }
-            case 26:
-            {
-                App::CommandHandler(20);
-                break;
-            }
-            case 27:
-            {
-                App::CommandHandler(71);
-                break;
-            }
-            case 28:
-            {
-                App::CommandHandler(70);
-                break;
-            }
-            case 30:
-            {
-                //App::CommandHandler(appletGetOperationMode() ? 44 : 43);
-                break;
-            }
-            case 33:
-            {
-                App::CommandHandler(72);
-                break;
-            }
-            case 34:
-            {
-                //App::CommandHandler(appletIsInControllerFirmwareUpdateSection() & 1 ? 64 : 65);
-                break;
-            }
-		}
-	}
+	appletGetMessage(&msg);
+    App::lastAeCmd = msg;
+    switch(msg) {
+        case 6:
+        {
+            //
+            break;
+        }
+        case 20:    //HomeButton
+        {
+            App::CommandHandler(CMD_Home);
+            break;
+        }
+        case 21:
+        {
+            App::CommandHandler(13);
+            break;
+        }
+        case 22:    //PowerButton
+        case 29:
+        case 32:
+        {
+            App::CommandHandler(CMD_Sleepmode);
+            break;
+        }
+        case 23:
+        {
+            App::CommandHandler(17);
+            break;
+        }
+        case 25:
+        {
+            App::CommandHandler(0);
+            break;
+        }
+        case 26:
+        {
+            App::CommandHandler(20);
+            break;
+        }
+        case 27:
+        {
+            App::CommandHandler(71);
+            break;
+        }
+        case 28:
+        {
+            App::CommandHandler(70);
+            break;
+        }
+        case 30:
+        {
+            App::CommandHandler(appletGetOperationMode() ? 44 : 43);
+            break;
+        }
+        case 33:
+        {
+            App::CommandHandler(72);
+            break;
+        }
+        case 34:
+        {
+            //App::CommandHandler(appletIsInControllerFirmwareUpdateSection() & 1 ? 64 : 65);
+            break;
+        }
+    }
 	
 	return true;
 }

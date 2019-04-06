@@ -65,8 +65,7 @@ void __attribute__((weak)) __appInit(void) {
     rc = fsInitialize();
     if (R_FAILED(rc)) 
         fatalSimple(MAKERESULT(Module_Libnx, LibnxError_InitFail_FS));
-	
-    romfsInit();
+    
     fsdevMountSdmc();
 }
 
@@ -77,7 +76,6 @@ void __attribute__((weak)) __appExit(void) {
     nvExit();
     smExit();
     fsExit();
-    romfsExit();
     fsdevUnmountAll();
 }
 
