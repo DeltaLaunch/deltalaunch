@@ -44,7 +44,6 @@ Dashboard::Dashboard(u32 width, u32 height, std::string font) {
 	gameRows = 1;
     debugInfo = false;
 	MaxColumns = 12;
-	IsMenuOpen = false;
     Wallpaper = SDL_CreateTexture(Graphics::GetRenderer(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, Width, Height);
     LockScreen = SDL_CreateTexture(Graphics::GetRenderer(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, Width, Height);
 	
@@ -70,9 +69,7 @@ Dashboard::~Dashboard() {
 /*
 *   Draw/Set Graphics
 */
-void Dashboard::UpdateDash(u32 kDown) {
-    IsMenuOpen = settings->IsOpen();
-    
+void Dashboard::UpdateDash(u32 kDown) {    
     if(kDown & KEY_A) ActivateDash();
 	if(kDown & KEY_PLUS)  debugInfo = !debugInfo;
 	if(kDown & KEY_MINUS) ;
@@ -95,7 +92,6 @@ void Dashboard::UpdateDash(u32 kDown) {
 }
 
 void Dashboard::DrawWallpaper() {
-	IsMenuOpen = settings->IsOpen();
     SDL_Rect pos;
     pos.x = 0; pos.y = 0;
     pos.w = Width; pos.h = Height;
@@ -144,7 +140,7 @@ void Dashboard::DrawButtons() {
             Graphics::Rectangle(button->Pos, button->Color);
         
 		//Detect touch selection
-        if(Hid::IsTouched(button->Pos) && !IsMenuOpen) {
+        if(Hid::IsTouched(button->Pos) && !settings->IsOpen()) {
             lastErr = button->Run();
 			if(lastErr) App::ShowError("An Error has occurred!", "Error code: " + std::to_string(lastErr), lastErr);
 		}
@@ -189,7 +185,7 @@ void Dashboard::DrawGames() {
 		}
         
         //Detect touch selection
-        if(!IsMenuOpen && game->GetTitleId() && Hid::IsTouched(game->Pos)) {
+        if(!settings->IsOpen() && game->GetTitleId() && Hid::IsTouched(game->Pos)) {
             if (ind == App::gameSelectInd) {
                 lastErr = game->Play();
                 if(lastErr) 
@@ -306,20 +302,17 @@ void Dashboard::ActivateDash() {
 }
 
 Result Dashboard::OpenSettings() {
-	IsMenuOpen = true;
 	settings->Show();
 	return 0;
 }
 
 Result Dashboard::CloseSettings() {
-	IsMenuOpen = false;
 	settings->Hide();
 	return 0;
 }
 
-void Dashboard::UpdateSettings(u32 hid) {
-	settings->Update(hid);
-    IsMenuOpen = settings->IsOpen();
+void Dashboard::UpdateSettings(u32 kDown) {
+	settings->Update(kDown);
 }
 
 /*

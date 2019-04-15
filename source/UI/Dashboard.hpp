@@ -35,6 +35,7 @@
 #include "../Services/Time.hpp"
 #include "../Services/Power.hpp"
 #include "../Services/App.hpp"
+#include "../Services/Hid.hpp"
 #include "../Types.h"
 
 class Dashboard
@@ -52,7 +53,7 @@ class Dashboard
         void SetGames();
         void DrawOverlay();
         void SetOverlay(std::string battery, SDL_Rect batPos, SDL_Rect clkPos);
-        void UpdateSettings(u32 hid);
+        void UpdateSettings(u32 kDown);
         void DrawDebugText();
         
         //Interactions
@@ -73,7 +74,6 @@ class Dashboard
 		void AddGame(Game *game);
 
 		u8 gameRows;
-		bool IsMenuOpen;
 		SettingsMenu *settings;
     private:
         u32 Width, Height;

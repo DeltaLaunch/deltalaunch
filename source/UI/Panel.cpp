@@ -55,7 +55,7 @@ void Panel::Update(u32 kDown, bool selected) {
         p.y += Pos.y;
         Graphics::DrawOption(Font, p, opt->Text, opt->GetOptText(), selected);
     }
-    if(selected){
+    if(selected){        
         if(kDown & KEY_DUP) IncrementSelect();
         if(kDown & KEY_DDOWN) DecrementSelect();
         if(kDown & KEY_A) {

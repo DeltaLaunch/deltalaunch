@@ -30,6 +30,7 @@
 #include "../Services/Time.hpp"
 #include "../Services/Power.hpp"
 #include "../Services/Settings.hpp"
+#include "../Services/Hid.hpp"
 #include "../Types.h"
 
 class SettingsMenu: public Menu
@@ -46,6 +47,7 @@ class SettingsMenu: public Menu
 		void Back();
         
         static void GameLookFeel();
+        static void LockScreenToggle();
 		
 		u8 gameRows;
         

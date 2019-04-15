@@ -26,10 +26,15 @@
 class Option
 {
     public:
-        Option(std::string optName, const char** ops, u32 x, u32 y, u32 w, u32 h, u32 col, std::function<void()> callback);
+        Option(std::string optName, std::vector<std::string> opts, u32 x, u32 y, u32 w, u32 h, u32 col, std::function<void()> callback, u32 defaultVal);
         ~Option();
         
-        void Run() { if(Callback != nullptr) Callback(); }
+        void Run() { 
+            if(Callback != nullptr) {
+                Callback(); 
+                optIndex = ((optIndex >= Opts.size()-1) ? 0 : optIndex+1);
+            }
+        }
         bool HasFunc() { return Callback != nullptr; }
         
         u32 GetOptIndex() { return optIndex; }

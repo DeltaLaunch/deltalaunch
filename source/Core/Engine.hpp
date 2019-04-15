@@ -58,11 +58,11 @@ class Engine
         Dashboard *dash;
         Mix_Music *bgm;
         FsStorage romfs;
+        static EngineState State;
     private:
         ThreadManager *frndThread;
 		ThreadManager *samsThread;
 		ThreadManager *aemThread;
-        EngineState State;
         std::string baseThemeDir;
         u32 Width, Height;
         void *HeapAddr;

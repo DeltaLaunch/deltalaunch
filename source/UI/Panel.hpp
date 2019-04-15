@@ -25,6 +25,7 @@
 #include <vector>
 #include <tuple>
 #include "../Core/Graphics.hpp"
+#include "../Services/Hid.hpp"
 #include "Button.hpp"
 #include "Option.hpp"
 #include "../Types.h"
@@ -35,7 +36,6 @@ class Panel
         Panel(TTF_Font *font, u32 x, u32 y);
         ~Panel();
         
-        //void AddButton(Button *but) { Buttons.push_back(but); }
         void AddString(u32 x, u32 y, std::string str) { Strings.push_back(std::tuple<u32, u32, std::string>(x,y,str)); }
         void AddOption(Option *op) { Options.push_back(op); }
         
@@ -50,7 +50,6 @@ class Panel
         SDL_Rect Pos;
         TTF_Font *Font;
         u32 optSelect;
-        //std::vector<Button*> Buttons;
         std::vector<Option*> Options;
         std::vector<std::tuple<u32, u32, std::string>> Strings;
 };

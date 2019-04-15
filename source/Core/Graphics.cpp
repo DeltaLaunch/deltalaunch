@@ -143,12 +143,12 @@ void Graphics::DrawOption(TTF_Font *font, SDL_Rect Pos, std::string Text, std::s
         pos.w = Pos.w+10; pos.h = Pos.h+10;
         Graphics::Rectangle(pos, GetDefaultSelCol());
         Graphics::Rectangle(Pos, GetDefaultButCol());
-        Graphics::DrawText(font, Pos.x + 10, Pos.y + (Pos.h/2) - (tHight/2), Text, GetDefaultSelCol());
-        Graphics::DrawText(font, Pos.x + 100, Pos.y + (Pos.h/2) - (tHight/2), OptionText, GetDefaultSelCol());
+        Graphics::DrawText(font, Pos.x + 10, Pos.y + (Pos.h/2) - (tHight/2), Text);
+        Graphics::DrawText(font, Pos.x + 200, Pos.y + (Pos.h/2) - (tHight/2), OptionText, GetDefaultSelCol());
     }
     else {
         Graphics::DrawText(font, Pos.x + 10, Pos.y + (Pos.h/2) - (tHight/2), Text);
-        Graphics::DrawText(font, Pos.x + 100, Pos.y + (Pos.h/2) - (tHight/2), OptionText);
+        Graphics::DrawText(font, Pos.x + 200, Pos.y + (Pos.h/2) - (tHight/2), OptionText);
     }
 }
 

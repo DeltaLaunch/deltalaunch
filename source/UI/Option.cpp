@@ -18,18 +18,17 @@
 
 #include "Option.hpp"
 
-Option::Option(std::string optName, const char** ops, u32 x, u32 y, u32 w, u32 h, u32 col, std::function<void()> callback) {
+Option::Option(std::string optName, std::vector<std::string> opts, u32 x, u32 y, u32 w, u32 h, u32 col, std::function<void()> callback, u32 defaultVal) {
     Pos.x = x;
     Pos.y = y;
     Pos.w = w;
     Pos.h = h;
     Callback = callback;
-    std::vector<std::string> vec (ops, ops + sizeof(ops) / sizeof(ops[0]) );
-    Opts = vec;
-    optIndex = 0;
+    Opts = opts;
+    optIndex = defaultVal;
     Text = optName;
 }
 
 Option::~Option() {
-    //
+    Opts.clear();
 }

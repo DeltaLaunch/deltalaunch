@@ -26,12 +26,14 @@ SettingsMenu::SettingsMenu(TTF_Font *fontHdr, TTF_Font *fontBdy, SDL_Rect pos) :
     smallFont = fontBdy;
     panX = 500;
     panY = 100;
-    u32 Y = 40, butW = 210, butH = 50, butCol = 0x202020FF, optW = 240;
+    u32 Y = 40, butW = 210, butH = 50, butCol = 0x202020FF, optW = 280;
     u32 space = 15+butH;
     
     Buttons.push_back(new Button("Lock Screen", 60, Y+=space, butW, butH, butCol, nullptr));
     Panel *lock = new Panel(fontBdy, panX, panY);
     lock->AddString(0, 0, std::string("Toggle the lock screen flag."));
+    std::vector<std::string> lck {"Off", "On"};
+    lock->AddOption(new Option("Lock screen:", lck, 0, 50, optW, butH, butCol, LockScreenToggle, Settings::GetLockScreenFlag()));
     Panels.push_back(lock);
     
     Buttons.push_back(new Button("Internet", 60, Y+=space, butW, butH, butCol, nullptr));
@@ -52,8 +54,8 @@ SettingsMenu::SettingsMenu(TTF_Font *fontHdr, TTF_Font *fontBdy, SDL_Rect pos) :
     Buttons.push_back(new Button("Look and Feel", 60, Y+=space, butW, butH, butCol, nullptr));
     Panel *look = new Panel(fontBdy, panX, panY);
     look->AddString(0, 0, std::string("Change look and feel."));
-    const char *lookOps[] = {"test", "test2"};
-    look->AddOption(new Option("Option:", lookOps, 0, 50, optW, butH, butCol, GameLookFeel));
+    std::vector<std::string> gamesel {"Outline", "Diffsize"};
+    look->AddOption(new Option("Game select:", gamesel, 0, 50, optW, butH, butCol, GameLookFeel, Settings::gameSelType));
     Panels.push_back(look);
     
     Buttons.push_back(new Button("Themes", 60, Y+=space, butW, butH, butCol, nullptr));
@@ -75,11 +77,17 @@ SettingsMenu::SettingsMenu(TTF_Font *fontHdr, TTF_Font *fontBdy, SDL_Rect pos) :
 }
 
 SettingsMenu::~SettingsMenu() {
+    for(auto pan: Panels) delete pan;
     plExit();
 }
 
 void SettingsMenu::GameLookFeel() {
     Settings::gameSelType = (Settings::gameSelType == SELECT_OUTLINE) ? SELECT_SIZEDIFF : SELECT_OUTLINE;
+}
+
+void SettingsMenu::LockScreenToggle() {
+    bool l = Settings::GetLockScreenFlag();
+    Settings::SetLockScreenFlag(!l);
 }
 
 /*
@@ -105,13 +113,13 @@ void SettingsMenu::Back() {
 	else currLayer--;
 }
 
-void SettingsMenu::Update(u32 kDown) {
-	if(kDown & KEY_A) Activate();
-	if(kDown & KEY_B) Back();
-	if(kDown & KEY_DUP && !currLayer) DecrementSelect();
-	if(kDown & KEY_DDOWN && !currLayer) IncrementSelect();
+void SettingsMenu::Update(u32 kDown) {    
     Graphics::RenderTexture(Sprite, Pos);
     Graphics::DrawText(FontHdr, 30, 25, GetTitle());
     DrawButtons();
     Panels[menuOpt]->Update(kDown, (bool)currLayer);
+    if(kDown & KEY_A) Activate();
+	if(kDown & KEY_B) Back();
+	if(kDown & KEY_DUP && !currLayer) DecrementSelect();
+	if(kDown & KEY_DDOWN && !currLayer) IncrementSelect();
 }

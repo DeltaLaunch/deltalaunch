@@ -18,6 +18,11 @@
 
 #include "Hid.hpp"
 
+u64 Hid::GetInput() {
+    hidScanInput();
+    return hidKeysDown(CONTROLLER_P1_AUTO);
+}
+
 bool Hid::IsTouched(){
     if(hidTouchCount() < 1) return false;
     touchPosition touchPos;

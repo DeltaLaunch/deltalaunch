@@ -20,6 +20,8 @@
 #include <experimental/filesystem>
 namespace fs = std::experimental::filesystem::v1;
 
+EngineState Engine::State;
+
 Engine::Engine(u32 width, u32 height, void *heapAddr, size_t heapSize) {
     //Detect reinx
     if(!Rnx::IsUsingReiNX()) {
@@ -141,31 +143,34 @@ void Engine::Clear() {
 }
 
 void Engine::Update() {
-	//Get hid input
-    hidScanInput();
-    u64 kDown = hidKeysDown(CONTROLLER_P1_AUTO);
-    
-    //Lockscreen
-    if(State == STATE_LOCKSCREEN) {
-        Clear();
-        dash->DrawLockScreen();
-        Render();
-        if((kDown & KEY_A) || Hid::IsTouched()) 
-            State = STATE_DASHBOARD;
+    u64 kDown = Hid::GetInput();
+    switch(State) {
+        case STATE_LOCKSCREEN:
+        {
+            Clear();
+            dash->DrawLockScreen();
+            Render();
+            if((kDown & KEY_A) || Hid::IsTouched()) 
+                State = STATE_DASHBOARD;
+            break;
+        }
+        case STATE_DASHBOARD:
+        {
+            dash->UpdateDash(kDown);
+            dash->DrawWallpaper();
+            dash->DrawButtons();
+            dash->DrawGames();
+            dash->DrawOverlay();
+            dash->DrawDebugText();
+            State = dash->settings->IsOpen() ? STATE_SETTINGS : STATE_DASHBOARD;
+            break;
+        }
+        case STATE_SETTINGS:
+        {
+            if(!dash->settings->IsOpen())
+                State = STATE_DASHBOARD;
+            dash->UpdateSettings(kDown);
+            break;
+        }
     }
-    else {
-        State = dash->IsMenuOpen ? STATE_SETTINGS : STATE_DASHBOARD;
-    }
-    
-    //Dash
-	if(State == STATE_DASHBOARD) {
-        dash->UpdateDash(kDown);
-		dash->DrawWallpaper();
-		dash->DrawButtons();
-		dash->DrawGames();
-		dash->DrawOverlay();
-		dash->DrawDebugText();
-	}
-	if(State == STATE_SETTINGS)
-		dash->UpdateSettings(kDown);
 }
