@@ -23,7 +23,7 @@ Game::Game() {
     Icon = nullptr;
 	TitleId = 0;
 	Flag = 0;
-    SelColor = AQUA;
+    SelColor = Graphics::GetDefaultSelCol();
 }
 
 Game::~Game() {

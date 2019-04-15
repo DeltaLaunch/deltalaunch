@@ -118,6 +118,39 @@ void Graphics::DrawText(TTF_Font *font, u32 x, u32 y, std::string str, u32 col) 
     SDL_FreeSurface(surface);
 }
 
+void Graphics::DrawButton(TTF_Font *font, SDL_Rect Pos, std::string Text, bool isSel) {
+    int tHight = 0;
+    TTF_SizeText(font, Text.c_str(), NULL, &tHight);
+    if(isSel) {
+        SDL_Rect pos; 
+        pos.x = Pos.x-5; pos.y = Pos.y-5;
+        pos.w = Pos.w+10; pos.h = Pos.h+10;
+        Graphics::Rectangle(pos, GetDefaultSelCol());
+        Graphics::Rectangle(Pos, GetDefaultButCol());
+        Graphics::DrawText(font, Pos.x + 12, Pos.y + (Pos.h/2) - (tHight/2), Text, GetDefaultSelCol());
+    }
+    else {
+        Graphics::DrawText(font, Pos.x + 12, Pos.y + (Pos.h/2) - (tHight/2), Text);
+    }
+}
+
+void Graphics::DrawOption(TTF_Font *font, SDL_Rect Pos, std::string Text, std::string OptionText, bool isSel) {
+    int tHight = 0;
+    TTF_SizeText(font, Text.c_str(), NULL, &tHight);
+    if(isSel) {
+        SDL_Rect pos; 
+        pos.x = Pos.x-5; pos.y = Pos.y-5;
+        pos.w = Pos.w+10; pos.h = Pos.h+10;
+        Graphics::Rectangle(pos, GetDefaultSelCol());
+        Graphics::Rectangle(Pos, GetDefaultButCol());
+        Graphics::DrawText(font, Pos.x + 10, Pos.y + (Pos.h/2) - (tHight/2), Text, GetDefaultSelCol());
+        Graphics::DrawText(font, Pos.x + 100, Pos.y + (Pos.h/2) - (tHight/2), OptionText, GetDefaultSelCol());
+    }
+    else {
+        Graphics::DrawText(font, Pos.x + 10, Pos.y + (Pos.h/2) - (tHight/2), Text);
+        Graphics::DrawText(font, Pos.x + 100, Pos.y + (Pos.h/2) - (tHight/2), OptionText);
+    }
+}
 
 void Graphics::Render() {
     SDL_RenderPresent(Rend);

@@ -18,6 +18,9 @@
 
 #include "Settings.hpp"
 
+SelectType Settings::gameSelType;
+GameAreaType Settings::gameAreaType;
+
 std::string Settings::GetFirmwareVersion() {
     SetSysFirmwareVersion firm;
     setsysInitialize();

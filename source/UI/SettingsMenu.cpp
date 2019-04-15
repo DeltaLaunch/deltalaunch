@@ -23,65 +23,72 @@ SettingsMenu::SettingsMenu(TTF_Font *fontHdr, TTF_Font *fontBdy, SDL_Rect pos) :
 	
 	//vars
 	menuOpt = 0;
-    gameAreaType = GAMEAREA_MINI;
-    gameSelectType = SELECT_OUTLINE;
+    smallFont = fontBdy;
+    panX = 500;
+    panY = 100;
+    u32 Y = 40, butW = 210, butH = 50, butCol = 0x202020FF, optW = 240;
+    u32 space = 15+butH;
+    
+    Buttons.push_back(new Button("Lock Screen", 60, Y+=space, butW, butH, butCol, nullptr));
+    Panel *lock = new Panel(fontBdy, panX, panY);
+    lock->AddString(0, 0, std::string("Toggle the lock screen flag."));
+    Panels.push_back(lock);
+    
+    Buttons.push_back(new Button("Internet", 60, Y+=space, butW, butH, butCol, nullptr));
+    Panel *internet = new Panel(fontBdy, panX, panY);
+    internet->AddString(0, 0, std::string("View internet settings."));
+    Panels.push_back(internet);
+    
+    Buttons.push_back(new Button("Data Management", 60, Y+=space, butW, butH, butCol, nullptr));
+    Panel *dataMan = new Panel(fontBdy, panX, panY);
+    dataMan->AddString(0, 0, std::string("Manage your data."));
+    Panels.push_back(dataMan);
+    
+    Buttons.push_back(new Button("Users", 60, Y+=space, butW, butH, butCol, nullptr));
+    Panel *user = new Panel(fontBdy, panX, panY);
+    user->AddString(0, 0, std::string("Edit user profiles."));
+    Panels.push_back(user);
+    
+    Buttons.push_back(new Button("Look and Feel", 60, Y+=space, butW, butH, butCol, nullptr));
+    Panel *look = new Panel(fontBdy, panX, panY);
+    look->AddString(0, 0, std::string("Change look and feel."));
+    const char *lookOps[] = {"test", "test2"};
+    look->AddOption(new Option("Option:", lookOps, 0, 50, optW, butH, butCol, GameLookFeel));
+    Panels.push_back(look);
+    
+    Buttons.push_back(new Button("Themes", 60, Y+=space, butW, butH, butCol, nullptr));
+    Panel *theme = new Panel(fontBdy, panX, panY);
+    theme->AddString(0, 0, std::string("Change current theme."));
+    Panels.push_back(theme);
+    
+    Buttons.push_back(new Button("TV Settings", 60, Y+=space, butW, butH, butCol, nullptr));
+    Panel *tvSet = new Panel(fontBdy, panX, panY);
+    tvSet->AddString(0, 0, std::string("Manage your TV settings."));
+    Panels.push_back(tvSet);
+    
+    Buttons.push_back(new Button("System Info", 60, Y+=space, butW, butH, butCol, nullptr));
+    Panel *sysinfo = new Panel(fontBdy, panX, panY);
+    sysinfo->AddString(0, 0, std::string("Special specific information."));
+    sysinfo->AddString(5, 50, std::string("Firmware: " + Settings::GetFirmwareVersion()));
+    sysinfo->AddString(5, 70, std::string("Serial: " + Settings::GetSerialNumber()));
+    Panels.push_back(sysinfo);
 }
 
 SettingsMenu::~SettingsMenu() {
     plExit();
 }
 
+void SettingsMenu::GameLookFeel() {
+    Settings::gameSelType = (Settings::gameSelType == SELECT_OUTLINE) ? SELECT_SIZEDIFF : SELECT_OUTLINE;
+}
+
 /*
 *   Draw/Set Graphics
 */
-void SettingsMenu::DrawPanel() {
-	u32 panX = 500, panY = 100;
-	switch(menuOpt){
-		case 0:
-		{
-			Graphics::DrawText(FontBdy, panX, panY, "Toggle the lock screen flag.");
-			break;
-		}
-		case 1:
-		{
-			Graphics::DrawText(FontBdy, panX, panY, "View internet settings.");
-			break;
-		}
-		case 2:
-		{
-			Graphics::DrawText(FontBdy, panX, panY, "Edit profile.");
-			break;
-		}
-        case 3:
-        {
-            Graphics::DrawText(FontBdy, panX, panY, "Change look and feel.");
-            Graphics::DrawText(FontBdy, panX+5, panY+50, (gameSelectType == SELECT_OUTLINE ? "Outline Mode: Outline" : "Outline Mode: Diff size"));
-            break;
-        }
-		case 4:
-		{
-			Graphics::DrawText(FontBdy, panX, panY, "Special specific information.");
-			Graphics::DrawText(FontBdy, panX+5, panY+50, "Firmware: " + Settings::GetFirmwareVersion());
-			Graphics::DrawText(FontBdy, panX+5, panY+70, "Serial: " + Settings::GetSerialNumber());
-			break;
-		}
-	}
-}
-
 void SettingsMenu::DrawButtons() {
     int ind = 0;
     for(auto button: Buttons) {
-        if(ind == menuOpt) {
-            SDL_Rect pos; 
-            pos.x = button->Pos.x-5; pos.y = button->Pos.y-5;
-            pos.w = button->Pos.w+10; pos.h = button->Pos.h+10;
-            Graphics::Rectangle(pos, AQUA);
-            Graphics::Rectangle(button->Pos, GREY);
-            Graphics::DrawText(FontBdy, button->Pos.x + 12, button->Pos.y + (button->Pos.h/2) - 4, button->Text, AQUA);
-        }
-        else {
-            Graphics::DrawText(FontBdy, button->Pos.x + 12, button->Pos.y + (button->Pos.h/2) - 4, button->Text);
-        }
+        Graphics::DrawButton(smallFont, button->Pos, button->Text, (!currLayer && (ind == menuOpt)) ? true : false);
         ind++;
     }
 }
@@ -90,33 +97,7 @@ void SettingsMenu::DrawButtons() {
 *   Trigger events
 */
 void SettingsMenu::Activate() {
-    switch(menuOpt){
-        case 0:
-        {
-            //toggle lock 
-            break;
-        }
-        case 1:
-        {
-            //Internet settings
-            break;
-        }
-        case 2:
-        {
-            //Profile
-            break;
-        }
-        case 3:
-        {
-            //Selection type
-            gameSelectType = (gameSelectType == SELECT_OUTLINE ? SELECT_SIZEDIFF : SELECT_OUTLINE);
-            break;
-        }
-        case 4:
-        {
-            //system info/update
-        }
-    }
+    if(!currLayer && Panels[menuOpt]->OptionCnt() > 0) currLayer++;
 }
 
 void SettingsMenu::Back() {
@@ -127,10 +108,10 @@ void SettingsMenu::Back() {
 void SettingsMenu::Update(u32 kDown) {
 	if(kDown & KEY_A) Activate();
 	if(kDown & KEY_B) Back();
-	if(kDown & KEY_DUP) DecrementSelect();
-	if(kDown & KEY_DDOWN) IncrementSelect();
+	if(kDown & KEY_DUP && !currLayer) DecrementSelect();
+	if(kDown & KEY_DDOWN && !currLayer) IncrementSelect();
     Graphics::RenderTexture(Sprite, Pos);
     Graphics::DrawText(FontHdr, 30, 25, GetTitle());
     DrawButtons();
-	DrawPanel();
+    Panels[menuOpt]->Update(kDown, (bool)currLayer);
 }

@@ -35,6 +35,7 @@ Engine::Engine(u32 width, u32 height, void *heapAddr, size_t heapSize) {
     FILE *fp = fopen("/test.txt", "w");
     for (const auto & entry : fs::directory_iterator("romfs:/")) {
 		fwrite(entry.path().string().c_str(), strlen(entry.path().string().c_str()), 1, fp);
+        fwrite("\r\n", strlen("\r\n"), 1, fp);
 	}
     fclose(fp);
 }
@@ -118,7 +119,7 @@ void Engine::Initialize() {
     dash->SetGames();
     
     //appletLoadAndApplyIdlePolicySettings();
-    appletAllowToEnterSleep();
+    //appletAllowToEnterSleep();
 
 	//Start threads
     frndThread = new ThreadManager(Threads::FriendThread);

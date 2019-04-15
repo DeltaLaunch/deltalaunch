@@ -16,20 +16,20 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-#include <string>
-#include <switch.h>
-#include "../Types.h"
+#include "Option.hpp"
 
-class Settings
-{
-    public:
-        static SelectType gameSelType;
-        static GameAreaType gameAreaType;
-        static std::string GetFirmwareVersion();
-		static std::string GetSerialNumber();
-        static u8 GetLockScreenFlag();
-        static void SetLockScreenFlag(u8 flag);
-        static u8 GetAudioVolume();
-        static void SetAudioVolume(u8 vol);
-};
+Option::Option(std::string optName, const char** ops, u32 x, u32 y, u32 w, u32 h, u32 col, std::function<void()> callback) {
+    Pos.x = x;
+    Pos.y = y;
+    Pos.w = w;
+    Pos.h = h;
+    Callback = callback;
+    std::vector<std::string> vec (ops, ops + sizeof(ops) / sizeof(ops[0]) );
+    Opts = vec;
+    optIndex = 0;
+    Text = optName;
+}
+
+Option::~Option() {
+    //
+}

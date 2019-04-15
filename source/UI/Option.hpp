@@ -18,37 +18,27 @@
 
 #pragma once
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <functional>
 #include <string>
-#include <ios>
-#include <sstream>
+#include <functional>
+#include <vector>
 #include <switch.h>
-#include "../Services/App.hpp"
-#include "../Services/Account.hpp"
-#include "../Core/Graphics.hpp"
 
-class Game
+class Option
 {
     public:
-		Game();
-        ~Game();
-        void MountSaveData();
-        Result Play();
-		
-		//Getters/setters
-		u64 GetTitleId() { return TitleId; }
-		void SetTitleId(u64 tid) { TitleId = tid; }
-        void SetFlag(u8 flag) { Flag = flag; }
-		u32 GetColor() { return SelColor; }
-        void SetColor(u32 col) { SelColor = col; }
-
-		SDL_Texture *Icon;
+        Option(std::string optName, const char** ops, u32 x, u32 y, u32 w, u32 h, u32 col, std::function<void()> callback);
+        ~Option();
+        
+        void Run() { if(Callback != nullptr) Callback(); }
+        bool HasFunc() { return Callback != nullptr; }
+        
+        u32 GetOptIndex() { return optIndex; }
+        std::string GetOptText() { return Opts.at(optIndex); };
+        
         SDL_Rect Pos;
-        SDL_Texture *Sprite;
         std::string Text;
     private:
-        u64 TitleId;
-		u8 Flag;
-		u32 SelColor;
+        u32 optIndex;
+        std::vector<std::string> Opts;
+        std::function<void()> Callback;
 };

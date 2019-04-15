@@ -26,6 +26,9 @@
 #include <stdint.h>
 #include <string>
 
+#define GREY 0x4C4C4CFF
+#define AQUA 0xFFCEFF
+
 class Graphics
 {
     public:
@@ -42,6 +45,10 @@ class Graphics
         static void DrawTexture(std::string tex, u32 x, u32 y);
         static void RenderTexture(SDL_Texture *tex, SDL_Rect pos);
         static SDL_Renderer *GetRenderer() { return Rend; }
+        static void DrawButton(TTF_Font *font, SDL_Rect Pos, std::string Text, bool isSel);
+        static void DrawOption(TTF_Font *font, SDL_Rect Pos, std::string Text, std::string OptionText, bool isSel);
+        static u32 GetDefaultSelCol() { return AQUA; }
+        static u32 GetDefaultButCol() { return GREY; }
         static void Render();
         static void Clear();
 };

@@ -39,6 +39,8 @@ Dashboard::Dashboard(u32 width, u32 height, std::string font) {
     lastErr = 0;
 	App::dashLayer = 0;
 	App::gameSelectInd = 0;
+    Settings::gameSelType = SELECT_OUTLINE;
+    Settings::gameAreaType = GAMEAREA_FULL;
 	gameRows = 1;
     debugInfo = false;
 	MaxColumns = 12;
@@ -48,13 +50,6 @@ Dashboard::Dashboard(u32 width, u32 height, std::string font) {
 	
 	SetPos.x=SetPos.y=0; SetPos.w=Width; SetPos.h=Height;
 	settings = new SettingsMenu(hdrFont, smallFont, SetPos);
-	u32 Y = 20, butW = 200, butH = 60, butCol = 0x202020FF;
-    u32 space = 20+butH;
-    settings->AddButton(new Button("Lock Screen", 60, Y+=space, butW, butH, butCol, nullptr));
-    settings->AddButton(new Button("Internet", 60, Y+=space, butW, butH, butCol, nullptr));
-    settings->AddButton(new Button("Profile", 60, Y+=space, butW, butH, butCol, nullptr));
-    settings->AddButton(new Button("Look and Feel", 60, Y+=space, butW, butH, butCol, nullptr));
-    settings->AddButton(new Button("System Info", 60, Y+=space, butW, butH, butCol, nullptr));
 }
 
 Dashboard::~Dashboard() {
@@ -161,7 +156,7 @@ void Dashboard::DrawGames() {
 	unsigned ind = 0;
 	for(auto game: Games) {
         //Classic outline format
-        if(settings->gameSelectType == SELECT_OUTLINE) {
+        if(Settings::gameSelType == SELECT_OUTLINE) {
             //Draw selection outline
             if(ind == App::gameSelectInd && App::dashLayer == 0) {
                 SDL_Rect pos = game->Pos; 
@@ -177,7 +172,7 @@ void Dashboard::DrawGames() {
             }
         }
 		//Or draw size diff mode
-		if(settings->gameSelectType == SELECT_SIZEDIFF) {
+		if(Settings::gameSelType == SELECT_SIZEDIFF) {
             //Draw game bigger
             if(ind == App::gameSelectInd && App::dashLayer == 0) {
                 SDL_Rect pos = game->Pos; 

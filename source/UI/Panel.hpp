@@ -22,37 +22,35 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 #include <switch.h>
-#include "Button.hpp"
-#include "Game.hpp"
-#include "Menu.hpp"
-#include "Panel.hpp"
+#include <vector>
+#include <tuple>
 #include "../Core/Graphics.hpp"
-#include "../Services/Time.hpp"
-#include "../Services/Power.hpp"
-#include "../Services/Settings.hpp"
+#include "Button.hpp"
+#include "Option.hpp"
 #include "../Types.h"
 
-class SettingsMenu: public Menu
+class Panel
 {
     public:
-        SettingsMenu(TTF_Font *fontHdr, TTF_Font *fontBdy, SDL_Rect pos);
-        ~SettingsMenu();
-        //Draw/set
-        void DrawButtons();
-		
-		//Overrides
-		void Update(u32 kDown);
-		void Activate();
-		void Back();
+        Panel(TTF_Font *font, u32 x, u32 y);
+        ~Panel();
         
-        static void GameLookFeel();
-		
-		u8 gameRows;
+        //void AddButton(Button *but) { Buttons.push_back(but); }
+        void AddString(u32 x, u32 y, std::string str) { Strings.push_back(std::tuple<u32, u32, std::string>(x,y,str)); }
+        void AddOption(Option *op) { Options.push_back(op); }
         
-    private:        
-        u32 panX, panY;
-        u32 Width, Height;
-		TTF_Font *smallFont;
-        SDL_Texture *bg;
-        std::vector<Panel*> Panels;
+        void Update(u32 kDown, bool selected);
+        
+        void IncrementSelect();
+        void DecrementSelect();
+        
+        u32 OptionCnt() { return Options.size(); }
+        
+    private:
+        SDL_Rect Pos;
+        TTF_Font *Font;
+        u32 optSelect;
+        //std::vector<Button*> Buttons;
+        std::vector<Option*> Options;
+        std::vector<std::tuple<u32, u32, std::string>> Strings;
 };
