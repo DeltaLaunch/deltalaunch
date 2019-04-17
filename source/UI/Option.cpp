@@ -18,7 +18,7 @@
 
 #include "Option.hpp"
 
-Option::Option(std::string optName, std::vector<std::string> opts, u32 x, u32 y, u32 w, u32 h, u32 col, std::function<void()> callback, u32 defaultVal) {
+Option::Option(std::string optName, std::vector<std::string> opts, u32 x, u32 y, u32 w, u32 h, u32 col, std::function<Result()> callback, u32 defaultVal) {
     Pos.x = x;
     Pos.y = y;
     Pos.w = w;

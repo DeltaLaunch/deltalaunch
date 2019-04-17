@@ -26,14 +26,12 @@
 class Option
 {
     public:
-        Option(std::string optName, std::vector<std::string> opts, u32 x, u32 y, u32 w, u32 h, u32 col, std::function<void()> callback, u32 defaultVal);
+        Option(std::string optName, std::vector<std::string> opts, u32 x, u32 y, u32 w, u32 h, u32 col, std::function<Result()> callback, u32 defaultVal);
         ~Option();
         
         void Run() { 
-            if(Callback != nullptr) {
-                Callback(); 
+            if(Callback != nullptr && R_SUCCEEDED(Callback())) 
                 optIndex = ((optIndex >= Opts.size()-1) ? 0 : optIndex+1);
-            }
         }
         bool HasFunc() { return Callback != nullptr; }
         
@@ -45,5 +43,5 @@ class Option
     private:
         u32 optIndex;
         std::vector<std::string> Opts;
-        std::function<void()> Callback;
+        std::function<Result()> Callback;
 };

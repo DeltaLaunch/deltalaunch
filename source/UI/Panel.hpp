@@ -40,6 +40,8 @@ class Panel
         void AddOption(Option *op) { Options.push_back(op); }
         void AddImage(u32 x, u32 y, u32 w, u32 h, SDL_Texture* tex) { Images.push_back(std::tuple<u32, u32, u32, u32, SDL_Texture*>(x, y, w, h, tex)); }
         
+        void SetImage(u32 ind, SDL_Texture *tex) { SDL_DestroyTexture(std::get<4>(Images.at(ind))); std::get<4>(Images.at(ind)) = tex; }
+        
         void Update(u32 kDown, bool selected);
         
         void IncrementSelect();

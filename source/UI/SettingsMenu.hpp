@@ -47,11 +47,11 @@ class SettingsMenu: public Menu
 		void Back();
         
         //Options
-        static void GameLookFeel();
-        static void LockScreenToggle();
-        static void VrModeToggle();
-        static void UpdateConsole();
-        static void EditProfilePic();
+        static Result GameLookFeel();
+        static Result LockScreenToggle();
+        static Result VrModeToggle();
+        static Result UpdateConsole();
+        static Result EditProfilePic(Panel *pan);
 		
 		u8 gameRows;
         

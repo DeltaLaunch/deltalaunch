@@ -28,7 +28,6 @@ SettingsMenu::SettingsMenu(TTF_Font *fontHdr, TTF_Font *fontBdy, SDL_Rect pos) :
     panY = 100;
     u32 Y = 40, butW = 210, butH = 50, butCol = 0x202020FF, optW = 280, optY = 20;
     u32 space = 15+butH;
-    shouldUpdateImg = false;
     
     Buttons.push_back(new Button("Lock Screen", 60, Y+=space, butW, butH, butCol, nullptr));
     Panel *lock = new Panel(fontBdy, panX, panY);
@@ -52,7 +51,7 @@ SettingsMenu::SettingsMenu(TTF_Font *fontHdr, TTF_Font *fontBdy, SDL_Rect pos) :
     user->AddString(0, 0, std::string("Edit user profiles."));
     std::vector<std::string> pfp {"Edit profile image"};
     user->AddImage(0, 40, 256, 256, Account::GetProfileImage(Account::GetFirstAccount()));
-    user->AddOption(new Option("", pfp, 0, 260+space, 270, butH, butCol, EditProfilePic, NULL));
+    user->AddOption(new Option("", pfp, 0, 260+space, 270, butH, butCol, std::bind(EditProfilePic, user), NULL));
     Panels.push_back(user);
     
     Buttons.push_back(new Button("Look and Feel", 60, Y+=space, butW, butH, butCol, nullptr));
@@ -91,28 +90,31 @@ SettingsMenu::~SettingsMenu() {
     plExit();
 }
 
-void SettingsMenu::GameLookFeel() {
+Result SettingsMenu::GameLookFeel() {
     Settings::gameSelType = (Settings::gameSelType == SELECT_OUTLINE) ? SELECT_SIZEDIFF : SELECT_OUTLINE;
 }
 
-void SettingsMenu::LockScreenToggle() {
+Result SettingsMenu::LockScreenToggle() {
     bool l = Settings::GetLockScreenFlag();
     Settings::SetLockScreenFlag(!l);
 }
 
-void SettingsMenu::VrModeToggle() {
+Result SettingsMenu::VrModeToggle() {
     bool b = App::IsVrEnabled();
     appletSetVrModeEnabled(!b);
     if(!b) appletBeginVrModeEx();
     else appletEndVrModeEx();
+    return 0;
 }
 
-void SettingsMenu::UpdateConsole() {
+Result SettingsMenu::UpdateConsole() {
     //
+    return 0;
 }
 
-void SettingsMenu::EditProfilePic() {
+Result SettingsMenu::EditProfilePic(Panel *pan) {
     FILE *fp = fopen("/profile.jpg", "rb");
+    Result rc = 0;
     if(fp){
         u128 uid = Account::GetFirstAccount();
         size_t fsize = 0;
@@ -126,15 +128,16 @@ void SettingsMenu::EditProfilePic() {
         AccountProfileBase pb;
         AccountUserData ud;
         accountInitialize();
-        accountGetProfile(&acc, uid);
-        accountProfileGet(&acc, &ud, &pb);
+        rc = accountGetProfile(&acc, uid);
+        rc = accountProfileGet(&acc, &ud, &pb);
         ud.iconID = 0;
-        accGetProfileEditor(&acc, uid);
-        accStoreWithImage(&acc, &pb, &ud, buf, fsize);
+        rc = accGetProfileEditor(&acc, uid);
+        rc = accStoreWithImage(&acc, &pb, &ud, buf, fsize);
         accountProfileClose(&acc);
         accountExit();
-        shouldUpdateImg = true;
+        pan->SetImage(0, Account::GetProfileImage(Account::GetFirstAccount()));
     }
+    return rc;
 }
 
 /*
