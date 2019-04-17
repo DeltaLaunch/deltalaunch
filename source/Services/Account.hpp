@@ -17,13 +17,20 @@
 */
 
 #pragma once
+#include <SDL2/SDL.h>
+#include "../Core/Graphics.hpp"
+#include "App.hpp"
 #include <string>
+#include <malloc.h>
 #include <switch.h>
 
 class Account
 {
     public:
         static s32 GetUserCount();
-		static u128 GetFirstAccount();
+		static u128 GetActiveAccount();
+        static u128 GetFirstAccount();
+        static u128 TryGetUser();
+        static SDL_Texture *GetProfileImage(u128 userID);
 		static Result SetProfilePicture(u128 userId, u8 *jpg, size_t jpgSize);
 };

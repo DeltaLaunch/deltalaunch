@@ -45,6 +45,7 @@ class Graphics
         static void DrawTexture(std::string tex, u32 x, u32 y);
         static void RenderTexture(SDL_Texture *tex, SDL_Rect pos);
         static SDL_Renderer *GetRenderer() { return Rend; }
+        static SDL_Surface *BufToSurf(void *buf, size_t size);
         static void DrawButton(TTF_Font *font, SDL_Rect Pos, std::string Text, bool isSel);
         static void DrawOption(TTF_Font *font, SDL_Rect Pos, std::string Text, std::string OptionText, bool isSel);
         static u32 GetDefaultSelCol() { return AQUA; }

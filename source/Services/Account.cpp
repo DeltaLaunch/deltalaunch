@@ -26,15 +26,59 @@ s32 Account::GetUserCount() {
     return cnt;
 }
 
-u128 Account::GetFirstAccount() {
-	u128 *userIDs = (u128*)malloc(8*sizeof(u128));
-	size_t total;
+u128 Account::GetActiveAccount() {
+	u128 userID;
+    bool sel;
 	accountInitialize();
-	accountListAllUsers(userIDs, 8, &total);
+	Result rc = accountGetActiveUser(&userID, &sel);
 	accountExit();
-	u128 id = userIDs[0];
-	free(userIDs);
-	return id;
+    if(R_FAILED(rc) || !userID || !sel)
+        userID = App::LaunchPSelect();
+	return userID;
+}
+
+#define MAX_USERS 8
+u128 Account::GetFirstAccount() {
+    u128 userIDs[MAX_USERS];
+    size_t total = 0;
+    accountInitialize();
+    accountListAllUsers(userIDs, MAX_USERS, &total);
+    accountExit();
+
+    if(!total){
+        // do error logging
+        return (u128)-1;
+    }
+    return userIDs[0];
+}
+
+u128 Account::TryGetUser() {
+    u128 userID;
+    accountInitialize();
+    Result rc = accTrySelectUserWithoutInteraction(&userID);
+    accountExit();
+    if(R_FAILED(rc) || !userID)
+        userID = App::LaunchPSelect();
+    return userID;
+}
+
+SDL_Texture *Account::GetProfileImage(u128 userID) {
+    SDL_Texture *tex = NULL;
+    if(userID) {
+        AccountProfile acc;
+        size_t imgSize = 0;
+        accountInitialize();
+        accountGetProfile(&acc, userID);
+        accountProfileGetImageSize(&acc, &imgSize);
+        void *buf = malloc(imgSize);
+        accountProfileLoadImage(&acc, buf, imgSize, &imgSize);
+        SDL_Surface *img = Graphics::BufToSurf(buf, imgSize);
+        tex = Graphics::CreateTexFromSurf(img);
+        free(buf);
+        accountProfileClose(&acc);
+        accountExit();
+    }
+    return tex;
 }
 
 Result Account::SetProfilePicture(u128 userId, u8 *jpg, size_t jpgSize) {

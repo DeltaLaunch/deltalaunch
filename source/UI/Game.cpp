@@ -41,7 +41,7 @@ void Game::MountSaveData() {
 Result Game::Play() {
     Result rc = 0;
     if(!App::currentApplication.active) {
-        u128 userid = App::LaunchPSelect();
+        u128 userid = Account::GetActiveAccount();
         if(userid == 0) return 0;
         rc = App::LaunchGame(TitleId, userid);
         //leet hax

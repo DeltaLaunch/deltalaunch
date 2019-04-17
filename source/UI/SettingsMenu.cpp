@@ -26,14 +26,15 @@ SettingsMenu::SettingsMenu(TTF_Font *fontHdr, TTF_Font *fontBdy, SDL_Rect pos) :
     smallFont = fontBdy;
     panX = 500;
     panY = 100;
-    u32 Y = 40, butW = 210, butH = 50, butCol = 0x202020FF, optW = 280;
+    u32 Y = 40, butW = 210, butH = 50, butCol = 0x202020FF, optW = 280, optY = 20;
     u32 space = 15+butH;
+    shouldUpdateImg = false;
     
     Buttons.push_back(new Button("Lock Screen", 60, Y+=space, butW, butH, butCol, nullptr));
     Panel *lock = new Panel(fontBdy, panX, panY);
     lock->AddString(0, 0, std::string("Toggle the lock screen flag."));
     std::vector<std::string> lck {"Off", "On"};
-    lock->AddOption(new Option("Lock screen:", lck, 0, 50, optW, butH, butCol, LockScreenToggle, Settings::GetLockScreenFlag()));
+    lock->AddOption(new Option("Lock screen:", lck, 0, optY+=space, optW, butH, butCol, LockScreenToggle, Settings::GetLockScreenFlag()));
     Panels.push_back(lock);
     
     Buttons.push_back(new Button("Internet", 60, Y+=space, butW, butH, butCol, nullptr));
@@ -49,13 +50,19 @@ SettingsMenu::SettingsMenu(TTF_Font *fontHdr, TTF_Font *fontBdy, SDL_Rect pos) :
     Buttons.push_back(new Button("Users", 60, Y+=space, butW, butH, butCol, nullptr));
     Panel *user = new Panel(fontBdy, panX, panY);
     user->AddString(0, 0, std::string("Edit user profiles."));
+    std::vector<std::string> pfp {"Edit profile image"};
+    user->AddImage(0, 40, 256, 256, Account::GetProfileImage(Account::GetFirstAccount()));
+    user->AddOption(new Option("", pfp, 0, 260+space, 270, butH, butCol, EditProfilePic, NULL));
     Panels.push_back(user);
     
     Buttons.push_back(new Button("Look and Feel", 60, Y+=space, butW, butH, butCol, nullptr));
     Panel *look = new Panel(fontBdy, panX, panY);
     look->AddString(0, 0, std::string("Change look and feel."));
+    optY=20;
     std::vector<std::string> gamesel {"Outline", "Diffsize"};
-    look->AddOption(new Option("Game select:", gamesel, 0, 50, optW, butH, butCol, GameLookFeel, Settings::gameSelType));
+    look->AddOption(new Option("Game select:", gamesel, 0, optY+=space, optW, butH, butCol, GameLookFeel, Settings::gameSelType));
+    std::vector<std::string> vrmode {"Disable", "Enable"};
+    look->AddOption(new Option("VR Mode:", vrmode, 0, optY+=space, optW, butH, butCol, VrModeToggle, App::IsVrEnabled()));
     Panels.push_back(look);
     
     Buttons.push_back(new Button("Themes", 60, Y+=space, butW, butH, butCol, nullptr));
@@ -73,6 +80,9 @@ SettingsMenu::SettingsMenu(TTF_Font *fontHdr, TTF_Font *fontBdy, SDL_Rect pos) :
     sysinfo->AddString(0, 0, std::string("Special specific information."));
     sysinfo->AddString(5, 50, std::string("Firmware: " + Settings::GetFirmwareVersion()));
     sysinfo->AddString(5, 70, std::string("Serial: " + Settings::GetSerialNumber()));
+    sysinfo->AddString(5, 90, std::string("Nickname: " + Settings::GetDeviceNickname()));
+    std::vector<std::string> update {"Update"};
+    sysinfo->AddOption(new Option("", update, 0, 400, 200, butH, butCol, UpdateConsole, 0));
     Panels.push_back(sysinfo);
 }
 
@@ -88,6 +98,43 @@ void SettingsMenu::GameLookFeel() {
 void SettingsMenu::LockScreenToggle() {
     bool l = Settings::GetLockScreenFlag();
     Settings::SetLockScreenFlag(!l);
+}
+
+void SettingsMenu::VrModeToggle() {
+    bool b = App::IsVrEnabled();
+    appletSetVrModeEnabled(!b);
+    if(!b) appletBeginVrModeEx();
+    else appletEndVrModeEx();
+}
+
+void SettingsMenu::UpdateConsole() {
+    //
+}
+
+void SettingsMenu::EditProfilePic() {
+    FILE *fp = fopen("/profile.jpg", "rb");
+    if(fp){
+        u128 uid = Account::GetFirstAccount();
+        size_t fsize = 0;
+        fseek(fp, 0, SEEK_END);
+        fsize = ftell(fp);
+        rewind(fp);
+        u8 buf[fsize] = {0};
+        fread(buf, fsize, 1, fp);
+        fclose(fp);
+        AccountProfile acc;
+        AccountProfileBase pb;
+        AccountUserData ud;
+        accountInitialize();
+        accountGetProfile(&acc, uid);
+        accountProfileGet(&acc, &ud, &pb);
+        ud.iconID = 0;
+        accGetProfileEditor(&acc, uid);
+        accStoreWithImage(&acc, &pb, &ud, buf, fsize);
+        accountProfileClose(&acc);
+        accountExit();
+        shouldUpdateImg = true;
+    }
 }
 
 /*

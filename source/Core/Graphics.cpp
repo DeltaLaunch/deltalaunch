@@ -34,7 +34,7 @@ void Graphics::Init(std::string name, u32 width, u32 height) {
     Mix_Init(MIX_INIT_FLAC | MIX_INIT_MOD | MIX_INIT_MP3 | MIX_INIT_OGG);
     
     appletRequestForeground();
-    appletSetHandlesRequestToDisplay(true);
+    //appletSetHandlesRequestToDisplay(true);
 }
 
 void Graphics::Exit() {
@@ -135,8 +135,8 @@ void Graphics::DrawButton(TTF_Font *font, SDL_Rect Pos, std::string Text, bool i
 }
 
 void Graphics::DrawOption(TTF_Font *font, SDL_Rect Pos, std::string Text, std::string OptionText, bool isSel) {
-    int tHight = 0;
-    TTF_SizeText(font, Text.c_str(), NULL, &tHight);
+    int tHight = 0, tWid = 0;
+    TTF_SizeText(font, Text.c_str(), &tWid, &tHight);
     if(isSel) {
         SDL_Rect pos; 
         pos.x = Pos.x-5; pos.y = Pos.y-5;
@@ -144,12 +144,16 @@ void Graphics::DrawOption(TTF_Font *font, SDL_Rect Pos, std::string Text, std::s
         Graphics::Rectangle(pos, GetDefaultSelCol());
         Graphics::Rectangle(Pos, GetDefaultButCol());
         Graphics::DrawText(font, Pos.x + 10, Pos.y + (Pos.h/2) - (tHight/2), Text);
-        Graphics::DrawText(font, Pos.x + 200, Pos.y + (Pos.h/2) - (tHight/2), OptionText, GetDefaultSelCol());
+        Graphics::DrawText(font, Pos.x + ((Text != "") ? 200 : 40), Pos.y + (Pos.h/2) - (tHight/2), OptionText, GetDefaultSelCol());
     }
     else {
         Graphics::DrawText(font, Pos.x + 10, Pos.y + (Pos.h/2) - (tHight/2), Text);
-        Graphics::DrawText(font, Pos.x + 200, Pos.y + (Pos.h/2) - (tHight/2), OptionText);
+        Graphics::DrawText(font, Pos.x + ((Text != "") ? 200 : 40), Pos.y + (Pos.h/2) - (tHight/2), OptionText);
     }
+}
+
+SDL_Surface *Graphics::BufToSurf(void *buf, size_t size) {
+    return IMG_Load_RW(SDL_RWFromMem(buf, size), 1);
 }
 
 void Graphics::Render() {

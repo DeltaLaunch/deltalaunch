@@ -38,6 +38,14 @@ std::string Settings::GetSerialNumber() {
 	return std::string(serial);
 }
 
+std::string Settings::GetDeviceNickname() {
+    char nick[0x80] = {0};
+    setsysInitialize();
+    setsysGetDeviceNickname(nick);
+    setsysExit();
+    return std::string(nick);
+}
+
 u8 Settings::GetLockScreenFlag() {
     u8 flag;
     setsysInitialize();

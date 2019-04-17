@@ -32,6 +32,7 @@ class App
     public:
 		static Result LaunchGame(u64 tid, u128 userID);
         static Result GetTitleIds(std::vector<u64> &tids);
+        static bool IsVrEnabled();
 		static NsApplicationControlData GetGameControlData(u64 tid, u8 flag);
         static bool IsGamecardInserted();
 		static Result LaunchAlbum(u8 arg, bool startupSound);

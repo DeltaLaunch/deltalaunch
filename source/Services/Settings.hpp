@@ -27,6 +27,7 @@ class Settings
         static SelectType gameSelType;
         static GameAreaType gameAreaType;
         static std::string GetFirmwareVersion();
+        static std::string GetDeviceNickname();
 		static std::string GetSerialNumber();
         static u8 GetLockScreenFlag();
         static void SetLockScreenFlag(u8 flag);

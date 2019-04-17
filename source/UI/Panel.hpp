@@ -38,6 +38,7 @@ class Panel
         
         void AddString(u32 x, u32 y, std::string str) { Strings.push_back(std::tuple<u32, u32, std::string>(x,y,str)); }
         void AddOption(Option *op) { Options.push_back(op); }
+        void AddImage(u32 x, u32 y, u32 w, u32 h, SDL_Texture* tex) { Images.push_back(std::tuple<u32, u32, u32, u32, SDL_Texture*>(x, y, w, h, tex)); }
         
         void Update(u32 kDown, bool selected);
         
@@ -51,5 +52,6 @@ class Panel
         TTF_Font *Font;
         u32 optSelect;
         std::vector<Option*> Options;
+        std::vector<std::tuple<u32, u32, u32, u32, SDL_Texture*>> Images;
         std::vector<std::tuple<u32, u32, std::string>> Strings;
 };

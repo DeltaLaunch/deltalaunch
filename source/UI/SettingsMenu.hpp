@@ -46,12 +46,16 @@ class SettingsMenu: public Menu
 		void Activate();
 		void Back();
         
+        //Options
         static void GameLookFeel();
         static void LockScreenToggle();
+        static void VrModeToggle();
+        static void UpdateConsole();
+        static void EditProfilePic();
 		
 		u8 gameRows;
         
-    private:        
+    private:
         u32 panX, panY;
         u32 Width, Height;
 		TTF_Font *smallFont;

@@ -103,6 +103,12 @@ Result App::GetTitleIds(std::vector<u64> &tids) {
     return rc;
 }
 
+bool App::IsVrEnabled() {
+    bool b = false;
+    appletIsVrModeEnabled(&b);
+    return b;
+}
+
 NsApplicationControlData App::GetGameControlData(u64 tid, u8 flag) {
     NsApplicationControlData buffer;
     size_t s = 0;
