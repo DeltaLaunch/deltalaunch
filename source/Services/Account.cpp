@@ -52,6 +52,33 @@ u128 Account::GetFirstAccount() {
     return userIDs[0];
 }
 
+Result Account::SetCustomProfileImage(std::string filename) {
+    FILE *fp = fopen(filename.c_str(), "rb");
+    Result rc = -1;
+    if(fp){
+        u128 uid = Account::GetFirstAccount();
+        size_t fsize = 0;
+        fseek(fp, 0, SEEK_END);
+        fsize = ftell(fp);
+        rewind(fp);
+        u8 buf[fsize] = {0};
+        fread(buf, fsize, 1, fp);
+        fclose(fp);
+        AccountProfile acc;
+        AccountProfileBase pb;
+        AccountUserData ud;
+        accountInitialize();
+        rc = accountGetProfile(&acc, uid);
+        rc = accountProfileGet(&acc, &ud, &pb);
+        ud.iconID = 0;
+        rc = accGetProfileEditor(&acc, uid);
+        rc = accStoreWithImage(&acc, &pb, &ud, buf, fsize);
+        accountProfileClose(&acc);
+        accountExit();
+    }
+    return rc;
+}
+
 u128 Account::TryGetUser() {
     u128 userID;
     accountInitialize();

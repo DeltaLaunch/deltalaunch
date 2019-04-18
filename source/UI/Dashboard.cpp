@@ -18,22 +18,9 @@
 
 #include "Dashboard.hpp"
 
-Dashboard::Dashboard(u32 width, u32 height, std::string font) {
+Dashboard::Dashboard(u32 width, u32 height) {
     Width = width;
     Height = height;
-    plInitialize();
-    if(font == "") {
-        PlFontData fnt;
-        plGetSharedFontByType(&fnt, PlSharedFontType_Standard);
-        debugFont = TTF_OpenFontRW(SDL_RWFromMem(fnt.address, fnt.size), 1, 14);
-        hdrFont = TTF_OpenFontRW(SDL_RWFromMem(fnt.address, fnt.size), 1, 28);
-        smallFont = TTF_OpenFontRW(SDL_RWFromMem(fnt.address, fnt.size), 1, 20);
-    } 
-    else {
-        debugFont = TTF_OpenFont(font.c_str(), 14);
-        hdrFont = TTF_OpenFont(font.c_str(), 28);
-        smallFont = TTF_OpenFont(font.c_str(), 20);
-    }
 	
 	//vars
     lastErr = 0;
@@ -48,14 +35,11 @@ Dashboard::Dashboard(u32 width, u32 height, std::string font) {
     LockScreen = SDL_CreateTexture(Graphics::GetRenderer(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, Width, Height);
 	
 	SetPos.x=SetPos.y=0; SetPos.w=Width; SetPos.h=Height;
-	settings = new SettingsMenu(hdrFont, smallFont, SetPos);
+	settings = new SettingsMenu(SetPos);
+    settings->Initialize();
 }
 
 Dashboard::~Dashboard() {
-    plExit();
-    TTF_CloseFont(debugFont);
-	TTF_CloseFont(hdrFont);
-	TTF_CloseFont(smallFont);
 	delete settings;
 	for(auto button: Buttons) delete button;
 	for(auto game: Games) delete game;
@@ -64,6 +48,40 @@ Dashboard::~Dashboard() {
     SDL_DestroyTexture(Wallpaper);
     SDL_DestroyTexture(LockScreen);
 	SDL_DestroyTexture(Battery);
+}
+
+void Dashboard::Initialize() {
+    //Create buttons to add to dash
+    unsigned x = 230;       //padding on edges
+    unsigned space = 100;   //space inbetween
+    std::vector<std::string> names = Settings::GetThemeNames();
+    std::string baseThemeDir = names[0] + std::string("/");
+    //FILE *fp = fopen("test.txt", "w"); fwrite(baseThemeDir.c_str(), strlen(baseThemeDir.c_str()), 1, fp); fclose(fp);
+    INIReader cfg(names[0] + ".cfg");
+    std::vector<std::tuple<std::string, std::function<Result()>>> ButtonFuncs{
+        std::tuple<std::string, std::function<Result()>>{"WebButton", std::bind(App::LaunchWebsite, "https://google.com/")},
+        std::tuple<std::string, std::function<Result()>>{"NewsButton", nullptr},
+        std::tuple<std::string, std::function<Result()>>{"ShopButton", App::LaunchShop},
+        std::tuple<std::string, std::function<Result()>>{"AlbumButton", std::bind(App::LaunchAlbum, 1, false)}, //1,false | 2,true
+        std::tuple<std::string, std::function<Result()>>{"HomebrewButton", App::LaunchHbl},
+        std::tuple<std::string, std::function<Result()>>{"SettingsButton", std::bind(&Dashboard::OpenSettings, this)},
+        std::tuple<std::string, std::function<Result()>>{"SleepButton", Power::Reboot},
+    };
+    for(u32 but = 0; but < ButtonFuncs.size(); but++) {
+        Buttons.push_back(new Button(
+            baseThemeDir + cfg.Get(std::get<0>(ButtonFuncs.at(but)), "sprite", "romfs:/Graphics/Icons/" + std::get<0>(ButtonFuncs.at(but)) + ".png"), 
+            baseThemeDir + cfg.Get(std::get<0>(ButtonFuncs.at(but)), "sprite_select", "romfs:/Graphics/Icons/" + std::get<0>(ButtonFuncs.at(but)) + "_select.png"), 
+            cfg.GetInteger(std::get<0>(ButtonFuncs.at(but)), "x", x+=space), 
+            cfg.GetInteger(std::get<0>(ButtonFuncs.at(but)), "y", 600), 
+            std::get<1>(ButtonFuncs.at(but))
+        ));
+    }
+    
+    //Boundries: (120, 110), (1200, 560) .. 450px vert
+    for(u32 i = 0; i < MaxColumns; i++){
+		Games.push_back(new Game());
+	}
+    SetGames();
 }
 
 /*
@@ -233,7 +251,7 @@ void Dashboard::SetGames() {
 
 void Dashboard::DrawOverlay() {
 	Graphics::RenderTexture(Battery, BatPos);
-    Graphics::DrawText(smallFont, ClkPos.x, ClkPos.y, Time::GetClock());
+    Graphics::DrawText(FNT_Small, ClkPos.x, ClkPos.y, Time::GetClock());
 }
 
 void Dashboard::SetOverlay(std::string battery, SDL_Rect batPos, SDL_Rect clkPos) {
@@ -247,18 +265,18 @@ void Dashboard::SetOverlay(std::string battery, SDL_Rect batPos, SDL_Rect clkPos
 }
 
 void Dashboard::DrawDebugText() {
-    if(debugInfo && debugFont) {
+    if(debugInfo) {
         touchPosition touchPos;
         hidTouchRead(&touchPos, 0);
         u32 X = 14,  Y = 0, s = 14;
-        Graphics::DrawText(debugFont, X, Y+=s, "DeltaLaunch alpha!");
-        Graphics::DrawText(debugFont, X, Y+=s, "Firmware: " + Settings::GetFirmwareVersion());
-        Graphics::DrawText(debugFont, X, Y+=s, "Serial: " + Settings::GetSerialNumber());
-		Graphics::DrawText(debugFont, X, Y+=s, "Battery: " + std::to_string(Power::GetBatteryLife()) + "%");
-        Graphics::DrawText(debugFont, X, Y+=s, "Touch: X=" + std::to_string(touchPos.px) + "; y=" + std::to_string(touchPos.py));
-        Graphics::DrawText(debugFont, X, Y+=s, "Ae Message: " + std::to_string(App::lastAeCmd));
-		Graphics::DrawText(debugFont, X, Y+=s, "Sams Message: " + std::to_string(App::lastSamsCmd));
-        Graphics::DrawText(debugFont, X, Y+=s, "Last Error: " + std::to_string(lastErr));
+        Graphics::DrawText(FNT_Debug, X, Y+=s, "DeltaLaunch alpha!");
+        Graphics::DrawText(FNT_Debug, X, Y+=s, "Firmware: " + Settings::GetFirmwareVersion());
+        Graphics::DrawText(FNT_Debug, X, Y+=s, "Serial: " + Settings::GetSerialNumber());
+		Graphics::DrawText(FNT_Debug, X, Y+=s, "Battery: " + std::to_string(Power::GetBatteryLife()) + "%");
+        Graphics::DrawText(FNT_Debug, X, Y+=s, "Touch: X=" + std::to_string(touchPos.px) + "; y=" + std::to_string(touchPos.py));
+        Graphics::DrawText(FNT_Debug, X, Y+=s, "Ae Message: " + std::to_string(App::lastAeCmd));
+		Graphics::DrawText(FNT_Debug, X, Y+=s, "Sams Message: " + std::to_string(App::lastSamsCmd));
+        Graphics::DrawText(FNT_Debug, X, Y+=s, "Last Error: " + std::to_string(lastErr));
         Y = 0;
     }
 }
@@ -313,15 +331,4 @@ Result Dashboard::CloseSettings() {
 
 void Dashboard::UpdateSettings(u32 kDown) {
 	settings->Update(kDown);
-}
-
-/*
-*   Add elements to form
-*/
-void Dashboard::AddButton(Button *button) {
-    Buttons.push_back(button);
-}
-
-void Dashboard::AddGame(Game *game) {
-	Games.push_back(game);
 }

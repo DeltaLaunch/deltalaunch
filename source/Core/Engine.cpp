@@ -17,8 +17,6 @@
 */
 
 #include "Engine.hpp"
-#include <experimental/filesystem>
-namespace fs = std::experimental::filesystem::v1;
 
 EngineState Engine::State;
 
@@ -29,17 +27,10 @@ Engine::Engine(u32 width, u32 height, void *heapAddr, size_t heapSize) {
     }
     
     romfsInit();
-    Graphics::Init(TITLE, width, height);
     HeapAddr = heapAddr;
     HeapSize = heapSize;
     Width = width;
     Height = height;
-    FILE *fp = fopen("/test.txt", "w");
-    for (const auto & entry : fs::directory_iterator("romfs:/")) {
-		fwrite(entry.path().string().c_str(), strlen(entry.path().string().c_str()), 1, fp);
-        fwrite("\r\n", strlen("\r\n"), 1, fp);
-	}
-    fclose(fp);
 }
 
 Engine::~Engine() {
@@ -52,8 +43,10 @@ Engine::~Engine() {
 
 void Engine::Initialize() {
     //Read config file
-    baseThemeDir = "/Theme/Default/";
-    INIReader cfg("/Theme/Default.cfg");
+    std::vector<std::string> names = Settings::GetThemeNames();
+    baseThemeDir = names[0] + std::string("/");
+    INIReader cfg(names[0] + ".cfg");
+    Graphics::Init(TITLE, Width, Height, baseThemeDir+cfg.Get("Config", "font", "romfs:/Fonts/NintendoStandard.ttf"));
 
     Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 4096);
     Mix_VolumeMusic(cfg.GetInteger("Background", "bgmVol", 64));
@@ -72,53 +65,14 @@ void Engine::Initialize() {
     //Init dashboard
     SDL_Rect batPos; batPos.x = cfg.GetInteger("BatteryOverlay", "x", 1180); batPos.y = cfg.GetInteger("BatteryOverlay", "y", 14);
     SDL_Rect clkPos; clkPos.x = cfg.GetInteger("ClockOverlay", "x", 1110); clkPos.y = cfg.GetInteger("ClockOverlay", "y", 14);
-    dash = new Dashboard(Width, Height, (baseThemeDir+cfg.Get("Config", "font", "romfs:/Fonts/NintendoStandard.ttf")).c_str());
+    dash = new Dashboard(Width, Height);
+    dash->Initialize();
     dash->SetWallpaper(layers);
     dash->SetLockScreen(baseThemeDir + cfg.Get("Config", "lockscreen_image", "romfs:/Graphics/Lock.png"));
     dash->SetOverlay(baseThemeDir + cfg.Get("BatteryOverlay", "battery", "romfs:/Graphics/Overlay/Battery.png"), batPos, clkPos);
 	dash->settings->SetBackground(baseThemeDir + cfg.Get("Config", "menus", "romfs:/Graphics/Menu.png"));
     State = (Settings::GetLockScreenFlag() ? STATE_LOCKSCREEN : STATE_DASHBOARD);
 	layers.clear();
-    
-    //Create buttons to add to dash
-    unsigned x = 230;       //padding on edges
-    unsigned space = 100;   //space inbetween
-    std::vector<std::tuple<std::string, std::function<Result()>>> Buttons{
-        std::tuple<std::string, std::function<Result()>>{"WebButton", std::bind(App::LaunchWebsite, "https://google.com/")},
-        std::tuple<std::string, std::function<Result()>>{"NewsButton", nullptr},
-        std::tuple<std::string, std::function<Result()>>{"ShopButton", App::LaunchShop},
-        std::tuple<std::string, std::function<Result()>>{"AlbumButton", std::bind(App::LaunchAlbum, 1, false)}, //1,false | 2,true
-        std::tuple<std::string, std::function<Result()>>{"HomebrewButton", App::LaunchHbl},
-        std::tuple<std::string, std::function<Result()>>{"SettingsButton", std::bind(&Dashboard::OpenSettings, dash)},
-        std::tuple<std::string, std::function<Result()>>{"PowerButton", Power::Reboot},
-    };
-    
-    std::string buts[] = {
-        "Web",
-        "News",
-        "Shop",
-        "Album",
-        "Homebrew",
-        "Settings",
-        "Power"
-    };
-    for(int but = 0; but < (int)Buttons.size(); but++) {
-        dash->AddButton(
-            new Button(
-                baseThemeDir + cfg.Get(std::get<0>(Buttons.at(but)), "sprite", "romfs:/Graphics/Icons/" +buts[but]+".png"), 
-                baseThemeDir + cfg.Get(std::get<0>(Buttons.at(but)), "sprite_select", "romfs:/Graphics/Icons/"+buts[but]+"_select.png"), 
-                cfg.GetInteger(std::get<0>(Buttons.at(but)), "x", x+=space), 
-                cfg.GetInteger(std::get<0>(Buttons.at(but)), "y", 600), 
-                std::get<1>(Buttons.at(but))
-            )
-        );
-    }
-    
-    //Boundries: (120, 110), (1200, 560) .. 450px vert
-    for(int i = 0; i < (int)dash->MaxColumns; i++){
-		dash->AddGame(new Game());
-	}
-    dash->SetGames();
     
     //appletLoadAndApplyIdlePolicySettings();
     //appletAllowToEnterSleep();

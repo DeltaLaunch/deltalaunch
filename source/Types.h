@@ -23,3 +23,9 @@ enum Command {
     CMD_Reboot = 24,
     
 };
+
+enum FontSize {
+    FNT_Small,
+    FNT_Big,
+    FNT_Debug
+}; 

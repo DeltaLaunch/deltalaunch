@@ -18,16 +18,15 @@
 
 #include "Panel.hpp"
 
-Panel::Panel(TTF_Font *font, u32 x, u32 y){
+Panel::Panel(u32 x, u32 y){
     Pos.x = x;
     Pos.y = y;
-    Font = font;
     optSelect = 0;
 }
 
 Panel::~Panel() {
     for(auto opts: Options) delete opts;
-    for(auto pics: Images) SDL_DestroyTexture(std::get<4>(pics));
+    for(auto pics: Images) delete pics;
     Options.clear();
     Strings.clear();
     Images.clear();
@@ -49,23 +48,23 @@ void Panel::DecrementSelect() {
 
 void Panel::Update(u32 kDown, bool selected) {
     for(int s = 0; s < (int)Strings.size(); s++) {
-        Graphics::DrawText(Font, std::get<0>(Strings.at(s))+Pos.x, std::get<1>(Strings.at(s))+Pos.y, std::get<2>(Strings.at(s)));
+        Graphics::DrawText(FNT_Small, std::get<0>(Strings.at(s))+Pos.x, std::get<1>(Strings.at(s))+Pos.y, std::get<2>(Strings.at(s)));
     }
     unsigned ind = 0;
     for(auto opt: Options) {
         SDL_Rect p = opt->Pos;
         p.x += Pos.x;
         p.y += Pos.y;
-        Graphics::DrawOption(Font, p, opt->Text, opt->GetOptText(), (ind == optSelect) && selected);
+        Graphics::DrawOption(p, opt->Text, opt->GetOptText(), (ind == optSelect) && selected);
         ind++;
     }
     for(int i = 0; i < (int)Images.size(); i++) {
         SDL_Rect p;
-        p.x = Pos.x + std::get<0>(Images.at(i));
-        p.y = Pos.y + std::get<1>(Images.at(i));
-        p.w = std::get<2>(Images.at(i));
-        p.h = std::get<3>(Images.at(i));
-        Graphics::RenderTexture(std::get<4>(Images.at(i)), p);
+        p.x = Pos.x + Images.at(i)->Pos.x;
+        p.y = Pos.y + Images.at(i)->Pos.y;
+        p.w = Images.at(i)->Pos.w;
+        p.h = Images.at(i)->Pos.h;
+        Graphics::RenderTexture(Images.at(i)->Tex, p);
         ind++;
     }
     if(selected){        

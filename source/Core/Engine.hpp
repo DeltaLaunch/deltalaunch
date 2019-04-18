@@ -25,7 +25,6 @@
 #include <string>
 #include <vector>
 #include <tuple>
-#include <experimental/filesystem>
 #include <dirent.h>
 #include <switch.h>
 
@@ -41,6 +40,7 @@
 #include "../Services/Hid.hpp"
 #include "../Services/App.hpp"
 #include "../Services/Power.hpp"
+#include "../Services/Settings.hpp"
 #include "../Types.h"
 
 #define BACKGROUND_LAYERS 99

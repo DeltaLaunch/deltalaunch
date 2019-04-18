@@ -24,36 +24,50 @@
 #include <switch.h>
 #include <vector>
 #include <tuple>
-#include "../Core/Graphics.hpp"
-#include "../Services/Hid.hpp"
 #include "Button.hpp"
 #include "Option.hpp"
+#include "Image.hpp"
+#include "../Core/Graphics.hpp"
+#include "../Services/Hid.hpp"
 #include "../Types.h"
 
 class Panel
 {
     public:
-        Panel(TTF_Font *font, u32 x, u32 y);
+        Panel(u32 x, u32 y);
         ~Panel();
         
-        void AddString(u32 x, u32 y, std::string str) { Strings.push_back(std::tuple<u32, u32, std::string>(x,y,str)); }
-        void AddOption(Option *op) { Options.push_back(op); }
-        void AddImage(u32 x, u32 y, u32 w, u32 h, SDL_Texture* tex) { Images.push_back(std::tuple<u32, u32, u32, u32, SDL_Texture*>(x, y, w, h, tex)); }
+        void AddString(u32 x, u32 y, std::string str) { 
+            Strings.push_back(std::tuple<u32, u32, std::string>(x,y,str)); 
+        }
+        void AddOption(Option *op) { 
+            Options.push_back(op); 
+        }
+        void AddImage(u32 x, u32 y, u32 w, u32 h, SDL_Texture* tex) { 
+            SDL_Rect pos;
+            pos.x = x; pos.y = y;
+            pos.w = w; pos.h = h;
+            Images.push_back(new Image(pos, tex)); 
+        }
         
-        void SetImage(u32 ind, SDL_Texture *tex) { SDL_DestroyTexture(std::get<4>(Images.at(ind))); std::get<4>(Images.at(ind)) = tex; }
+        void SetImage(u32 ind, SDL_Texture *tex) { 
+            SDL_DestroyTexture(Images.at(ind)->Tex);
+            Images.at(ind)->Tex = tex; 
+        }
         
         void Update(u32 kDown, bool selected);
         
         void IncrementSelect();
         void DecrementSelect();
         
-        u32 OptionCnt() { return Options.size(); }
+        u32 OptionCnt() { 
+            return Options.size();
+        }
         
     private:
         SDL_Rect Pos;
-        TTF_Font *Font;
         u32 optSelect;
         std::vector<Option*> Options;
-        std::vector<std::tuple<u32, u32, u32, u32, SDL_Texture*>> Images;
+        std::vector<Image*> Images;
         std::vector<std::tuple<u32, u32, std::string>> Strings;
 };

@@ -16,19 +16,21 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "Option.hpp"
+#pragma once
+#include <SDL2/SDL.h>
+#include <switch.h>
 
-Option::Option(std::string optName, std::vector<std::string> opts, u32 x, u32 y, u32 w, u32 h, u32 col, std::function<Result()> callback, u32 defaultVal) {
-    Pos.x = x;
-    Pos.y = y;
-    Pos.w = w;
-    Pos.h = h;
-    Callback = callback;
-    Opts = opts;
-    optIndex = defaultVal;
-    Text = optName;
-}
-
-Option::~Option() {
-    Opts.clear();
-}
+class Image
+{
+    public:
+        Image(SDL_Rect pos, SDL_Texture *tex) {
+            Pos = pos;
+            Tex = tex;
+        };
+        ~Image() {
+            SDL_DestroyTexture(Tex);
+        };
+        
+        SDL_Rect Pos;
+        SDL_Texture *Tex;
+};

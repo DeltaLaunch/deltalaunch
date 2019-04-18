@@ -36,8 +36,10 @@
 class SettingsMenu: public Menu
 {
     public:
-        SettingsMenu(TTF_Font *fontHdr, TTF_Font *fontBdy, SDL_Rect pos);
+        SettingsMenu(SDL_Rect pos);
         ~SettingsMenu();
+        void Initialize();
+        
         //Draw/set
         void DrawButtons();
 		
@@ -46,19 +48,11 @@ class SettingsMenu: public Menu
 		void Activate();
 		void Back();
         
-        //Options
-        static Result GameLookFeel();
-        static Result LockScreenToggle();
-        static Result VrModeToggle();
-        static Result UpdateConsole();
-        static Result EditProfilePic(Panel *pan);
-		
 		u8 gameRows;
         
     private:
         u32 panX, panY;
         u32 Width, Height;
-		TTF_Font *smallFont;
         SDL_Texture *bg;
         std::vector<Panel*> Panels;
 };

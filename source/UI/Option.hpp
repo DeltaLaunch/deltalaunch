@@ -26,17 +26,28 @@
 class Option
 {
     public:
-        Option(std::string optName, std::vector<std::string> opts, u32 x, u32 y, u32 w, u32 h, u32 col, std::function<Result()> callback, u32 defaultVal);
-        ~Option();
+        Option(std::string optName, std::vector<std::string> opts, u32 x, u32 y, u32 w, u32 h, u32 col, u32 defaultVal, std::function<Result()> callback) {
+            Pos.x = x;
+            Pos.y = y;
+            Pos.w = w;
+            Pos.h = h;
+            Callback = callback;
+            Opts = opts;
+            optIndex = defaultVal;
+            Text = optName;
+        };
+        ~Option() {
+            Opts.clear();
+        };
         
         void Run() { 
             if(Callback != nullptr && R_SUCCEEDED(Callback())) 
-                optIndex = ((optIndex >= Opts.size()-1) ? 0 : optIndex+1);
+                optIndex = ((!Opts.empty() && optIndex >= Opts.size()-1) ? 0 : optIndex+1);
         }
         bool HasFunc() { return Callback != nullptr; }
         
         u32 GetOptIndex() { return optIndex; }
-        std::string GetOptText() { return Opts.at(optIndex); };
+        std::string GetOptText() { return !Opts.empty() ? Opts.at(optIndex) : ""; };
         
         SDL_Rect Pos;
         std::string Text;

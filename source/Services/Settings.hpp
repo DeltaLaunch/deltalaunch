@@ -19,6 +19,8 @@
 #pragma once
 #include <string>
 #include <switch.h>
+#include <vector>
+#include <experimental/filesystem>
 #include "../Types.h"
 
 class Settings
@@ -33,4 +35,5 @@ class Settings
         static void SetLockScreenFlag(u8 flag);
         static u8 GetAudioVolume();
         static void SetAudioVolume(u8 vol);
+        static std::vector<std::string> GetThemeNames();
 };

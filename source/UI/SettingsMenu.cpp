@@ -18,71 +18,9 @@
 
 #include "SettingsMenu.hpp"
 
-SettingsMenu::SettingsMenu(TTF_Font *fontHdr, TTF_Font *fontBdy, SDL_Rect pos) : Menu("Settings", fontHdr, fontBdy, pos){
+SettingsMenu::SettingsMenu(SDL_Rect pos) : Menu("Settings", pos){
     plInitialize();
-	
-	//vars
 	menuOpt = 0;
-    smallFont = fontBdy;
-    panX = 500;
-    panY = 100;
-    u32 Y = 40, butW = 210, butH = 50, butCol = 0x202020FF, optW = 280, optY = 20;
-    u32 space = 15+butH;
-    
-    Buttons.push_back(new Button("Lock Screen", 60, Y+=space, butW, butH, butCol, nullptr));
-    Panel *lock = new Panel(fontBdy, panX, panY);
-    lock->AddString(0, 0, std::string("Toggle the lock screen flag."));
-    std::vector<std::string> lck {"Off", "On"};
-    lock->AddOption(new Option("Lock screen:", lck, 0, optY+=space, optW, butH, butCol, LockScreenToggle, Settings::GetLockScreenFlag()));
-    Panels.push_back(lock);
-    
-    Buttons.push_back(new Button("Internet", 60, Y+=space, butW, butH, butCol, nullptr));
-    Panel *internet = new Panel(fontBdy, panX, panY);
-    internet->AddString(0, 0, std::string("View internet settings."));
-    Panels.push_back(internet);
-    
-    Buttons.push_back(new Button("Data Management", 60, Y+=space, butW, butH, butCol, nullptr));
-    Panel *dataMan = new Panel(fontBdy, panX, panY);
-    dataMan->AddString(0, 0, std::string("Manage your data."));
-    Panels.push_back(dataMan);
-    
-    Buttons.push_back(new Button("Users", 60, Y+=space, butW, butH, butCol, nullptr));
-    Panel *user = new Panel(fontBdy, panX, panY);
-    user->AddString(0, 0, std::string("Edit user profiles."));
-    std::vector<std::string> pfp {"Edit profile image"};
-    user->AddImage(0, 40, 256, 256, Account::GetProfileImage(Account::GetFirstAccount()));
-    user->AddOption(new Option("", pfp, 0, 260+space, 270, butH, butCol, std::bind(EditProfilePic, user), NULL));
-    Panels.push_back(user);
-    
-    Buttons.push_back(new Button("Look and Feel", 60, Y+=space, butW, butH, butCol, nullptr));
-    Panel *look = new Panel(fontBdy, panX, panY);
-    look->AddString(0, 0, std::string("Change look and feel."));
-    optY=20;
-    std::vector<std::string> gamesel {"Outline", "Diffsize"};
-    look->AddOption(new Option("Game select:", gamesel, 0, optY+=space, optW, butH, butCol, GameLookFeel, Settings::gameSelType));
-    std::vector<std::string> vrmode {"Disable", "Enable"};
-    look->AddOption(new Option("VR Mode:", vrmode, 0, optY+=space, optW, butH, butCol, VrModeToggle, App::IsVrEnabled()));
-    Panels.push_back(look);
-    
-    Buttons.push_back(new Button("Themes", 60, Y+=space, butW, butH, butCol, nullptr));
-    Panel *theme = new Panel(fontBdy, panX, panY);
-    theme->AddString(0, 0, std::string("Change current theme."));
-    Panels.push_back(theme);
-    
-    Buttons.push_back(new Button("TV Settings", 60, Y+=space, butW, butH, butCol, nullptr));
-    Panel *tvSet = new Panel(fontBdy, panX, panY);
-    tvSet->AddString(0, 0, std::string("Manage your TV settings."));
-    Panels.push_back(tvSet);
-    
-    Buttons.push_back(new Button("System Info", 60, Y+=space, butW, butH, butCol, nullptr));
-    Panel *sysinfo = new Panel(fontBdy, panX, panY);
-    sysinfo->AddString(0, 0, std::string("Special specific information."));
-    sysinfo->AddString(5, 50, std::string("Firmware: " + Settings::GetFirmwareVersion()));
-    sysinfo->AddString(5, 70, std::string("Serial: " + Settings::GetSerialNumber()));
-    sysinfo->AddString(5, 90, std::string("Nickname: " + Settings::GetDeviceNickname()));
-    std::vector<std::string> update {"Update"};
-    sysinfo->AddOption(new Option("", update, 0, 400, 200, butH, butCol, UpdateConsole, 0));
-    Panels.push_back(sysinfo);
 }
 
 SettingsMenu::~SettingsMenu() {
@@ -90,54 +28,109 @@ SettingsMenu::~SettingsMenu() {
     plExit();
 }
 
-Result SettingsMenu::GameLookFeel() {
-    Settings::gameSelType = (Settings::gameSelType == SELECT_OUTLINE) ? SELECT_SIZEDIFF : SELECT_OUTLINE;
-}
-
-Result SettingsMenu::LockScreenToggle() {
-    bool l = Settings::GetLockScreenFlag();
-    Settings::SetLockScreenFlag(!l);
-}
-
-Result SettingsMenu::VrModeToggle() {
-    bool b = App::IsVrEnabled();
-    appletSetVrModeEnabled(!b);
-    if(!b) appletBeginVrModeEx();
-    else appletEndVrModeEx();
-    return 0;
-}
-
-Result SettingsMenu::UpdateConsole() {
-    //
-    return 0;
-}
-
-Result SettingsMenu::EditProfilePic(Panel *pan) {
-    FILE *fp = fopen("/profile.jpg", "rb");
-    Result rc = 0;
-    if(fp){
-        u128 uid = Account::GetFirstAccount();
-        size_t fsize = 0;
-        fseek(fp, 0, SEEK_END);
-        fsize = ftell(fp);
-        rewind(fp);
-        u8 buf[fsize] = {0};
-        fread(buf, fsize, 1, fp);
-        fclose(fp);
-        AccountProfile acc;
-        AccountProfileBase pb;
-        AccountUserData ud;
-        accountInitialize();
-        rc = accountGetProfile(&acc, uid);
-        rc = accountProfileGet(&acc, &ud, &pb);
-        ud.iconID = 0;
-        rc = accGetProfileEditor(&acc, uid);
-        rc = accStoreWithImage(&acc, &pb, &ud, buf, fsize);
-        accountProfileClose(&acc);
-        accountExit();
-        pan->SetImage(0, Account::GetProfileImage(Account::GetFirstAccount()));
-    }
-    return rc;
+void SettingsMenu::Initialize() {
+    panX = 500;
+    panY = 100;
+    u32 Y = 40, butW = 210, butH = 50, butCol = 0x202020FF, optW = 280, optY = 20;
+    u32 space = 15+butH;
+    
+    //Toggle lock screen
+    Buttons.push_back(new Button("Lock Screen", 60, Y+=space, butW, butH, butCol, nullptr));
+    Panel *lock = new Panel(panX, panY);
+    lock->AddString(0, 0, std::string("Toggle the lock screen flag."));
+    std::vector<std::string> lck {"Off", "On"};
+    lock->AddOption(new Option("Lock screen:", lck, 0, optY+=space, optW, butH, butCol, Settings::GetLockScreenFlag(), 
+    []()->Result{ 
+        bool l = Settings::GetLockScreenFlag();
+        Settings::SetLockScreenFlag(!l);
+        return 0;
+    }));
+    Panels.push_back(lock);
+    
+    //Internet/network settings
+    Buttons.push_back(new Button("Internet", 60, Y+=space, butW, butH, butCol, nullptr));
+    Panel *internet = new Panel(panX, panY);
+    internet->AddString(0, 0, std::string("View internet settings."));
+    Panels.push_back(internet);
+    
+    //Manage titles
+    Buttons.push_back(new Button("Data Management", 60, Y+=space, butW, butH, butCol, nullptr));
+    Panel *dataMan = new Panel(panX, panY);
+    dataMan->AddString(0, 0, std::string("Manage your data."));
+    Panels.push_back(dataMan);
+    
+    //User customization
+    Buttons.push_back(new Button("Users", 60, Y+=space, butW, butH, butCol, nullptr));
+    Panel *user = new Panel(panX, panY);
+    user->AddString(0, 0, std::string("Edit user profiles."));
+    std::vector<std::string> pfp {"Edit profile image"};
+    user->AddImage(0, 40, 256, 256, Account::GetProfileImage(Account::GetFirstAccount()));
+    user->AddOption(new Option("", pfp, 0, 260+space, 270, butH, butCol, NULL, 
+    [user]()->Result{
+        Result rc = 0;
+        rc = Account::SetCustomProfileImage("/profile.jpg");
+        user->SetImage(0, Account::GetProfileImage(Account::GetFirstAccount()));
+        return rc;
+    }));
+    Panels.push_back(user);
+    
+    //Mechanics of how the UI works
+    Buttons.push_back(new Button("Look and Feel", 60, Y+=space, butW, butH, butCol, nullptr));
+    Panel *look = new Panel(panX, panY);
+    look->AddString(0, 0, std::string("Change look and feel."));
+    optY=20;
+    std::vector<std::string> gamesel {"Outline", "Diffsize"};
+    look->AddOption(new Option("Game select:", gamesel, 0, optY+=space, optW, butH, butCol, Settings::gameSelType, 
+    []()->Result{
+        Result rc = 0;
+        Settings::gameSelType = (Settings::gameSelType == SELECT_OUTLINE) ? SELECT_SIZEDIFF : SELECT_OUTLINE; 
+        return rc;
+    }));
+    std::vector<std::string> vrmode {"Disable", "Enable"};
+    look->AddOption(new Option("VR Mode:", vrmode, 0, optY+=space, optW, butH, butCol, App::IsVrEnabled(), 
+    []()->Result{
+        Result rc = 0;
+        bool b = App::IsVrEnabled();
+        rc = appletSetVrModeEnabled(!b);
+        if(!b) rc = appletBeginVrModeEx();
+        else rc = appletEndVrModeEx();
+        return rc;
+    }));
+    Panels.push_back(look);
+    
+    //Themes
+    Buttons.push_back(new Button("Themes", 60, Y+=space, butW, butH, butCol, nullptr));
+    Panel *theme = new Panel(panX, panY);
+    theme->AddString(0, 0, std::string("Change current theme."));
+    Panels.push_back(theme);
+    
+    //TV settings
+    Buttons.push_back(new Button("TV Settings", 60, Y+=space, butW, butH, butCol, nullptr));
+    Panel *tvSet = new Panel(panX, panY);
+    tvSet->AddString(0, 0, std::string("Manage your TV settings."));
+    Panels.push_back(tvSet);
+    
+    //System information and updates
+    Buttons.push_back(new Button("System Info", 60, Y+=space, butW, butH, butCol, nullptr));
+    Panel *sysinfo = new Panel(panX, panY);
+    sysinfo->AddString(0, 0, std::string("Special specific information."));
+    sysinfo->AddString(5, 50, std::string("Firmware: " + Settings::GetFirmwareVersion()));
+    sysinfo->AddString(5, 75, std::string("Serial: " + Settings::GetSerialNumber()));
+    std::vector<std::string> nick {Settings::GetDeviceNickname()};
+    sysinfo->AddOption(new Option("Nickname:", nick, 5, 100, butW, butH, butCol, 0, 
+    [sysinfo]()->Result{
+        Result rc = 0;
+        //
+        return rc;
+    }));
+    std::vector<std::string> update {"Update"};
+    sysinfo->AddOption(new Option("", update, 0, 400, 200, butH, butCol, 0, 
+    []()->Result{
+        Result rc = 0;
+        //
+        return rc;
+    }));
+    Panels.push_back(sysinfo);
 }
 
 /*
@@ -146,7 +139,7 @@ Result SettingsMenu::EditProfilePic(Panel *pan) {
 void SettingsMenu::DrawButtons() {
     int ind = 0;
     for(auto button: Buttons) {
-        Graphics::DrawButton(smallFont, button->Pos, button->Text, (!currLayer && (ind == menuOpt)) ? true : false);
+        Graphics::DrawButton(button->Pos, button->Text, (!currLayer && (ind == menuOpt)) ? true : false);
         ind++;
     }
 }
@@ -159,13 +152,13 @@ void SettingsMenu::Activate() {
 }
 
 void SettingsMenu::Back() {
-	if(currLayer == 0) Hide();
+	if(!currLayer) Hide();
 	else currLayer--;
 }
 
 void SettingsMenu::Update(u32 kDown) {    
     Graphics::RenderTexture(Sprite, Pos);
-    Graphics::DrawText(FontHdr, 30, 25, GetTitle());
+    Graphics::DrawText(FNT_Big, 30, 25, GetTitle());
     DrawButtons();
     Panels[menuOpt]->Update(kDown, (bool)currLayer);
     if(kDown & KEY_A) Activate();

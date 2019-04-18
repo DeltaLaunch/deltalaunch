@@ -25,6 +25,7 @@
 #include <switch.h>
 #include <stdint.h>
 #include <string>
+#include "../Types.h"
 
 #define GREY 0x4C4C4CFF
 #define AQUA 0xFFCEFF
@@ -34,20 +35,23 @@ class Graphics
     public:
         static SDL_Renderer *Rend;
         static SDL_Window *Window;
-        static void Init(std::string name, u32 width, u32 height);
+        static TTF_Font *debugFont;
+		static TTF_Font *hdrFont;
+		static TTF_Font *smallFont;
+        static void Init(std::string name, u32 width, u32 height, std::string font);
         static void Exit();
 		static void ClearScreen();
         static void Rectangle(u32 x, u32 y, u32 w, u32 h, u32 scolor);
         static void Rectangle(SDL_Rect pos, u32 scolor);
         static SDL_Texture *CreateTexFromSurf(SDL_Surface *surf);
-        static void DrawText(TTF_Font *font, u32 x, u32 y, std::string str);
-        static void DrawText(TTF_Font *font, u32 x, u32 y, std::string str, u32 col);
+        static void DrawText(FontSize fntsize, u32 x, u32 y, std::string str);
+        static void DrawText(FontSize fntsize, u32 x, u32 y, std::string str, u32 col);
         static void DrawTexture(std::string tex, u32 x, u32 y);
         static void RenderTexture(SDL_Texture *tex, SDL_Rect pos);
         static SDL_Renderer *GetRenderer() { return Rend; }
         static SDL_Surface *BufToSurf(void *buf, size_t size);
-        static void DrawButton(TTF_Font *font, SDL_Rect Pos, std::string Text, bool isSel);
-        static void DrawOption(TTF_Font *font, SDL_Rect Pos, std::string Text, std::string OptionText, bool isSel);
+        static void DrawButton(SDL_Rect Pos, std::string Text, bool isSel);
+        static void DrawOption(SDL_Rect Pos, std::string Text, std::string OptionText, bool isSel);
         static u32 GetDefaultSelCol() { return AQUA; }
         static u32 GetDefaultButCol() { return GREY; }
         static void Render();

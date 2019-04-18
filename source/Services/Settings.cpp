@@ -73,3 +73,11 @@ void Settings::SetAudioVolume(u8 vol) {
     setsysSetAudioVolume(vol);
     setsysExit();
 }
+
+std::vector<std::string> Settings::GetThemeNames() {
+    std::vector<std::string> names;
+    for (const auto & entry : std::experimental::filesystem::v1::directory_iterator("/Themes")) {
+        names.push_back(entry.path().string());
+	}
+    return names;
+}

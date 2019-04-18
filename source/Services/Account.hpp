@@ -29,6 +29,7 @@ class Account
     public:
         static s32 GetUserCount();
 		static u128 GetActiveAccount();
+        static Result SetCustomProfileImage(std::string filename);
         static u128 GetFirstAccount();
         static u128 TryGetUser();
         static SDL_Texture *GetProfileImage(u128 userID);

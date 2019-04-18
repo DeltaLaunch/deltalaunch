@@ -18,11 +18,9 @@
 
 #include "Menu.hpp"
 
-Menu::Menu(std::string title, TTF_Font *fontHdr, TTF_Font *fontBdy, SDL_Rect pos) {
+Menu::Menu(std::string title, SDL_Rect pos) {
 	Title = title;
     Pos = pos;
-    FontHdr = fontHdr;
-    FontBdy = fontBdy;
     Visible = false;
     currLayer = 0;
     menuOpt = 0;

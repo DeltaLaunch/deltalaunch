@@ -28,7 +28,7 @@
 class Menu
 {
     public:
-		Menu(std::string title, TTF_Font *fontHdr, TTF_Font *fontBdy, SDL_Rect pos);
+		Menu(std::string title, SDL_Rect pos);
 		virtual ~Menu();
 		
 		//Getters/Setters
@@ -51,8 +51,6 @@ class Menu
         SDL_Rect Pos;
 		u32 Color;
 		SDL_Texture *Sprite;
-		TTF_Font *FontHdr;
-        TTF_Font *FontBdy;
 		u16 menuOpt, currLayer;
 		bool running;
 	private:

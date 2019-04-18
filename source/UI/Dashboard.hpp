@@ -23,11 +23,15 @@
 #include <SDL2/SDL_mixer.h>
 #include <SDL2/SDL_ttf.h>
 #include <vector>
+#include <functional>
+#include <tuple>
+#include <string>
 #include <switch.h>
 #include "Button.hpp"
 #include "Game.hpp"
 #include "SettingsMenu.hpp"
 #include "../Core/Graphics.hpp"
+#include "../Core/INI.hpp"
 #include "../Services/Hid.hpp"
 #include "../Services/Rnx.hpp"
 #include "../Services/Settings.hpp"
@@ -41,8 +45,10 @@
 class Dashboard
 {
     public:
-        Dashboard(u32 width, u32 height, std::string font);
+        Dashboard(u32 width, u32 height);
         ~Dashboard();
+        void Initialize();
+        
         //Draw/set
         void DrawWallpaper();
         void SetWallpaper(std::vector<std::string> layers);
@@ -68,10 +74,6 @@ class Dashboard
 		//Menus
 		Result OpenSettings();
 		Result CloseSettings();
-        
-        //Add elements
-        void AddButton(Button *button);
-		void AddGame(Game *game);
 
 		u8 gameRows;
 		SettingsMenu *settings;
@@ -80,9 +82,6 @@ class Dashboard
         u32 lastPosX;
         bool debugInfo;
         bool GcState;
-        TTF_Font *debugFont;
-		TTF_Font *hdrFont;
-		TTF_Font *smallFont;
 		Result lastErr;
         SDL_Rect BatPos, ClkPos, SetPos;
         SDL_Texture *Wallpaper;
