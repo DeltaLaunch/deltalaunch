@@ -113,18 +113,18 @@ void SettingsMenu::Initialize() {
     //System information and updates
     Buttons.push_back(new Button("System Info", 60, Y+=space, butW, butH, butCol, nullptr));
     Panel *sysinfo = new Panel(panX, panY);
-    sysinfo->AddString(0, 0, std::string("Special specific information."));
-    sysinfo->AddString(5, 50, std::string("Firmware: " + Settings::GetFirmwareVersion()));
-    sysinfo->AddString(5, 75, std::string("Serial: " + Settings::GetSerialNumber()));
+    sysinfo->AddString(0, 0, std::string("Console specific information."));
+    sysinfo->AddString(0, 50, std::string("Firmware: " + Settings::GetFirmwareVersion()));
+    sysinfo->AddString(0, 75, std::string("Serial: " + Settings::GetSerialNumber()));
     std::vector<std::string> nick {Settings::GetDeviceNickname()};
-    sysinfo->AddOption(new Option("Nickname:", nick, 5, 100, butW, butH, butCol, 0, 
+    sysinfo->AddOption(new Option("Nickname:", nick, 0, 100, optW, butH, butCol, 0, 
     [sysinfo]()->Result{
         Result rc = 0;
         //
         return rc;
     }));
     std::vector<std::string> update {"Update"};
-    sysinfo->AddOption(new Option("", update, 0, 400, 200, butH, butCol, 0, 
+    sysinfo->AddOption(new Option("", update, 0, 400, 190, butH, butCol, 0, 
     []()->Result{
         Result rc = 0;
         //
@@ -139,7 +139,7 @@ void SettingsMenu::Initialize() {
 void SettingsMenu::DrawButtons() {
     int ind = 0;
     for(auto button: Buttons) {
-        Graphics::DrawButton(button->Pos, button->Text, (!currLayer && (ind == menuOpt)) ? true : false);
+        Graphics::DrawButton(button->Pos, button->Text, ((ind != menuOpt)) ? BTN_Unselected : (!currLayer ? BTN_Selected_Lay1 : BTN_Selected_Lay2));
         ind++;
     }
 }

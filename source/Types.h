@@ -29,3 +29,9 @@ enum FontSize {
     FNT_Big,
     FNT_Debug
 }; 
+
+enum ButtonType {
+    BTN_Unselected,
+    BTN_Selected_Lay1,
+    BTN_Selected_Lay2
+};

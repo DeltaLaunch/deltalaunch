@@ -149,19 +149,31 @@ void Graphics::DrawText(FontSize fntsize, u32 x, u32 y, std::string str, u32 col
     SDL_FreeSurface(surface);
 }
 
-void Graphics::DrawButton(SDL_Rect Pos, std::string Text, bool isSel) {
+void Graphics::DrawButton(SDL_Rect Pos, std::string Text, ButtonType butType) {
     int tHight = 0;
     TTF_SizeText(smallFont, Text.c_str(), NULL, &tHight);
-    if(isSel) {
-        SDL_Rect pos; 
-        pos.x = Pos.x-5; pos.y = Pos.y-5;
-        pos.w = Pos.w+10; pos.h = Pos.h+10;
-        Graphics::Rectangle(pos, GetDefaultSelCol());
-        Graphics::Rectangle(Pos, GetDefaultButCol());
-        Graphics::DrawText(FNT_Small, Pos.x + 12, Pos.y + (Pos.h/2) - (tHight/2), Text, GetDefaultSelCol());
-    }
-    else {
-        Graphics::DrawText(FNT_Small, Pos.x + 12, Pos.y + (Pos.h/2) - (tHight/2), Text);
+    switch(butType) {
+        case BTN_Unselected:
+        {
+            Graphics::DrawText(FNT_Small, Pos.x + 12, Pos.y + (Pos.h/2) - (tHight/2), Text);
+            break;
+        }
+        case BTN_Selected_Lay1:
+        {
+            
+            SDL_Rect pos; 
+            pos.x = Pos.x-5; pos.y = Pos.y-5;
+            pos.w = Pos.w+10; pos.h = Pos.h+10;
+            Graphics::Rectangle(pos, GetDefaultSelCol());
+            Graphics::Rectangle(Pos, GetDefaultButCol());
+            Graphics::DrawText(FNT_Small, Pos.x + 12, Pos.y + (Pos.h/2) - (tHight/2), Text, GetDefaultSelCol());
+            break;
+        }
+        case BTN_Selected_Lay2:
+        {
+            Graphics::DrawText(FNT_Small, Pos.x + 12, Pos.y + (Pos.h/2) - (tHight/2), Text, GetDefaultSelCol());
+            break;
+        }
     }
 }
 
