@@ -89,12 +89,12 @@ void Dashboard::Initialize() {
 */
 void Dashboard::UpdateDash(u32 kDown) {    
     if(kDown & KEY_A) ActivateDash();
-	if(kDown & KEY_PLUS)  debugInfo = !debugInfo;
+	if(kDown & KEY_LSTICK)  debugInfo = !debugInfo;
 	if(kDown & KEY_MINUS) ;
-	if(kDown & KEY_DLEFT) DecrementDashSel();
-	if(kDown & KEY_DRIGHT) IncrementDashSel();
-	if(kDown & KEY_DUP) App::dashLayer = 0;
-	if(kDown & KEY_DDOWN) App::dashLayer = 1;
+	if((kDown & KEY_DLEFT) || (kDown & KEY_LSTICK_LEFT)) DecrementDashSel();
+	if((kDown & KEY_DRIGHT) || (kDown & KEY_LSTICK_RIGHT)) IncrementDashSel();
+	if((kDown & KEY_DUP) || (kDown & KEY_LSTICK_UP)) App::dashLayer = 0;
+	if((kDown & KEY_DDOWN) || (kDown & KEY_LSTICK_DOWN)) App::dashLayer = 1;
 	if(Hid::IsTouched(GameIconArea)) {
 		if(lastPosX != 0) 
 			OffsetGameIcons(Hid::GetTouchPos().px - lastPosX);
