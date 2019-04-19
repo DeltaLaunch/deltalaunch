@@ -24,29 +24,26 @@
 #include <ios>
 #include <sstream>
 #include <switch.h>
-#include "GameBase.hpp"
-#include "../Services/App.hpp"
-#include "../Services/Account.hpp"
-#include "../Core/Graphics.hpp"
 
-class Game: public GameBase
+class GameBase
 {
     public:
-		Game();
-        ~Game();
-        void MountSaveData();
-        Result Run();
-		
-		//Getters/setters
-		u64 GetTitleId() { return TitleId; }
-		void SetTitleId(u64 tid) { TitleId = tid; }
-        std::string GetName() { return Name; }
-        void SetName(std::string name) { Name = name; }
-        std::string GetAuthor() { return Author; }
-        void SetAuthor(std::string author) { Author = author; }
+		GameBase() {
+            Icon = nullptr;
+        };
+        virtual ~GameBase() {};
         
-    private:
-        std::string Name;
-        std::string Author;
-        u64 TitleId;
+        virtual Result Run() { return 0; };
+        
+        //Getters/setters
+		virtual u64 GetTitleId() { return 0; }
+		virtual void SetTitleId(u64 tid) {}
+        virtual std::string GetName() { return ""; }
+        virtual void SetName(std::string name) {}
+        virtual std::string GetAuthor() { return ""; }
+        virtual void SetAuthor(std::string author) {}
+        
+        u32 FolderID;   //0 = not in folder; 1-n = folder id
+        SDL_Rect Pos;
+		SDL_Texture *Icon;
 };

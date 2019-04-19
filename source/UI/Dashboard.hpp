@@ -88,5 +88,5 @@ class Dashboard
         SDL_Texture *LockScreen;
         SDL_Texture *Battery;
         std::vector<Button*> Buttons;
-		std::vector<Game*> Games;
+		std::vector<GameBase*> GameEntries;
 };

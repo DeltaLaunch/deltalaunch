@@ -19,18 +19,40 @@
 #pragma once
 #include <SDL2/SDL.h>
 #include <switch.h>
+#include "PanelObjBase.hpp"
 
-class Image
+class Image: public PanelObjBase
 {
     public:
-        Image(SDL_Rect pos, SDL_Texture *tex) {
-            Pos = pos;
+        Image(u32 x, u32 y, u32 w, u32 h, SDL_Texture *tex, std::function<Result()> callback) : PanelObjBase(x, y, w, h) {
             Tex = tex;
+            Properties = ELEM_Image;
+            Callback = callback;
+        }
+        
+        Image(u32 x, u32 y, u32 w, u32 h, SDL_Texture *tex) : PanelObjBase(x, y, w, h) {
+            Tex = tex;
+            Properties = ELEM_Image;
         };
+        
         ~Image() {
             SDL_DestroyTexture(Tex);
         };
         
-        SDL_Rect Pos;
-        SDL_Texture *Tex;
+        void Run() override {
+            Callback();
+        }
+        
+        void Draw(SDL_Rect pos, bool selected) override {
+            SDL_Rect p = pos;
+            p.x += Pos.x; p.y += Pos.y;
+            p.w = Pos.w; p.h = Pos.h;
+            if(selected){
+                SDL_Rect ps = p;
+                ps.x -= 5; ps.y -= 5;
+                ps.w += 10; ps.h += 10;
+                Graphics::Rectangle(ps, Graphics::GetDefaultSelCol());
+            }
+            Graphics::RenderTexture(Tex, p);
+        }
 };

@@ -42,9 +42,9 @@ Dashboard::Dashboard(u32 width, u32 height) {
 Dashboard::~Dashboard() {
 	delete settings;
 	for(auto button: Buttons) delete button;
-	for(auto game: Games) delete game;
+	for(auto game: GameEntries) delete game;
     Buttons.clear();
-	Games.clear();
+	GameEntries.clear();
     SDL_DestroyTexture(Wallpaper);
     SDL_DestroyTexture(LockScreen);
 	SDL_DestroyTexture(Battery);
@@ -79,7 +79,7 @@ void Dashboard::Initialize() {
     
     //Boundries: (120, 110), (1200, 560) .. 450px vert
     for(u32 i = 0; i < MaxColumns; i++){
-		Games.push_back(new Game());
+		GameEntries.push_back(new Game());
 	}
     SetGames();
 }
@@ -168,44 +168,45 @@ void Dashboard::DrawButtons() {
 
 void Dashboard::DrawGames() {
 	unsigned ind = 0;
-	for(auto game: Games) {
+	for(auto entry: GameEntries) {
         //Classic outline format
         if(Settings::gameSelType == SELECT_OUTLINE) {
             //Draw selection outline
             if(ind == App::gameSelectInd && App::dashLayer == 0) {
-                SDL_Rect pos = game->Pos; 
+                SDL_Rect pos = entry->Pos; 
                 pos.x -= 5; pos.y -= 5; pos.w += 10; pos.h += 10;
-                Graphics::Rectangle(pos, game->GetColor());
+                Graphics::Rectangle(pos, Graphics::GetDefaultSelCol());
+                Graphics::DrawText(FNT_Small, pos.x, pos.y-25, entry->GetName(), Graphics::GetDefaultSelCol());
             }
             
             //Draw either game icon or backer
-            if(game->GetTitleId() != 0) {
-                Graphics::RenderTexture(game->Icon, game->Pos);
+            if(entry->GetTitleId() != 0) {
+                Graphics::RenderTexture(entry->Icon, entry->Pos);
             } else {
-                Graphics::Rectangle(game->Pos, 0x70);
+                Graphics::Rectangle(entry->Pos, 0x70);
             }
         }
 		//Or draw size diff mode
 		if(Settings::gameSelType == SELECT_SIZEDIFF) {
             //Draw game bigger
             if(ind == App::gameSelectInd && App::dashLayer == 0) {
-                SDL_Rect pos = game->Pos; 
+                SDL_Rect pos = entry->Pos; 
                 pos.x -= 20; pos.y -= 20; pos.w += 40; pos.h += 40;
-                Graphics::RenderTexture(game->Icon, pos);
+                Graphics::RenderTexture(entry->Icon, pos);
             }
             else {
                 //Draw either game icon or backer
-                if(game->GetTitleId() != 0) {
-                    Graphics::RenderTexture(game->Icon, game->Pos);
+                if(entry->GetTitleId() != 0) {
+                    Graphics::RenderTexture(entry->Icon, entry->Pos);
                 }
-                Graphics::Rectangle(game->Pos, 0x70);
+                Graphics::Rectangle(entry->Pos, 0x70);
             }
 		}
         
         //Detect touch selection
-        if(!settings->IsOpen() && game->GetTitleId() && Hid::IsTouched(game->Pos)) {
+        if(!settings->IsOpen() && entry->GetTitleId() && Hid::IsTouched(entry->Pos)) {
             if (ind == App::gameSelectInd) {
-                lastErr = game->Play();
+                lastErr = entry->Run();
                 if(lastErr) 
                     App::ShowError("An Error has occurred!", "Error code: " + std::to_string(lastErr), lastErr);
             } else {
@@ -222,13 +223,12 @@ void Dashboard::SetGames() {
     u32 normalPortraitSize = 256;
     
     //Create game images
-	std::vector<u64> tids;
-    App::GetTitleIds(tids);
+	std::vector<NsApplicationRecord> recs;
+    App::GetAppRecords(recs);
     int i = 0;
-	size_t total = tids.size();
-	for(auto game: Games) {
-		u64 tid = i < (int)total ? tids[i] : 0;
-        game->SetFlag(0);
+	size_t total = recs.size();
+	for(auto game: GameEntries) {
+		u64 tid = i < (int)total ? recs[i].titleID : 0;
         game->SetTitleId(tid);
         game->Pos.w = normalPortraitSize/gameRows; 
         game->Pos.h = normalPortraitSize/gameRows;
@@ -243,10 +243,19 @@ void Dashboard::SetGames() {
 			if(img) 
 				game->Icon = SDL_CreateTextureFromSurface(Graphics::GetRenderer(), img);
 			SDL_FreeSurface(img);
+            int i;
+            for(i = 0; i < 15; i++){
+                if(data.nacp.lang[i].name[0]==0) continue;
+                game->SetName(data.nacp.lang[i].name);
+            }
+            for(i = 0; i < 15; i++){
+                if(data.nacp.lang[i].author[0]==0) continue;
+                game->SetAuthor(data.nacp.lang[i].author);
+            }
 		}
         i++;
 	}
-    tids.clear();
+    recs.clear();
 }
 
 void Dashboard::DrawOverlay() {
@@ -286,19 +295,19 @@ void Dashboard::DrawDebugText() {
 */
 void Dashboard::OffsetGameIcons(u32 deltaX) {
     int i = 0;
-    for(auto game: Games) {
+    for(auto game: GameEntries) {
 		game->Pos.x = (game->Pos.x <= 100+(i*(game->Pos.w+(14/gameRows)))) ? (game->Pos.x + deltaX) : 100+(i*(game->Pos.w+(14/gameRows)));
         i++;
 	}
 }
 
 void Dashboard::IncrementDashSel() {
-	if(App::dashLayer == 0 && App::gameSelectInd < Games.size()-1) {
+	if(App::dashLayer == 0 && App::gameSelectInd < GameEntries.size()-1) {
         App::gameSelectInd++;
-        if(Games[App::gameSelectInd]->Pos.x < 0) 
-            OffsetGameIcons(100 - (Games[App::gameSelectInd]->Pos.x));
-        if(Games[App::gameSelectInd]->Pos.x + Games[App::gameSelectInd]->Pos.w >= GameIconArea.x + GameIconArea.w) 
-            OffsetGameIcons((GameIconArea.x + GameIconArea.w) - (Games[App::gameSelectInd]->Pos.x + Games[App::gameSelectInd]->Pos.w));
+        if(GameEntries[App::gameSelectInd]->Pos.x < 0) 
+            OffsetGameIcons(100 - (GameEntries[App::gameSelectInd]->Pos.x));
+        if(GameEntries[App::gameSelectInd]->Pos.x + GameEntries[App::gameSelectInd]->Pos.w >= GameIconArea.x + GameIconArea.w) 
+            OffsetGameIcons((GameIconArea.x + GameIconArea.w) - (GameEntries[App::gameSelectInd]->Pos.x + GameEntries[App::gameSelectInd]->Pos.w));
     }
 	if(App::dashLayer == 1 && App::appletSelectInd < Buttons.size()-1) App::appletSelectInd++;
 }
@@ -306,16 +315,16 @@ void Dashboard::IncrementDashSel() {
 void Dashboard::DecrementDashSel() {
 	if(App::dashLayer == 0 && App::gameSelectInd > 0) {
         App::gameSelectInd--;
-        if(Games[App::gameSelectInd]->Pos.x < 0) 
-            OffsetGameIcons(100 - (Games[App::gameSelectInd]->Pos.x));
-        if(Games[App::gameSelectInd]->Pos.x + Games[App::gameSelectInd]->Pos.w >= GameIconArea.x + GameIconArea.w) 
-            OffsetGameIcons((GameIconArea.x + GameIconArea.w) - (Games[App::gameSelectInd]->Pos.x + Games[App::gameSelectInd]->Pos.w));
+        if(GameEntries[App::gameSelectInd]->Pos.x < 0) 
+            OffsetGameIcons(100 - (GameEntries[App::gameSelectInd]->Pos.x));
+        if(GameEntries[App::gameSelectInd]->Pos.x + GameEntries[App::gameSelectInd]->Pos.w >= GameIconArea.x + GameIconArea.w) 
+            OffsetGameIcons((GameIconArea.x + GameIconArea.w) - (GameEntries[App::gameSelectInd]->Pos.x + GameEntries[App::gameSelectInd]->Pos.w));
     }
 	if(App::dashLayer == 1 && App::appletSelectInd > 0) App::appletSelectInd--;
 }
 
 void Dashboard::ActivateDash() {
-    if(App::dashLayer == 0) Games[App::gameSelectInd]->Play();
+    if(App::dashLayer == 0) GameEntries[App::gameSelectInd]->Run();
 	if(App::dashLayer == 1) Buttons[App::appletSelectInd]->Run();
 }
 

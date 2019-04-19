@@ -18,17 +18,12 @@
 
 #include "Game.hpp"
 
-Game::Game() {
-    Sprite = nullptr;
-    Icon = nullptr;
+Game::Game() : GameBase() {
 	TitleId = 0;
-	Flag = 0;
-    SelColor = Graphics::GetDefaultSelCol();
 }
 
 Game::~Game() {
 	SDL_DestroyTexture(Icon);
-	SDL_DestroyTexture(Sprite);
 }
 
 void Game::MountSaveData() {
@@ -38,7 +33,7 @@ void Game::MountSaveData() {
     fsMountSaveData(fs, 0, &save);
 }
 
-Result Game::Play() {
+Result Game::Run() {
     Result rc = 0;
     if(!App::currentApplication.active) {
         u128 userid = Account::GetActiveAccount();

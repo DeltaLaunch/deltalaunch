@@ -22,37 +22,41 @@
 #include <functional>
 #include <vector>
 #include <switch.h>
+#include "PanelObjBase.hpp"
 
-class Option
+class Option: public PanelObjBase
 {
     public:
-        Option(std::string optName, std::vector<std::string> opts, u32 x, u32 y, u32 w, u32 h, u32 col, u32 defaultVal, std::function<Result()> callback) {
-            Pos.x = x;
-            Pos.y = y;
-            Pos.w = w;
-            Pos.h = h;
+        Option(std::string optName, std::vector<std::string> opts, u32 x, u32 y, u32 w, u32 h, u32 col, u32 defaultVal, std::function<Result()> callback) : PanelObjBase(x, y, w, h) {
             Callback = callback;
             Opts = opts;
             optIndex = defaultVal;
             Text = optName;
+            Properties = ELEM_Option;
         };
+        
         ~Option() {
             Opts.clear();
         };
         
-        void Run() { 
+        void Draw(SDL_Rect pos, bool selected) override {
+            SDL_Rect p = pos;
+            p.x += Pos.x; p.y += Pos.y;
+            p.w = Pos.w; p.h = Pos.h;
+            Graphics::DrawOption(p, Text, !Opts.empty() ? Opts.at(optIndex) : "", selected);
+        }
+        
+        void Run() override { 
             if(Callback != nullptr && R_SUCCEEDED(Callback())) 
                 optIndex = ((!Opts.empty() && optIndex >= Opts.size()-1) ? 0 : optIndex+1);
         }
-        bool HasFunc() { return Callback != nullptr; }
         
-        u32 GetOptIndex() { return optIndex; }
-        std::string GetOptText() { return !Opts.empty() ? Opts.at(optIndex) : ""; };
+        u32 GetOptIndex() { 
+            return optIndex; 
+        }
         
-        SDL_Rect Pos;
-        std::string Text;
     private:
+        std::string Text;
         u32 optIndex;
         std::vector<std::string> Opts;
-        std::function<Result()> Callback;
 };

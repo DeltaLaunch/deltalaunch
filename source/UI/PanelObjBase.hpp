@@ -18,35 +18,30 @@
 
 #pragma once
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <functional>
-#include <string>
-#include <ios>
-#include <sstream>
 #include <switch.h>
-#include "GameBase.hpp"
-#include "../Services/App.hpp"
-#include "../Services/Account.hpp"
-#include "../Core/Graphics.hpp"
+#include <functional>
+#include "../Types.h"
 
-class Game: public GameBase
+class PanelObjBase
 {
     public:
-		Game();
-        ~Game();
-        void MountSaveData();
-        Result Run();
-		
-		//Getters/setters
-		u64 GetTitleId() { return TitleId; }
-		void SetTitleId(u64 tid) { TitleId = tid; }
-        std::string GetName() { return Name; }
-        void SetName(std::string name) { Name = name; }
-        std::string GetAuthor() { return Author; }
-        void SetAuthor(std::string author) { Author = author; }
+        PanelObjBase(u32 x, u32 y, u32 w, u32 h) {
+            Pos.x = x;
+            Pos.y = y;
+            Pos.w = w;
+            Pos.h = h;
+        };
+        virtual ~PanelObjBase() {};
         
-    private:
-        std::string Name;
-        std::string Author;
-        u64 TitleId;
+        virtual void Draw(SDL_Rect pos, bool selected) {};
+        virtual void Run() {};
+        
+        bool HasFunc() { return Callback != nullptr; };
+        
+        SDL_Texture *Tex;
+        PanelElement Properties;
+        
+    protected:
+        SDL_Rect Pos;
+        std::function<Result()> Callback;
 };

@@ -39,7 +39,7 @@ void SettingsMenu::Initialize() {
     Panel *lock = new Panel(panX, panY);
     lock->AddString(0, 0, std::string("Toggle the lock screen flag."));
     std::vector<std::string> lck {"Off", "On"};
-    lock->AddOption(new Option("Lock screen:", lck, 0, optY+=space, optW, butH, butCol, Settings::GetLockScreenFlag(), 
+    lock->AddElement(new Option("Lock screen:", lck, 0, optY+=space, optW, butH, butCol, Settings::GetLockScreenFlag(), 
     []()->Result{ 
         bool l = Settings::GetLockScreenFlag();
         Settings::SetLockScreenFlag(!l);
@@ -63,13 +63,18 @@ void SettingsMenu::Initialize() {
     Buttons.push_back(new Button("Users", 60, Y+=space, butW, butH, butCol, nullptr));
     Panel *user = new Panel(panX, panY);
     user->AddString(0, 0, std::string("Edit user profiles."));
-    std::vector<std::string> pfp {"Edit profile image"};
-    user->AddImage(0, 40, 256, 256, Account::GetProfileImage(Account::GetFirstAccount()));
-    user->AddOption(new Option("", pfp, 0, 260+space, 270, butH, butCol, NULL, 
+    user->AddElement(new Image(0, 40, 256, 256, Account::GetProfileImage(Account::GetFirstAccount()), 
     [user]()->Result{
         Result rc = 0;
         rc = Account::SetCustomProfileImage("/profile.jpg");
         user->SetImage(0, Account::GetProfileImage(Account::GetFirstAccount()));
+        return rc;
+    }));
+    std::vector<std::string> pfp {"Use pre-defined image"};
+    user->AddElement(new Option("", pfp, 0, 260+space, 270, butH, butCol, NULL, 
+    [user]()->Result{
+        Result rc = 0;
+        //non-custom pfp
         return rc;
     }));
     Panels.push_back(user);
@@ -80,14 +85,14 @@ void SettingsMenu::Initialize() {
     look->AddString(0, 0, std::string("Change look and feel."));
     optY=20;
     std::vector<std::string> gamesel {"Outline", "Diffsize"};
-    look->AddOption(new Option("Game select:", gamesel, 0, optY+=space, optW, butH, butCol, Settings::gameSelType, 
+    look->AddElement(new Option("Game select:", gamesel, 0, optY+=space, optW, butH, butCol, Settings::gameSelType, 
     []()->Result{
         Result rc = 0;
         Settings::gameSelType = (Settings::gameSelType == SELECT_OUTLINE) ? SELECT_SIZEDIFF : SELECT_OUTLINE; 
         return rc;
     }));
     std::vector<std::string> vrmode {"Disable", "Enable"};
-    look->AddOption(new Option("VR Mode:", vrmode, 0, optY+=space, optW, butH, butCol, App::IsVrEnabled(), 
+    look->AddElement(new Option("VR Mode:", vrmode, 0, optY+=space, optW, butH, butCol, App::IsVrEnabled(), 
     []()->Result{
         Result rc = 0;
         bool b = App::IsVrEnabled();
@@ -117,14 +122,14 @@ void SettingsMenu::Initialize() {
     sysinfo->AddString(0, 50, std::string("Firmware: " + Settings::GetFirmwareVersion()));
     sysinfo->AddString(0, 75, std::string("Serial: " + Settings::GetSerialNumber()));
     std::vector<std::string> nick {Settings::GetDeviceNickname()};
-    sysinfo->AddOption(new Option("Nickname:", nick, 0, 100, optW, butH, butCol, 0, 
+    sysinfo->AddElement(new Option("Nickname:", nick, 0, 100, optW, butH, butCol, 0, 
     [sysinfo]()->Result{
         Result rc = 0;
         //
         return rc;
     }));
     std::vector<std::string> update {"Update"};
-    sysinfo->AddOption(new Option("", update, 0, 400, 190, butH, butCol, 0, 
+    sysinfo->AddElement(new Option("", update, 0, 400, 190, butH, butCol, 0, 
     []()->Result{
         Result rc = 0;
         //
@@ -148,7 +153,7 @@ void SettingsMenu::DrawButtons() {
 *   Trigger events
 */
 void SettingsMenu::Activate() {
-    if(!currLayer && Panels[menuOpt]->OptionCnt() > 0) currLayer++;
+    if(!currLayer && Panels[menuOpt]->ElementCnt() > 0) currLayer++;
 }
 
 void SettingsMenu::Back() {

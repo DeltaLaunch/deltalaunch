@@ -26,6 +26,7 @@
 #include "Game.hpp"
 #include "Menu.hpp"
 #include "Panel.hpp"
+#include "PanelObjBase.hpp"
 #include "../Core/Graphics.hpp"
 #include "../Services/Time.hpp"
 #include "../Services/Power.hpp"

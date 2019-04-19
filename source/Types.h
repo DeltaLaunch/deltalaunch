@@ -35,3 +35,9 @@ enum ButtonType {
     BTN_Selected_Lay1,
     BTN_Selected_Lay2
 };
+
+enum PanelElement {
+    ELEM_Image,
+    ELEM_Button,
+    ELEM_Option
+};

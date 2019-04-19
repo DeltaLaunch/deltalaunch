@@ -90,14 +90,14 @@ Result App::LaunchGame(u64 tid, u128 userID) {
     return rc;
 }
 
-Result App::GetTitleIds(std::vector<u64> &tids) {
+Result App::GetAppRecords(std::vector<NsApplicationRecord> &recs) {
     Result rc;
     size_t size = 0;
     NsApplicationRecord rec[2000];
     rc = nsInitialize();
     rc = nsListApplicationRecord(rec, 2000, 0, &size);
     for(int i = 0; i < (int)size; i++) {
-        tids.push_back(rec[i].titleID);
+        recs.push_back(rec[i]);
     }
     nsExit();
     return rc;
@@ -328,7 +328,8 @@ Result App::ShowError(std::string errText, std::string details, Result rc) {
 }
 
 Result App::LaunchHbl() {
-    //TODO
+    //load nsp
+    
     return 0;
 }
 

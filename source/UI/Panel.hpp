@@ -27,6 +27,7 @@
 #include "Button.hpp"
 #include "Option.hpp"
 #include "Image.hpp"
+#include "PanelObjBase.hpp"
 #include "../Core/Graphics.hpp"
 #include "../Services/Hid.hpp"
 #include "../Types.h"
@@ -40,19 +41,21 @@ class Panel
         void AddString(u32 x, u32 y, std::string str) { 
             Strings.push_back(std::tuple<u32, u32, std::string>(x,y,str)); 
         }
-        void AddOption(Option *op) { 
-            Options.push_back(op); 
-        }
-        void AddImage(u32 x, u32 y, u32 w, u32 h, SDL_Texture* tex) { 
-            SDL_Rect pos;
-            pos.x = x; pos.y = y;
-            pos.w = w; pos.h = h;
-            Images.push_back(new Image(pos, tex)); 
+        void AddElement(PanelObjBase *op) { 
+            Elements.push_back(op); 
         }
         
-        void SetImage(u32 ind, SDL_Texture *tex) { 
-            SDL_DestroyTexture(Images.at(ind)->Tex);
-            Images.at(ind)->Tex = tex; 
+        void SetImage(u32 ind, SDL_Texture *tex) {
+            u32 i = 0;
+            for(auto elem: Elements) {
+                if(elem->Properties == ELEM_Image) {
+                    if(ind == i) {
+                        SDL_DestroyTexture(elem->Tex);
+                        elem->Tex = tex; 
+                    }
+                    i++;
+                }
+            }
         }
         
         void Update(u32 kDown, bool selected);
@@ -60,14 +63,13 @@ class Panel
         void IncrementSelect();
         void DecrementSelect();
         
-        u32 OptionCnt() { 
-            return Options.size();
+        u32 ElementCnt() { 
+            return Elements.size();
         }
         
     private:
         SDL_Rect Pos;
         u32 optSelect;
-        std::vector<Option*> Options;
-        std::vector<Image*> Images;
+        std::vector<PanelObjBase*> Elements;
         std::vector<std::tuple<u32, u32, std::string>> Strings;
 };

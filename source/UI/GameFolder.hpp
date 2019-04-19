@@ -21,32 +21,19 @@
 #include <SDL2/SDL_image.h>
 #include <functional>
 #include <string>
-#include <ios>
-#include <sstream>
 #include <switch.h>
 #include "GameBase.hpp"
-#include "../Services/App.hpp"
-#include "../Services/Account.hpp"
-#include "../Core/Graphics.hpp"
 
-class Game: public GameBase
+class GameFolder: public GameBase
 {
     public:
-		Game();
-        ~Game();
-        void MountSaveData();
-        Result Run();
-		
-		//Getters/setters
-		u64 GetTitleId() { return TitleId; }
-		void SetTitleId(u64 tid) { TitleId = tid; }
-        std::string GetName() { return Name; }
-        void SetName(std::string name) { Name = name; }
-        std::string GetAuthor() { return Author; }
-        void SetAuthor(std::string author) { Author = author; }
+		GameFolder() {};
+        ~GameFolder() {};
+        
+        void Run() {
+            
+        }
         
     private:
-        std::string Name;
-        std::string Author;
-        u64 TitleId;
+        std::function<void()> Callback;
 };

@@ -25,15 +25,13 @@ Panel::Panel(u32 x, u32 y){
 }
 
 Panel::~Panel() {
-    for(auto opts: Options) delete opts;
-    for(auto pics: Images) delete pics;
-    Options.clear();
+    for(auto el: Elements) delete el;
+    Elements.clear();
     Strings.clear();
-    Images.clear();
 }
 
 void Panel::IncrementSelect() {
-    if(optSelect < Options.size()-1)
+    if(optSelect < Elements.size()-1)
         optSelect++;
     else
         optSelect = 0;
@@ -43,7 +41,7 @@ void Panel::DecrementSelect() {
     if(optSelect > 0)
         optSelect--;
     else
-        optSelect = Options.size()-1;
+        optSelect = Elements.size()-1;
 }
 
 void Panel::Update(u32 kDown, bool selected) {
@@ -51,28 +49,16 @@ void Panel::Update(u32 kDown, bool selected) {
         Graphics::DrawText(FNT_Small, std::get<0>(Strings.at(s))+Pos.x, std::get<1>(Strings.at(s))+Pos.y, std::get<2>(Strings.at(s)));
     }
     unsigned ind = 0;
-    for(auto opt: Options) {
-        SDL_Rect p = opt->Pos;
-        p.x += Pos.x;
-        p.y += Pos.y;
-        Graphics::DrawOption(p, opt->Text, opt->GetOptText(), (ind == optSelect) && selected);
-        ind++;
-    }
-    for(int i = 0; i < (int)Images.size(); i++) {
-        SDL_Rect p;
-        p.x = Pos.x + Images.at(i)->Pos.x;
-        p.y = Pos.y + Images.at(i)->Pos.y;
-        p.w = Images.at(i)->Pos.w;
-        p.h = Images.at(i)->Pos.h;
-        Graphics::RenderTexture(Images.at(i)->Tex, p);
+    for(auto elem: Elements) {
+        elem->Draw(Pos, (ind == optSelect) && selected);
         ind++;
     }
     if(selected){        
         if(kDown & KEY_DUP) IncrementSelect();
         if(kDown & KEY_DDOWN) DecrementSelect();
         if(kDown & KEY_A) {
-            if(Options[optSelect]->HasFunc())
-                Options[optSelect]->Run();
+            if(Elements[optSelect]->HasFunc())
+                Elements[optSelect]->Run();
         }
     }
 }

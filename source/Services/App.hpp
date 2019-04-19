@@ -31,7 +31,7 @@ class App
 {
     public:
 		static Result LaunchGame(u64 tid, u128 userID);
-        static Result GetTitleIds(std::vector<u64> &tids);
+        static Result GetAppRecords(std::vector<NsApplicationRecord> &recs);
         static bool IsVrEnabled();
 		static NsApplicationControlData GetGameControlData(u64 tid, u8 flag);
         static bool IsGamecardInserted();
