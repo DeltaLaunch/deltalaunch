@@ -27,8 +27,15 @@
 class GameFolder: public GameBase
 {
     public:
-		GameFolder() {};
+		GameFolder(u32 id) : GameBase(id) {
+            Name = "Folder " + std::string(id);
+        };
+        
         ~GameFolder() {};
+        
+        void SetName(std::string name) {
+            Name = name;
+        }
         
         void Run() {
             

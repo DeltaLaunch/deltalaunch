@@ -28,8 +28,13 @@
 class GameBase
 {
     public:
-		GameBase() {
+        GameBase() {
             Icon = nullptr;
+            FolderID = 0;
+        }
+		GameBase(u32 id) {
+            Icon = nullptr;
+            FolderID = id;
         };
         virtual ~GameBase() {};
         

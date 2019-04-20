@@ -23,6 +23,7 @@ SDL_Window *Graphics::Window;
 TTF_Font *Graphics::debugFont;
 TTF_Font *Graphics::hdrFont;
 TTF_Font *Graphics::smallFont;
+u32 Graphics::defaultSelCol;
 
 void Graphics::Init(std::string name, u32 width, u32 height, std::string font) {
     //Basic SDL init

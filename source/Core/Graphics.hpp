@@ -28,7 +28,6 @@
 #include "../Types.h"
 
 #define GREY 0x4C4C4CFF
-#define AQUA 0xFFCEFF
 
 class Graphics
 {
@@ -52,8 +51,11 @@ class Graphics
         static SDL_Surface *BufToSurf(void *buf, size_t size);
         static void DrawButton(SDL_Rect Pos, std::string Text, ButtonType butType);
         static void DrawOption(SDL_Rect Pos, std::string Text, std::string OptionText, bool isSel);
-        static u32 GetDefaultSelCol() { return AQUA; }
+        static u32 GetDefaultSelCol() { return defaultSelCol; }
+        static void SetDefaultSelCol(u32 col) { defaultSelCol = col; }
         static u32 GetDefaultButCol() { return GREY; }
         static void Render();
         static void Clear();
+    private:
+        static u32 defaultSelCol;
 };

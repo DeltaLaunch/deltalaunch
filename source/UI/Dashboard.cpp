@@ -90,7 +90,7 @@ void Dashboard::Initialize() {
 void Dashboard::UpdateDash(u32 kDown) {    
     if(kDown & KEY_A) ActivateDash();
 	if(kDown & KEY_LSTICK)  debugInfo = !debugInfo;
-	if(kDown & KEY_MINUS) ;
+	if(kDown & KEY_MINUS) SetGames();
 	if((kDown & KEY_DLEFT) || (kDown & KEY_LSTICK_LEFT)) DecrementDashSel();
 	if((kDown & KEY_DRIGHT) || (kDown & KEY_LSTICK_RIGHT)) IncrementDashSel();
 	if((kDown & KEY_DUP) || (kDown & KEY_LSTICK_UP)) App::dashLayer = 0;
@@ -103,10 +103,10 @@ void Dashboard::UpdateDash(u32 kDown) {
 		lastPosX = 0;
 	}
     
-    if(App::IsGamecardInserted() == GcState) {
+    /*if(App::IsGamecardInserted() == GcState) {
         SetGames();
         GcState = !GcState;
-    }
+    }*/
 }
 
 void Dashboard::DrawWallpaper() {
@@ -229,20 +229,20 @@ void Dashboard::SetGames() {
 	size_t total = recs.size();
 	for(auto game: GameEntries) {
 		u64 tid = i < (int)total ? recs[i].titleID : 0;
-        game->SetTitleId(tid);
         game->Pos.w = normalPortraitSize/gameRows; 
         game->Pos.h = normalPortraitSize/gameRows;
-		game->Pos.x = 100+((i%(MaxColumns/gameRows))*(game->Pos.w+(14/gameRows))); 
+        game->Pos.x = 100+((i%(MaxColumns/gameRows))*(game->Pos.w+(14/gameRows))); 
         game->Pos.y = 200+((i/(MaxColumns/gameRows))*(game->Pos.h+(14/gameRows)));
-		if(tid) {
-			NsApplicationControlData data = App::GetGameControlData(tid, 0);
-			SDL_Surface *img = IMG_Load_RW(SDL_RWFromMem(data.icon, 0x20000), 1);
-			if(game->Icon != nullptr)
-				SDL_DestroyTexture(game->Icon);
-			game->Icon = SDL_CreateTexture(Graphics::GetRenderer(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, game->Pos.w, game->Pos.h);
-			if(img) 
-				game->Icon = SDL_CreateTextureFromSurface(Graphics::GetRenderer(), img);
-			SDL_FreeSurface(img);
+        if(game->GetTitleId() != tid) { //assume game entry doesnt need to be updated if tids are the same
+            game->SetTitleId(tid);
+            NsApplicationControlData data = App::GetGameControlData(tid, 0);
+            SDL_Surface *img = IMG_Load_RW(SDL_RWFromMem(data.icon, 0x20000), 1);
+            if(game->Icon != nullptr)
+                SDL_DestroyTexture(game->Icon);
+            game->Icon = SDL_CreateTexture(Graphics::GetRenderer(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, game->Pos.w, game->Pos.h);
+            if(img) 
+                game->Icon = SDL_CreateTextureFromSurface(Graphics::GetRenderer(), img);
+            SDL_FreeSurface(img);
             int i;
             for(i = 0; i < 15; i++){
                 if(data.nacp.lang[i].name[0]==0) continue;
@@ -252,7 +252,7 @@ void Dashboard::SetGames() {
                 if(data.nacp.lang[i].author[0]==0) continue;
                 game->SetAuthor(data.nacp.lang[i].author);
             }
-		}
+        }
         i++;
 	}
     recs.clear();
@@ -324,7 +324,10 @@ void Dashboard::DecrementDashSel() {
 }
 
 void Dashboard::ActivateDash() {
-    if(App::dashLayer == 0) GameEntries[App::gameSelectInd]->Run();
+    if(App::dashLayer == 0) {
+        GameEntries[App::gameSelectInd]->Run();
+        SetGames();
+    }
 	if(App::dashLayer == 1) Buttons[App::appletSelectInd]->Run();
 }
 
