@@ -24,6 +24,8 @@ TTF_Font *Graphics::debugFont;
 TTF_Font *Graphics::hdrFont;
 TTF_Font *Graphics::smallFont;
 u32 Graphics::defaultSelCol;
+u32 Graphics::winWidth;
+u32 Graphics::winHeight;
 
 void Graphics::Init(std::string name, u32 width, u32 height, std::string font) {
     //Basic SDL init
@@ -36,6 +38,8 @@ void Graphics::Init(std::string name, u32 width, u32 height, std::string font) {
     TTF_Init();
     SDL_SetRenderDrawColor(Rend, 0xFF, 0xFF, 0xFF, 0xFF);
     Mix_Init(MIX_INIT_FLAC | MIX_INIT_MOD | MIX_INIT_MP3 | MIX_INIT_OGG);
+    Graphics::winWidth = width;
+    Graphics::winHeight = height;
     
     plInitialize();
     if(font == "") {
@@ -71,7 +75,7 @@ void Graphics::Exit() {
 }
 
 void Graphics::ClearScreen() {
-	Rectangle(0, 0, 1280, 720, 0xFFFFFFFF);
+	Rectangle(0, 0, winWidth, winHeight, 0xFFFFFFFF);
 }
 
 void Graphics::Rectangle(u32 x, u32 y, u32 w, u32 h, u32 scolor) {
@@ -122,15 +126,16 @@ void Graphics::DrawText(FontSize fntsize, u32 x, u32 y, std::string str, u32 col
     SDL_Color scolor;
     scolor.r = (col >> 24)&0xFF; scolor.g = (col >> 16)&0xFF; scolor.b = (col >> 8)&0xFF; scolor.a = col&0xFF;
     SDL_Surface *surface;
+    
     switch(fntsize) {
         case FNT_Small:
-            surface = TTF_RenderUTF8_Blended_Wrapped(smallFont, str.c_str(), scolor, 1280);
+            surface = TTF_RenderUTF8_Blended_Wrapped(smallFont, str.c_str(), scolor, winWidth);
             break;
         case FNT_Big:
-            surface = TTF_RenderUTF8_Blended_Wrapped(hdrFont, str.c_str(), scolor, 1280);
+            surface = TTF_RenderUTF8_Blended_Wrapped(hdrFont, str.c_str(), scolor, winWidth);
             break;
         case FNT_Debug:
-            surface = TTF_RenderUTF8_Blended_Wrapped(debugFont, str.c_str(), scolor, 1280);
+            surface = TTF_RenderUTF8_Blended_Wrapped(debugFont, str.c_str(), scolor, winWidth);
             break;
     }
     if (!surface) return;

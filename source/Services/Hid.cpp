@@ -18,6 +18,8 @@
 
 #include "Hid.hpp"
 
+u64 Hid::Input;
+
 u64 Hid::GetInput() {
     hidScanInput();
     return hidKeysDown(CONTROLLER_P1_AUTO);

@@ -18,17 +18,14 @@
 
 #pragma once
 #include <SDL2/SDL.h>
-#include <SDL2/SDL2_gfxPrimitives.h> 
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_mixer.h>
-#include <SDL2/SDL_ttf.h>
 #include <vector>
 #include <functional>
 #include <tuple>
 #include <string>
 #include <switch.h>
-#include "Button.hpp"
+#include "Forms.hpp"
 #include "Game.hpp"
+#include "GameFolder.hpp"
 #include "SettingsMenu.hpp"
 #include "../Core/Graphics.hpp"
 #include "../Core/INI.hpp"
@@ -40,7 +37,6 @@
 #include "../Services/Power.hpp"
 #include "../Services/App.hpp"
 #include "../Services/Hid.hpp"
-#include "../Types.h"
 
 class Dashboard
 {
@@ -59,7 +55,7 @@ class Dashboard
         void SetGames();
         void DrawOverlay();
         void SetOverlay(std::string battery, SDL_Rect batPos, SDL_Rect clkPos);
-        void UpdateSettings(u32 kDown);
+        void UpdateSettings();
         void DrawDebugText();
         
         //Interactions
@@ -69,7 +65,7 @@ class Dashboard
 		void IncrementDashSel();
 		void DecrementDashSel();
         void ActivateDash();
-        void UpdateDash(u32 kDown);
+        void UpdateDash();
 		
 		//Menus
 		Result OpenSettings();
@@ -77,6 +73,7 @@ class Dashboard
 
 		u8 gameRows;
 		SettingsMenu *settings;
+        MessageBox *msgBox;
     private:
         u32 Width, Height;
         u32 lastPosX;
@@ -87,6 +84,7 @@ class Dashboard
         SDL_Texture *Wallpaper;
         SDL_Texture *LockScreen;
         SDL_Texture *Battery;
+        SDL_Texture *folderIcon;
         std::vector<Button*> Buttons;
 		std::vector<GameBase*> GameEntries;
 };

@@ -161,13 +161,13 @@ void SettingsMenu::Back() {
 	else currLayer--;
 }
 
-void SettingsMenu::Update(u32 kDown) {    
+void SettingsMenu::Update() {    
     Graphics::RenderTexture(Sprite, Pos);
     Graphics::DrawText(FNT_Big, 30, 25, GetTitle());
     DrawButtons();
-    Panels[menuOpt]->Update(kDown, (bool)currLayer);
-    if(kDown & KEY_A) Activate();
-	if(kDown & KEY_B) Back();
-	if(kDown & KEY_DUP && !currLayer) DecrementSelect();
-	if(kDown & KEY_DDOWN && !currLayer) IncrementSelect();
+    Panels[menuOpt]->Update(Hid::Input, (bool)currLayer);
+    if(Hid::Input & KEY_A) Activate();
+	if(Hid::Input & KEY_B) Back();
+	if(Hid::Input & KEY_DUP && !currLayer) DecrementSelect();
+	if(Hid::Input & KEY_DDOWN && !currLayer) IncrementSelect();
 }

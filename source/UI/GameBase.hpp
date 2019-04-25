@@ -32,8 +32,8 @@ class GameBase
             Icon = nullptr;
             FolderID = 0;
         }
-		GameBase(u32 id) {
-            Icon = nullptr;
+		GameBase(SDL_Texture *tex, u32 id) {
+            Icon = tex;
             FolderID = id;
         };
         virtual ~GameBase() {};
@@ -43,11 +43,12 @@ class GameBase
         //Getters/setters
 		virtual u64 GetTitleId() { return 0; }
 		virtual void SetTitleId(u64 tid) {}
-        virtual std::string GetName() { return ""; }
-        virtual void SetName(std::string name) {}
+        virtual std::string GetName() { return Name; }
+        virtual void SetName(std::string name) { Name = name; }
         virtual std::string GetAuthor() { return ""; }
         virtual void SetAuthor(std::string author) {}
         
+        std::string Name;
         u32 FolderID;   //0 = not in folder; 1-n = folder id
         SDL_Rect Pos;
 		SDL_Texture *Icon;

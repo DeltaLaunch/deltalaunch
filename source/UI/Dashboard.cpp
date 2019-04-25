@@ -33,7 +33,7 @@ Dashboard::Dashboard(u32 width, u32 height) {
 	MaxColumns = 12;
     Wallpaper = SDL_CreateTexture(Graphics::GetRenderer(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, Width, Height);
     LockScreen = SDL_CreateTexture(Graphics::GetRenderer(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, Width, Height);
-	
+    msgBox = MessageBox::getInstance();
 	SetPos.x=SetPos.y=0; SetPos.w=Width; SetPos.h=Height;
 	settings = new SettingsMenu(SetPos);
     settings->Initialize();
@@ -77,9 +77,22 @@ void Dashboard::Initialize() {
         ));
     }
     
+    //Setup folder sprite
+    SDL_Surface *img = IMG_Load((baseThemeDir + cfg.Get("Folders", "icon", "romfs:/Graphics/Folder.png")).c_str());
+    folderIcon = Graphics::CreateTexFromSurf(img);
+    if(!folderIcon) fatalSimple(0xBADC0DE);
+    
+    std::vector<NsApplicationRecord> recs;
+    App::GetAppRecords(recs);
+    size_t recCnt = recs.size();
+    recs.clear();
+    u32 fold = 0;
     //Boundries: (120, 110), (1200, 560) .. 450px vert
     for(u32 i = 0; i < MaxColumns; i++){
-		GameEntries.push_back(new Game());
+		if(i <= recCnt-1)
+            GameEntries.push_back(new Game());
+        else 
+            GameEntries.push_back(new GameFolder(folderIcon, fold++));
 	}
     SetGames();
 }
@@ -87,14 +100,14 @@ void Dashboard::Initialize() {
 /*
 *   Draw/Set Graphics
 */
-void Dashboard::UpdateDash(u32 kDown) {    
-    if(kDown & KEY_A) ActivateDash();
-	if(kDown & KEY_LSTICK)  debugInfo = !debugInfo;
-	if(kDown & KEY_MINUS) SetGames();
-	if((kDown & KEY_DLEFT) || (kDown & KEY_LSTICK_LEFT)) DecrementDashSel();
-	if((kDown & KEY_DRIGHT) || (kDown & KEY_LSTICK_RIGHT)) IncrementDashSel();
-	if((kDown & KEY_DUP) || (kDown & KEY_LSTICK_UP)) App::dashLayer = 0;
-	if((kDown & KEY_DDOWN) || (kDown & KEY_LSTICK_DOWN)) App::dashLayer = 1;
+void Dashboard::UpdateDash() { 
+    if(Hid::Input & KEY_A) ActivateDash();
+	if(Hid::Input & KEY_LSTICK)  debugInfo = !debugInfo;
+	if(Hid::Input & KEY_MINUS) msgBox->Show("Test", "hello");
+	if((Hid::Input & KEY_DLEFT) || (Hid::Input & KEY_LSTICK_LEFT)) DecrementDashSel();
+	if((Hid::Input & KEY_DRIGHT) || (Hid::Input & KEY_LSTICK_RIGHT)) IncrementDashSel();
+	if((Hid::Input & KEY_DUP) || (Hid::Input & KEY_LSTICK_UP)) App::dashLayer = 0;
+	if((Hid::Input & KEY_DDOWN) || (Hid::Input & KEY_LSTICK_DOWN)) App::dashLayer = 1;
 	if(Hid::IsTouched(GameIconArea)) {
 		if(lastPosX != 0) 
 			OffsetGameIcons(Hid::GetTouchPos().px - lastPosX);
@@ -102,6 +115,38 @@ void Dashboard::UpdateDash(u32 kDown) {
 	} else {
 		lastPosX = 0;
 	}
+    
+    //Check button interactions
+    for(auto button: Buttons) {
+        //Detect touch selection
+        if(Hid::IsTouched(button->Pos) && !settings->IsOpen()) {
+            lastErr = button->Run();
+			if(lastErr) App::ShowError("An Error has occurred!", "Error code: " + std::to_string(lastErr), lastErr);
+		}
+    }
+    
+    //Check game interactions
+    int ind = 0;
+    for(auto entry: GameEntries) {
+        //Detect touch selection
+        if(!settings->IsOpen() && Hid::IsTouched(entry->Pos)) {
+            if (ind == App::gameSelectInd) {
+                //Game
+                if(entry->GetTitleId() && entry->FolderID == 0) {
+                    lastErr = entry->Run();
+                    if(lastErr) 
+                        App::ShowError("An Error has occurred!", "Error code: " + std::to_string(lastErr), lastErr);
+                }
+                //Folder
+                else if(entry->FolderID != 0) {
+                    //TODO
+                }
+            } else {
+                App::gameSelectInd = ind;
+            }
+		}
+        ind++;
+    }
     
     /*if(App::IsGamecardInserted() == GcState) {
         SetGames();
@@ -156,12 +201,6 @@ void Dashboard::DrawButtons() {
 		//Default to rendering rectangle
         else
             Graphics::Rectangle(button->Pos, button->Color);
-        
-		//Detect touch selection
-        if(Hid::IsTouched(button->Pos) && !settings->IsOpen()) {
-            lastErr = button->Run();
-			if(lastErr) App::ShowError("An Error has occurred!", "Error code: " + std::to_string(lastErr), lastErr);
-		}
 		ind++;
     }
 }
@@ -176,13 +215,14 @@ void Dashboard::DrawGames() {
                 SDL_Rect pos = entry->Pos; 
                 pos.x -= 5; pos.y -= 5; pos.w += 10; pos.h += 10;
                 Graphics::Rectangle(pos, Graphics::GetDefaultSelCol());
-                Graphics::DrawText(FNT_Small, pos.x, pos.y-25, entry->GetName(), Graphics::GetDefaultSelCol());
+                if(gameRows == 1) Graphics::DrawText(FNT_Small, pos.x, pos.y-25, entry->GetName(), Graphics::GetDefaultSelCol());
             }
             
             //Draw either game icon or backer
-            if(entry->GetTitleId() != 0) {
+            if(entry->Icon != nullptr) {
                 Graphics::RenderTexture(entry->Icon, entry->Pos);
-            } else {
+            } 
+            else {
                 Graphics::Rectangle(entry->Pos, 0x70);
             }
         }
@@ -200,17 +240,6 @@ void Dashboard::DrawGames() {
                     Graphics::RenderTexture(entry->Icon, entry->Pos);
                 }
                 Graphics::Rectangle(entry->Pos, 0x70);
-            }
-		}
-        
-        //Detect touch selection
-        if(!settings->IsOpen() && entry->GetTitleId() && Hid::IsTouched(entry->Pos)) {
-            if (ind == App::gameSelectInd) {
-                lastErr = entry->Run();
-                if(lastErr) 
-                    App::ShowError("An Error has occurred!", "Error code: " + std::to_string(lastErr), lastErr);
-            } else {
-                App::gameSelectInd = ind;
             }
 		}
 		ind++;
@@ -231,18 +260,20 @@ void Dashboard::SetGames() {
 		u64 tid = i < (int)total ? recs[i].titleID : 0;
         game->Pos.w = normalPortraitSize/gameRows; 
         game->Pos.h = normalPortraitSize/gameRows;
-        game->Pos.x = 100+((i%(MaxColumns/gameRows))*(game->Pos.w+(14/gameRows))); 
+        game->Pos.x = /*(1280/2)-((game->Pos.w*(MaxColumns/gameRows))/2)*/100+((i%(MaxColumns/gameRows))*(game->Pos.w+(14/gameRows))); 
         game->Pos.y = 200+((i/(MaxColumns/gameRows))*(game->Pos.h+(14/gameRows)));
-        if(game->GetTitleId() != tid) { //assume game entry doesnt need to be updated if tids are the same
+        SDL_Surface *img;
+        if(tid != 0) { //assume game entry doesnt need to be updated if tids are the same
             game->SetTitleId(tid);
             NsApplicationControlData data = App::GetGameControlData(tid, 0);
-            SDL_Surface *img = IMG_Load_RW(SDL_RWFromMem(data.icon, 0x20000), 1);
+            img = IMG_Load_RW(SDL_RWFromMem(data.icon, 0x20000), 1);
             if(game->Icon != nullptr)
                 SDL_DestroyTexture(game->Icon);
-            game->Icon = SDL_CreateTexture(Graphics::GetRenderer(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, game->Pos.w, game->Pos.h);
-            if(img) 
-                game->Icon = SDL_CreateTextureFromSurface(Graphics::GetRenderer(), img);
-            SDL_FreeSurface(img);
+            //game->Icon = SDL_CreateTexture(Graphics::GetRenderer(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, game->Pos.w, game->Pos.h);
+            if(img) {
+                game->Icon = Graphics::CreateTexFromSurf(img);
+                SDL_FreeSurface(img);
+            }
             int i;
             for(i = 0; i < 15; i++){
                 if(data.nacp.lang[i].name[0]==0) continue;
@@ -324,7 +355,7 @@ void Dashboard::DecrementDashSel() {
 }
 
 void Dashboard::ActivateDash() {
-    if(App::dashLayer == 0) {
+    if(App::dashLayer == 0 && (GameEntries[App::gameSelectInd]->GetTitleId() != 0 || GameEntries[App::gameSelectInd]->FolderID != 0)) {
         GameEntries[App::gameSelectInd]->Run();
         SetGames();
     }
@@ -341,6 +372,6 @@ Result Dashboard::CloseSettings() {
 	return 0;
 }
 
-void Dashboard::UpdateSettings(u32 kDown) {
-	settings->Update(kDown);
+void Dashboard::UpdateSettings() {
+	settings->Update();
 }

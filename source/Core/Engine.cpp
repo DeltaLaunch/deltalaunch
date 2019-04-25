@@ -18,7 +18,8 @@
 
 #include "Engine.hpp"
 
-EngineState Engine::State;
+EngineState Engine::State = STATE_DASHBOARD;
+MessageBox* MessageBox::instance = nullptr;
 
 Engine::Engine(u32 width, u32 height, void *heapAddr, size_t heapSize) {
     //Detect reinx
@@ -98,33 +99,45 @@ void Engine::Clear() {
 }
 
 void Engine::Update() {
-    u64 kDown = Hid::GetInput();
+    Hid::Input = Hid::GetInput();
     switch(State) {
         case STATE_LOCKSCREEN:
         {
             Clear();
             dash->DrawLockScreen();
             Render();
-            if((kDown & KEY_A) || Hid::IsTouched()) 
+            if((Hid::Input & KEY_A) || Hid::IsTouched()) 
                 State = STATE_DASHBOARD;
             break;
         }
         case STATE_DASHBOARD:
         {
-            dash->UpdateDash(kDown);
+            //Draw
             dash->DrawWallpaper();
             dash->DrawButtons();
             dash->DrawGames();
             dash->DrawOverlay();
             dash->DrawDebugText();
-            State = dash->settings->IsOpen() ? STATE_SETTINGS : STATE_DASHBOARD;
+            if(dash->msgBox->IsOpen()) {
+                dash->msgBox->Update();
+            }
+            else {
+                //Get user input
+                dash->UpdateDash();
+            }
+            
+            
+            //Check state
+            if(dash->settings->IsOpen()) State = STATE_SETTINGS;
+            else State = STATE_DASHBOARD;
+            
             break;
         }
         case STATE_SETTINGS:
         {
             if(!dash->settings->IsOpen())
                 State = STATE_DASHBOARD;
-            dash->UpdateSettings(kDown);
+            dash->UpdateSettings();
             break;
         }
     }

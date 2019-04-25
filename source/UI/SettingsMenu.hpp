@@ -18,21 +18,14 @@
 
 #pragma once
 #include <SDL2/SDL.h>
-#include <SDL2/SDL2_gfxPrimitives.h> 
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_ttf.h>
 #include <switch.h>
-#include "Button.hpp"
 #include "Game.hpp"
-#include "Menu.hpp"
-#include "Panel.hpp"
-#include "PanelObjBase.hpp"
+#include "Forms.hpp"
 #include "../Core/Graphics.hpp"
 #include "../Services/Time.hpp"
 #include "../Services/Power.hpp"
 #include "../Services/Settings.hpp"
 #include "../Services/Hid.hpp"
-#include "../Types.h"
 
 class SettingsMenu: public Menu
 {
@@ -45,7 +38,7 @@ class SettingsMenu: public Menu
         void DrawButtons();
 		
 		//Overrides
-		void Update(u32 kDown);
+		void Update();
 		void Activate();
 		void Back();
         

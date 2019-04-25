@@ -24,8 +24,14 @@
 #include <stdio.h>
 #include <switch.h>
 #include "Power.hpp"
-#include "../Types.h"
 #include "../Core/Graphics.hpp"
+
+enum Command {
+    CMD_Home = 12,
+    CMD_Sleepmode = 16,
+    CMD_Shutdown = 22,
+    CMD_Reboot = 24,
+};
 
 class App
 {

@@ -29,6 +29,7 @@
 class Hid
 {
     public:
+        static u64 Input;
         static u64 GetInput();
         static bool IsTouched();
 		static bool IsTouched(SDL_Rect pos);

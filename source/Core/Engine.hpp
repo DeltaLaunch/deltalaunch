@@ -17,11 +17,6 @@
 */
 
 #pragma once
-#include <SDL2/SDL.h>
-#include <SDL2/SDL2_gfxPrimitives.h> 
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_mixer.h>
-#include <SDL2/SDL_ttf.h>
 #include <string>
 #include <vector>
 #include <tuple>
@@ -34,16 +29,20 @@
 #include "../Core/Audio.hpp"
 #include "../Core/INI.hpp"
 #include "../UI/Dashboard.hpp"
-#include "../UI/Button.hpp"
+#include "../UI/Forms.hpp"
 #include "../UI/Game.hpp"
-#include "../UI/Menu.hpp"
 #include "../Services/Hid.hpp"
 #include "../Services/App.hpp"
 #include "../Services/Power.hpp"
 #include "../Services/Settings.hpp"
-#include "../Types.h"
 
 #define BACKGROUND_LAYERS 99
+
+enum EngineState {
+	STATE_LOCKSCREEN,
+	STATE_DASHBOARD,
+	STATE_SETTINGS
+};
 
 class Engine
 {

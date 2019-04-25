@@ -28,9 +28,8 @@
 #include "Option.hpp"
 #include "Image.hpp"
 #include "PanelObjBase.hpp"
-#include "../Core/Graphics.hpp"
-#include "../Services/Hid.hpp"
-#include "../Types.h"
+#include "../../Core/Graphics.hpp"
+#include "../../Services/Hid.hpp"
 
 class Panel
 {

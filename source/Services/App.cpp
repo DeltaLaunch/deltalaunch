@@ -341,10 +341,10 @@ Result App::CommandHandler(u32 cmd) {
         case CMD_Home:
         {
             if(currentApplication.active) {
-                appRequestExit(&currentApplication);
+                appletHolderRequestExit(&currentApplication);
             }
             else if(currentApplet.active) {
-                appRequestExit(&currentApplet);
+                appletHolderRequestExit(&currentApplet);
             }
             else {
                 gameSelectInd = 0;

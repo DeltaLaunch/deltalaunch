@@ -21,7 +21,16 @@
 #include <switch.h>
 #include <vector>
 #include <experimental/filesystem>
-#include "../Types.h"
+
+enum SelectType{
+	SELECT_OUTLINE,
+	SELECT_SIZEDIFF
+};
+
+enum GameAreaType{
+    GAMEAREA_FULL,
+    GAMEAREA_MINI
+};
 
 class Settings
 {

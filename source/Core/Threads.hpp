@@ -21,7 +21,6 @@
 #include <switch.h>
 #include <string>
 #include "../Services/App.hpp"
-#include "../Types.h"
 
 class Threads {
     public:

@@ -46,7 +46,6 @@ class Game: public GameBase
         void SetAuthor(std::string author) { Author = author; }
         
     private:
-        std::string Name;
         std::string Author;
         u64 TitleId;
 };

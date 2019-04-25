@@ -18,12 +18,10 @@
 
 #pragma once
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_ttf.h>
 #include <string>
 #include <switch.h>
 #include "Button.hpp"
-#include "../Core/Graphics.hpp"
+#include "../../Core/Graphics.hpp"
 
 class Menu
 {
@@ -44,7 +42,7 @@ class Menu
 		void SetBackground(std::string tex);
 		
 		//Overrides
-		virtual void Update(u32 kDown) {}
+		virtual void Update() {}
 		virtual void Activate() {}
 		virtual void Back() {}
         

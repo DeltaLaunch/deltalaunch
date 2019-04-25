@@ -18,27 +18,35 @@
 
 #pragma once
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <functional>
-#include <string>
 #include <switch.h>
-#include "../Core/Graphics.hpp"
+#include <functional>
 
-class Button
+enum PanelElement {
+    ELEM_Image,
+    ELEM_Button,
+    ELEM_Option
+};
+
+class PanelObjBase
 {
     public:
-        Button(std::string sprite, std::string spriteSel, u32 x, u32 y, std::function<Result()> callback);
-        Button(std::string text, u32 x, u32 y, u32 w, u32 h, u32 col, std::function<Result()> callback);
-        ~Button();
-        Result Run();
-        bool HasFunc() { return Callback != nullptr; }
+        PanelObjBase(u32 x, u32 y, u32 w, u32 h) {
+            Pos.x = x;
+            Pos.y = y;
+            Pos.w = w;
+            Pos.h = h;
+        };
+        virtual ~PanelObjBase() {};
         
-        //vars
+        virtual void Draw(SDL_Rect pos, bool selected) {};
+        virtual void Run() {};
+        
+        bool HasFunc() { return Callback != nullptr; };
+        
+        SDL_Texture *Tex;
+        PanelElement Properties;
+        
+    protected:
         SDL_Rect Pos;
-        SDL_Texture *Sprite;
-		SDL_Texture *SpriteSelect;
-        u32 Color;
-        std::string Text;
-    private:
         std::function<Result()> Callback;
 };

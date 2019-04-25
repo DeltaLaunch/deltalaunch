@@ -17,32 +17,11 @@
 */
 
 #pragma once
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <functional>
-#include <string>
-#include <switch.h>
-#include "GameBase.hpp"
 
-class GameFolder: public GameBase
-{
-    public:
-		GameFolder(SDL_Texture *tex, u32 id) : GameBase(tex, id) {
-            Name = std::string("Folder ") + std::to_string(id);
-        };
-        
-        ~GameFolder() {
-            SDL_DestroyTexture(Icon);
-        };
-        
-        void SetName(std::string name) {
-            Name = name;
-        }
-        
-        Result Run() {
-            return 0;
-        }
-        
-    private:
-        std::function<void()> Callback;
-};
+#include "Popup\MessageBox.hpp"
+#include "Menus\Panel.hpp"
+#include "Menus\Menu.hpp"
+#include "Menus\Option.hpp"
+#include "Menus\Image.hpp"
+#include "Menus\Button.hpp"
+#include "Menus\PanelObjBase.hpp"

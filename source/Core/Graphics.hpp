@@ -25,9 +25,20 @@
 #include <switch.h>
 #include <stdint.h>
 #include <string>
-#include "../Types.h"
 
 #define GREY 0x4C4C4CFF
+
+enum FontSize {
+    FNT_Small,
+    FNT_Big,
+    FNT_Debug
+}; 
+
+enum ButtonType {
+    BTN_Unselected,
+    BTN_Selected_Lay1,
+    BTN_Selected_Lay2
+};
 
 class Graphics
 {
@@ -54,8 +65,12 @@ class Graphics
         static u32 GetDefaultSelCol() { return defaultSelCol; }
         static void SetDefaultSelCol(u32 col) { defaultSelCol = col; }
         static u32 GetDefaultButCol() { return GREY; }
+        static u32 GetWinWidth() { return winWidth; }
+        static u32 GetWinHeight() { return winHeight; }
         static void Render();
         static void Clear();
     private:
         static u32 defaultSelCol;
+        static u32 winWidth;
+        static u32 winHeight;
 };
