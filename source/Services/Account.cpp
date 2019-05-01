@@ -20,26 +20,31 @@
 
 s32 Account::GetUserCount() {
     s32 cnt = 0;
+    #ifdef SWITCH
     accountInitialize();
     accountGetUserCount(&cnt);
     accountExit();
+    #endif
     return cnt;
 }
 
 u128 Account::GetActiveAccount() {
 	u128 userID;
     bool sel;
+    #ifdef SWITCH
 	accountInitialize();
 	Result rc = accountGetActiveUser(&userID, &sel);
 	accountExit();
     if(R_FAILED(rc) || !userID || !sel)
         userID = App::LaunchPSelect();
+    #endif
 	return userID;
 }
 
 #define MAX_USERS 8
 u128 Account::GetFirstAccount() {
     u128 userIDs[MAX_USERS];
+    #ifdef SWITCH
     size_t total = 0;
     accountInitialize();
     accountListAllUsers(userIDs, MAX_USERS, &total);
@@ -49,6 +54,7 @@ u128 Account::GetFirstAccount() {
         // do error logging
         return (u128)-1;
     }
+    #endif
     return userIDs[0];
 }
 
@@ -81,16 +87,19 @@ Result Account::SetCustomProfileImage(std::string filename) {
 
 u128 Account::TryGetUser() {
     u128 userID;
+    #ifdef SWITCH
     accountInitialize();
     Result rc = accTrySelectUserWithoutInteraction(&userID);
     accountExit();
     if(R_FAILED(rc) || !userID)
         userID = App::LaunchPSelect();
+    #endif
     return userID;
 }
 
 SDL_Texture *Account::GetProfileImage(u128 userID) {
     SDL_Texture *tex = NULL;
+    #ifdef SWITCH
     if(userID) {
         AccountProfile acc;
         size_t imgSize = 0;
@@ -105,17 +114,18 @@ SDL_Texture *Account::GetProfileImage(u128 userID) {
         accountProfileClose(&acc);
         accountExit();
     }
+    #endif
     return tex;
 }
 
 Result Account::SetProfilePicture(u128 userId, u8 *jpg, size_t jpgSize) {
 	Result rc = 0;
+    #ifdef SWITCH
 	AccountProfile prof;
 	AccountProfileBase pb;
 	AccountUserData accData;
-	
 	rc = accGetProfileEditor(&prof, userId);
 	rc = accStoreWithImage(&prof, &pb, &accData, jpg, jpgSize);
-	
+	#endif
 	return rc;
 }

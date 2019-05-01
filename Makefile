@@ -20,7 +20,7 @@ include $(DEVKITPRO)/libnx/switch_rules
 TITLE       :=  Delta Launch
 TARGET		:=	$(notdir $(CURDIR))
 BUILD		:=	build
-SOURCES		:=	source source/UI source/Services source/Core
+SOURCES		:=	source source/UI source/Services source/Core source/UI/Menus source/UI/Popup
 DATA		:=	data
 INCLUDES	:=	include
 ROMFS	:=	romfs
@@ -32,10 +32,7 @@ EXEFS_SRC := exefs
 #---------------------------------------------------------------------------------
 ARCH	:=	-march=armv8-a -mtune=cortex-a57 -mtp=soft -fPIE
 
-CFLAGS	:=	-g -Wall -ffunction-sections \
-			$(ARCH) $(DEFINES)
-
-CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -DTITLE='"$(TITLE)"'
+CFLAGS	:=	-g -Wall -ffunction-sections $(ARCH) $(DEFINES) $(INCLUDE) -D__SWITCH__ -DTITLE='"$(TITLE)"' -DSWITCH
 
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -O2 -s -fno-exceptions -std=gnu++17 -lstdc++fs
 

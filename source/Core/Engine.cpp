@@ -21,23 +21,32 @@
 EngineState Engine::State = STATE_DASHBOARD;
 MessageBox* MessageBox::instance = nullptr;
 
-Engine::Engine(u32 width, u32 height, void *heapAddr, size_t heapSize) {
+Engine::Engine(u32 width, u32 height) {
     //Detect reinx
+    Rnx::Initialize();
     if(!Rnx::IsUsingReiNX()) {
         fatalSimple(0xBADC0DE);
     }
+    Rnx::SetHbTidForDelta(0x010000000000100F);
     
     romfsInit();
     HeapAddr = heapAddr;
     HeapSize = heapSize;
     Width = width;
     Height = height;
+    FILE *fp = fopen("log.txt", "w");
+    for (const auto & entry : std::experimental::filesystem::v1::directory_iterator("romfs:/")) {
+        fwrite(entry.path().string().c_str(), strlen(entry.path().string().c_str()), 1, fp);
+	}
+    fclose(fp);
+    running = true;
 }
 
 Engine::~Engine() {
 	delete frndThread;
 	delete samsThread;
     delete dash;
+    Rnx::Exit();
     romfsExit();
     Graphics::Exit();
 }

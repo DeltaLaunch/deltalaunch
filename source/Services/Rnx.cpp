@@ -18,10 +18,63 @@
 
 #include "Rnx.hpp"
 
+static Service g_rnxSrv;
+static u64 g_rnxRefCnt;
+
 bool Rnx::IsUsingReiNX() {
-    Service srvHand;
-    if(R_FAILED(smGetService(&srvHand, "rnx"))) return false;
-    serviceClose(&srvHand);
+    #ifdef SWITCH
+    if (serviceIsActive(&g_rnxSrv)) return true;
+    #endif
+    return false;
+}
+
+Result Rnx::Initialize() {
+    Result rc = 0;
+    #ifdef SWITCH
+    atomicIncrement64(&g_rnxRefCnt);
+    if (serviceIsActive(&g_rnxSrv)) return 0;
+    rc = smGetService(&g_rnxSrv, "rnx");
+    #endif
+    return rc;
+}
+
+void Rnx::Exit() {
+    #ifdef SWITCH
+    if (atomicDecrement64(&g_rnxRefCnt) == 0) {
+        serviceClose(&g_rnxSrv);
+    }
+    #endif
+}
+
+Result Rnx::SetHbTidForDelta(u64 tid) {
+    Result rc = 0;
+    #ifdef SWITCH
+    IpcCommand c;
+    ipcInitialize(&c);
+    struct Raw
+    {
+        u64 Magic;
+        u64 CmdId;
+        u64 Tid;
+    } *raw;
     
-    return true;
+    raw = (struct Raw*)ipcPrepareHeader(&c, sizeof(*raw));
+    raw->Magic = SFCI_MAGIC;
+    raw->CmdId = 1;
+    raw->Tid = tid;
+    
+    rc = serviceIpcDispatch(&g_rnxSrv);
+    if(R_SUCCEEDED(rc))
+    {
+        IpcParsedCommand r;
+        ipcParse(&r);
+        struct Parsed
+        {
+            u64 Magic;
+            u64 Result;
+        } *resp = (struct Parsed*)r.Raw;
+        rc = resp->Result;
+    }
+    #endif
+    return rc;
 }

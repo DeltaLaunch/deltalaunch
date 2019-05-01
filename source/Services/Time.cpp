@@ -22,8 +22,13 @@ std::string Time::GetClock() {
     u64 time = 0;
     TimeCalendarTime calTime;
     TimeCalendarAdditionalInfo info;
+    #ifdef SWITCH
     timeGetCurrentTime(TimeType_Default, &time);
     timeToCalendarTimeWithMyRule(time, &calTime, &info);
+    #else
+    calTime.hour = 0;
+    calTime.minute = 0;
+    #endif
     char buff[10];
     snprintf(buff, sizeof(buff), "%02d:%02d", calTime.hour, calTime.minute);
     return std::string(buff);

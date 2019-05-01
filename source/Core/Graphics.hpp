@@ -51,11 +51,13 @@ class Graphics
         static void Init(std::string name, u32 width, u32 height, std::string font);
         static void Exit();
 		static void ClearScreen();
+        static void BorderedRectangle(SDL_Rect pos, u32 foreCol, u32 bordCol, u8 bordThick);
         static void Rectangle(u32 x, u32 y, u32 w, u32 h, u32 scolor);
         static void Rectangle(SDL_Rect pos, u32 scolor);
         static SDL_Texture *CreateTexFromSurf(SDL_Surface *surf);
         static void DrawText(FontSize fntsize, u32 x, u32 y, std::string str);
         static void DrawText(FontSize fntsize, u32 x, u32 y, std::string str, u32 col);
+        static void DrawText(FontSize fntsize, u32 x, u32 y, std::string str, u32 col, u32 wrap);
         static void DrawTexture(std::string tex, u32 x, u32 y);
         static void RenderTexture(SDL_Texture *tex, SDL_Rect pos);
         static SDL_Renderer *GetRenderer() { return Rend; }

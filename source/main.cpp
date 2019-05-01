@@ -25,18 +25,10 @@
 
 #include "Core/Engine.hpp"
 
+#ifdef SWITCH
 u32 __nx_applet_type = AppletType_SystemApplet;
 
-static void*  heapAddr;
-static size_t heapSize = 0x10000000;
-
-void HeapInit() {
-    void* addr = NULL;
-    Result rc = svcSetHeapSize(&addr, heapSize);
-    if (R_FAILED(rc) || addr==NULL) 
-        fatalSimple(0xDEAD);
-    heapAddr = addr;
-}
+__attribute__((weak)) size_t __nx_heap_size = 0x10000000;
 
 void __attribute__((weak)) __appInit(void) {
     Result rc;
@@ -78,14 +70,13 @@ void __attribute__((weak)) __appExit(void) {
     fsExit();
     fsdevUnmountAll();
 }
+#endif
 
 int main(int argc, char* argv[]) {
-    HeapInit();
-    
     //Qlaunch loop
-    Engine eng(1280, 720, heapAddr, heapSize);
+    Engine eng(1280, 720);
     eng.Initialize();
-    while (true) {
+    while (eng.running) {
         eng.Clear();
         eng.Update();
         eng.Render();

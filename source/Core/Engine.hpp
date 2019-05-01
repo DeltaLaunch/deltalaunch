@@ -22,6 +22,7 @@
 #include <tuple>
 #include <dirent.h>
 #include <switch.h>
+#include <experimental/filesystem>
 
 #include "Threads.hpp"
 #include "ThreadManager.hpp"
@@ -47,7 +48,7 @@ enum EngineState {
 class Engine
 {
     public:
-        Engine(u32 width, u32 height, void *heapAddr, size_t heapSize);
+        Engine(u32 width, u32 height);
         ~Engine();
         void Initialize();
         void Render();
@@ -58,12 +59,11 @@ class Engine
         Mix_Music *bgm;
         FsStorage romfs;
         static EngineState State;
+        bool running;
     private:
         ThreadManager *frndThread;
 		ThreadManager *samsThread;
 		ThreadManager *aemThread;
         std::string baseThemeDir;
         u32 Width, Height;
-        void *HeapAddr;
-        size_t HeapSize;
 };

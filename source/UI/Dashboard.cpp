@@ -56,7 +56,6 @@ void Dashboard::Initialize() {
     unsigned space = 100;   //space inbetween
     std::vector<std::string> names = Settings::GetThemeNames();
     std::string baseThemeDir = names[0] + std::string("/");
-    //FILE *fp = fopen("test.txt", "w"); fwrite(baseThemeDir.c_str(), strlen(baseThemeDir.c_str()), 1, fp); fclose(fp);
     INIReader cfg(names[0] + ".cfg");
     std::vector<std::tuple<std::string, std::function<Result()>>> ButtonFuncs{
         std::tuple<std::string, std::function<Result()>>{"WebButton", std::bind(App::LaunchWebsite, "https://google.com/")},
@@ -126,7 +125,7 @@ void Dashboard::UpdateDash() {
     }
     
     //Check game interactions
-    int ind = 0;
+    u32 ind = 0;
     for(auto entry: GameEntries) {
         //Detect touch selection
         if(!settings->IsOpen() && Hid::IsTouched(entry->Pos)) {

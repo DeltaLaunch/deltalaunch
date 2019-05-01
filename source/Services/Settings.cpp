@@ -23,55 +23,78 @@ GameAreaType Settings::gameAreaType;
 
 std::string Settings::GetFirmwareVersion() {
     SetSysFirmwareVersion firm;
+    #ifdef SWITCH
     setsysInitialize();
     setsysGetFirmwareVersion(&firm);
     setsysExit();
     std::string str = std::string(firm.display_version);
+    #else
+    std::string str = std::string("0.0.0");
+    #endif
+    
     return str + " ReiNX";
 }
 
 std::string Settings::GetSerialNumber() {
+    #ifdef SWITCH
 	char serial[0x20] = {0};
 	setsysInitialize();
 	setsysGetSerialNumber(serial);
 	setsysExit();
-	return std::string(serial);
+    std::string str = std::string(serial);
+    #else
+    std::string str = std::string("XAW70000000000");
+    #endif
+	return str;
 }
 
 std::string Settings::GetDeviceNickname() {
+    #ifdef SWITCH
     char nick[0x80] = {0};
     setsysInitialize();
     setsysGetDeviceNickname(nick);
     setsysExit();
-    return std::string(nick);
+    std::string str = std::string(nick);
+    #else
+    std::string str = std::string("Rei");
+    #endif
+    return str;
 }
 
 u8 Settings::GetLockScreenFlag() {
-    u8 flag;
+    u8 flag = 0;
+    #ifdef SWITCH
     setsysInitialize();
     setsysGetLockScreenFlag(&flag);
     setsysExit();
+    #endif
     return flag;
 }
 
 void Settings::SetLockScreenFlag(u8 flag) {
+    #ifdef SWITCH
     setsysInitialize();
     setsysSetLockScreenFlag(flag);
     setsysExit();
+    #endif
 }
 
 u8 Settings::GetAudioVolume() {
-    u8 vol;
+    u8 vol = 0;
+    #ifdef SWITCH
     setsysInitialize();
     setsysGetAudioVolume(&vol);
     setsysExit();
+    #endif
     return vol;
 }
 
 void Settings::SetAudioVolume(u8 vol) {
+    #ifdef SWITCH
     setsysInitialize();
     setsysSetAudioVolume(vol);
     setsysExit();
+    #endif
 }
 
 std::vector<std::string> Settings::GetThemeNames() {

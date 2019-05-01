@@ -19,26 +19,34 @@
 #include "Power.hpp"
 
 Result Power::Shutdown() {
+    #ifdef SWITCH
     appletSetHandlesRequestToDisplay(false);
-	appletStartShutdown();
+	appletStartShutdown();    
+    #endif
     return 0;
 }
 
 Result Power::Reboot() {
+    #ifdef SWITCH
     appletSetHandlesRequestToDisplay(false);
 	appletStartReboot();
+    #endif
     return 0;
 }
 
 Result Power::Sleep() {
+    #ifdef SWITCH
     appletStartSleepSequence();
+    #endif
     return 0;
 }
 
 u32 Power::GetBatteryLife() {
-	u32 pwr = 0;
+	u32 pwr = 100;
+    #ifdef SWITCH
     psmInitialize();
 	psmGetBatteryChargePercentage(&pwr);
     psmExit();
+    #endif
 	return pwr;
 }

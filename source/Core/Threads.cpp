@@ -30,6 +30,7 @@ bool Threads::FriendThread() {
 }
 
 bool Threads::SystemAppletMessage() {
+    #ifdef SWITCH
 	Event epop;
     Result rc = appletGetPopFromGeneralChannelEvent(&epop);
     if(rc == 0)
@@ -162,11 +163,13 @@ bool Threads::SystemAppletMessage() {
 		}
     }
     eventClose(&epop);
+    #endif
     
 	return true;
 }
 
 bool Threads::AeMessageThread() {
+    #ifdef SWITCH
 	u32 msg = 0;
 	appletGetMessage(&msg);
     App::lastAeCmd = msg;
@@ -234,6 +237,7 @@ bool Threads::AeMessageThread() {
             break;
         }
     }
+    #endif
 	
 	return true;
 }

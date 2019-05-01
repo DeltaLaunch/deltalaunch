@@ -22,5 +22,8 @@
 class Rnx
 {
     public:
+        static Result Initialize();
+        static void Exit();
         static bool IsUsingReiNX();
+        static Result SetHbTidForDelta(u64 tid);
 };

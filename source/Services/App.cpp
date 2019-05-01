@@ -31,8 +31,9 @@ u32 App::lastSamsCmd;
 *   Application
 */
 Result App::LaunchGame(u64 tid, u128 userID) {
-    AppletStorage aStore;
     Result rc = 0;
+    #ifdef SWITCH
+    AppletStorage aStore;
     
     rc = appCreate(&currentApplication, tid, Create_App);
     if(R_FAILED(rc)) {
@@ -86,12 +87,14 @@ Result App::LaunchGame(u64 tid, u128 userID) {
     appletHolderClose(&currentApplication);
     appletStorageClose(&aStore);
     currentApplication.active = false;
+    #endif
     
     return rc;
 }
 
 Result App::GetAppRecords(std::vector<NsApplicationRecord> &recs) {
-    Result rc;
+    Result rc = 0;
+    #ifdef SWITCH
     size_t size = 0;
     NsApplicationRecord rec[2000];
     rc = nsInitialize();
@@ -100,29 +103,37 @@ Result App::GetAppRecords(std::vector<NsApplicationRecord> &recs) {
         recs.push_back(rec[i]);
     }
     nsExit();
+    #endif
+    
     return rc;
 }
 
 bool App::IsVrEnabled() {
     bool b = false;
+    #ifdef SWITCH
     appletIsVrModeEnabled(&b);
+    #endif
     return b;
 }
 
 NsApplicationControlData App::GetGameControlData(u64 tid, u8 flag) {
     NsApplicationControlData buffer;
     size_t s = 0;
+    #ifdef SWITCH
     nsInitialize();
     nsGetApplicationControlData(flag, tid, &buffer, 0x20000, &s);
     nsExit();
+    #endif
     return buffer;
 }
 
 bool App::IsGamecardInserted() {
-    FsDeviceOperator opt;
     bool b = false;
+    #ifdef SWITCH
+    FsDeviceOperator opt;
     fsOpenDeviceOperator(&opt);
     fsDeviceOperatorIsGameCardInserted(&opt, &b);
+    #endif
     return b;
 }
 
@@ -130,9 +141,10 @@ bool App::IsGamecardInserted() {
 *   Applet
 */
 Result App::LaunchAlbum(u8 arg, bool startupSound) {
+    Result rc = 0;
+    #ifdef SWITCH
     LibAppletArgs args;
     AppletStorage storeIn;
-    Result rc = 0;
     
     appletCreateLibraryApplet(&currentApplet, AppletId_photoViewer, LibAppletMode_AllForeground);
     libappletArgsCreate(&args, 0);
@@ -160,14 +172,16 @@ Result App::LaunchAlbum(u8 arg, bool startupSound) {
     appletStorageClose(&storeIn);
     appletHolderClose(&currentApplet);
     currentApplet.active = false;
+    #endif
     
     return rc;
 }
 
 u128 App::LaunchPSelect() {
-    AppletStorage storeIn, storeOut;
-    u128 player = 0;
     Result rc = 0;
+    u128 player = 0;
+    #ifdef SWITCH
+    AppletStorage storeIn, storeOut;
     LibAppletArgs args;
     
     rc = appletCreateLibraryApplet(&currentApplet, AppletId_playerSelect, LibAppletMode_AllForeground);
@@ -210,14 +224,16 @@ u128 App::LaunchPSelect() {
     appletHolderClose(&currentApplet);
     appletRequestForeground();
     currentApplet.active = false;
+    #endif
     
     return player;
 }
 
 Result App::LaunchShop() {
+    Result rc = 0;
+    #ifdef SWITCH
     LibAppletArgs args;
     AppletStorage storeIn, storeOut;
-    Result rc = 0;
     
     appletCreateLibraryApplet(&currentApplet, AppletId_shop, LibAppletMode_AllForeground);
     libappletArgsCreate(&args, 1);
@@ -253,14 +269,17 @@ Result App::LaunchShop() {
     appletStorageClose(&storeOut);
     appletHolderClose(&currentApplet);
     currentApplet.active = false;
+    #endif
     
     return rc;
 }
 
 Result App::LaunchWebsite(std::string url) {
+    Result rc = 0;
+    #ifdef SWITCH
     AppletStorage aStore;
     LibAppletArgs aArgs;
-    Result rc = 0;
+    
     rc = appletCreateLibraryApplet(&currentApplet, AppletId_web, LibAppletMode_AllForeground);
     if(R_FAILED(rc)) {
         ShowError("Error launching browser", "Error initializing applet", rc);
@@ -297,11 +316,13 @@ Result App::LaunchWebsite(std::string url) {
     appletHolderClose(&currentApplet);
     appletStorageClose(&aStore);
     currentApplet.active = false;
+    #endif
 
     return rc;
 }
 
 Result App::ShowError(std::string errText, std::string details, Result rc) {
+    #ifdef SWITCH
     AppletStorage errStor;
     LibAppletArgs args;
 
@@ -323,14 +344,23 @@ Result App::ShowError(std::string errText, std::string details, Result rc) {
     appletHolderJoin(&currentApplet);
     appletHolderClose(&currentApplet);
     currentApplet.active = false;
+    #endif
     
     return 0;
 }
 
 Result App::LaunchHbl() {
-    //load nsp
+    Result rc = 0;
+    #ifdef SWITCH
+    appletCreateLibraryApplet(&currentApplet, AppletId_offlineWeb, LibAppletMode_AllForeground);
+    currentApplet.active = true;
+    rc = appletHolderStart(&currentApplet);
+    appletHolderJoin(&currentApplet);
+    appletHolderClose(&currentApplet);
+    currentApplet.active = false;
+    #endif
     
-    return 0;
+    return rc;
 }
 
 /*
@@ -340,6 +370,7 @@ Result App::CommandHandler(u32 cmd) {
     switch(cmd) {
         case CMD_Home:
         {
+            #ifdef SWITCH
             if(currentApplication.active) {
                 appletHolderRequestExit(&currentApplication);
             }
@@ -351,6 +382,7 @@ Result App::CommandHandler(u32 cmd) {
                 appletSelectInd = 0;
                 dashLayer = 0;
             }
+            #endif
             break;
         }
         case 14:

@@ -78,6 +78,16 @@ void Graphics::ClearScreen() {
 	Rectangle(0, 0, winWidth, winHeight, 0xFFFFFFFF);
 }
 
+void Graphics::BorderedRectangle(SDL_Rect pos, u32 foreCol, u32 bordCol, u8 bordThick) {
+    SDL_Rect p = pos;
+    p.x -= bordThick;
+    p.y -= bordThick;
+    p.w += (bordThick*2);
+    p.h += (bordThick*2);
+    Rectangle(p, bordCol);
+    Rectangle(pos, foreCol);
+}
+
 void Graphics::Rectangle(u32 x, u32 y, u32 w, u32 h, u32 scolor) {
     SDL_Rect pos;
     pos.x = x;
@@ -119,23 +129,27 @@ void Graphics::RenderTexture(SDL_Texture *tex, SDL_Rect pos) {
 }
 
 void Graphics::DrawText(FontSize fntsize, u32 x, u32 y, std::string str) {
-    DrawText(fntsize, x, y, str, 0xFFFFFFFF);
+    DrawText(fntsize, x, y, str, 0xFFFFFFFF, winWidth);
 }
 
 void Graphics::DrawText(FontSize fntsize, u32 x, u32 y, std::string str, u32 col) {
+    DrawText(fntsize, x, y, str, col, winWidth);
+}
+
+void Graphics::DrawText(FontSize fntsize, u32 x, u32 y, std::string str, u32 col, u32 wrap) {
     SDL_Color scolor;
     scolor.r = (col >> 24)&0xFF; scolor.g = (col >> 16)&0xFF; scolor.b = (col >> 8)&0xFF; scolor.a = col&0xFF;
     SDL_Surface *surface;
     
     switch(fntsize) {
         case FNT_Small:
-            surface = TTF_RenderUTF8_Blended_Wrapped(smallFont, str.c_str(), scolor, winWidth);
+            surface = TTF_RenderUTF8_Blended_Wrapped(smallFont, str.c_str(), scolor, wrap);
             break;
         case FNT_Big:
-            surface = TTF_RenderUTF8_Blended_Wrapped(hdrFont, str.c_str(), scolor, winWidth);
+            surface = TTF_RenderUTF8_Blended_Wrapped(hdrFont, str.c_str(), scolor, wrap);
             break;
         case FNT_Debug:
-            surface = TTF_RenderUTF8_Blended_Wrapped(debugFont, str.c_str(), scolor, winWidth);
+            surface = TTF_RenderUTF8_Blended_Wrapped(debugFont, str.c_str(), scolor, wrap);
             break;
     }
     if (!surface) return;
