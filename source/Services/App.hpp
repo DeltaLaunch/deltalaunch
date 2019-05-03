@@ -57,4 +57,6 @@ class App
         
         static u32 lastAeCmd;
 		static u32 lastSamsCmd;
+    private:
+        static void ChangeHeap(size_t size) { void *addr; svcSetHeapSize(&addr, size); }
 };

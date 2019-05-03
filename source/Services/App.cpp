@@ -143,35 +143,21 @@ bool App::IsGamecardInserted() {
 Result App::LaunchAlbum(u8 arg, bool startupSound) {
     Result rc = 0;
     #ifdef SWITCH
+    ChangeHeap(0x1B000000);
     LibAppletArgs args;
-    AppletStorage storeIn;
     
     appletCreateLibraryApplet(&currentApplet, AppletId_photoViewer, LibAppletMode_AllForeground);
     libappletArgsCreate(&args, 0);
     libappletArgsSetPlayStartupSound(&args, startupSound);
     libappletArgsPush(&args, &currentApplet);
     
-    u8 stindata = arg;
-    rc = appletCreateStorage(&storeIn, sizeof(stindata));
-    if(R_FAILED(rc)) {
-        appletStorageClose(&storeIn);
-        ShowError("Error launching player select", "Error creating storage.", rc);
-    }
-    
-    rc = appletStorageWrite(&storeIn, 0, &stindata, sizeof(stindata));
-    if(R_FAILED(rc)) {
-        appletStorageClose(&storeIn);
-        ShowError("Error launching player select", "Error writing storage.", rc);
-    }
-    appletHolderPushInData(&currentApplet, &storeIn);
-    
     currentApplet.active = true;
     rc = appletHolderStart(&currentApplet);
     appletHolderJoin(&currentApplet);
     
-    appletStorageClose(&storeIn);
     appletHolderClose(&currentApplet);
     currentApplet.active = false;
+    ChangeHeap(0x10000000);
     #endif
     
     return rc;
@@ -277,45 +263,18 @@ Result App::LaunchShop() {
 Result App::LaunchWebsite(std::string url) {
     Result rc = 0;
     #ifdef SWITCH
-    AppletStorage aStore;
-    LibAppletArgs aArgs;
-    
-    rc = appletCreateLibraryApplet(&currentApplet, AppletId_web, LibAppletMode_AllForeground);
-    if(R_FAILED(rc)) {
-        ShowError("Error launching browser", "Error initializing applet", rc);
+    WebCommonConfig config;
+    WebCommonReply reply;
+    WebExitReason exitReason = (WebExitReason)0;
+    ChangeHeap(0x13001000);
+    rc = webPageCreate(&config, url.c_str());
+    if (R_SUCCEEDED(rc)) {
+        currentApplet.active = true;
+        rc = webConfigShow(&config, &reply);
+        currentApplet.active = false;
+        rc = webReplyGetExitReason(&reply, &exitReason);
     }
-    libappletArgsCreate(&aArgs, 0x50000);
-    libappletArgsPush(&aArgs, &currentApplet);
-    rc = appletCreateStorage(&aStore, 8192);
-    if(R_FAILED(rc)) {
-        ShowError("Error launching browser", "Error initializing arg storage", rc);
-    }
-
-    u8 indata[0x2000] = {0};
-    *(u64*)&indata[4] = 0x1000D00000005;
-    *(u64*)&indata[17] = 0xC000001;
-    *(u8*)&indata[16] = 1;
-    *(u16*)indata = 2;
-    strcpy((char*)&indata[25], url.c_str());
-
-    rc = appletStorageWrite(&aStore, 0, indata, 0x2000);
-    if(R_FAILED(rc)) {
-        ShowError("Error launching browser", "Error writing arg storage", rc);
-    }
-    appletHolderPushInData(&currentApplet, &aStore);
-    currentApplet.active = true;
-    rc = appletHolderStart(&currentApplet);
-    if(R_FAILED(rc)) {
-        ShowError("Error launching browser", "Lookup errorcode for more info", rc);
-    }
-    appletHolderJoin(&currentApplet);
-    LibAppletExitReason e = appletHolderGetExitReason(&currentApplet);
-    if(e != LibAppletExitReason_Normal) {
-        ShowError("Browser Error", "Lookup errorcode for more info", rc);
-    }
-    appletHolderClose(&currentApplet);
-    appletStorageClose(&aStore);
-    currentApplet.active = false;
+    ChangeHeap(0x10000000);
     #endif
 
     return rc;

@@ -30,8 +30,6 @@ Engine::Engine(u32 width, u32 height) {
     Rnx::SetHbTidForDelta(0x010000000000100F);
     
     romfsInit();
-    HeapAddr = heapAddr;
-    HeapSize = heapSize;
     Width = width;
     Height = height;
     FILE *fp = fopen("log.txt", "w");
