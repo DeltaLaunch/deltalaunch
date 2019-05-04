@@ -26,49 +26,19 @@
 #include "Core/Engine.hpp"
 
 #ifdef SWITCH
-u32 __nx_applet_type = AppletType_SystemApplet;
-
-__attribute__((weak)) size_t __nx_heap_size = 0x10000000;
-
-void __attribute__((weak)) __appInit(void) {
-    Result rc;
+extern "C"{
+    u32 __nx_applet_type = AppletType_SystemApplet;
     
-    // Initialize default services.
-    rc = smInitialize();
-    if (R_FAILED(rc))
-        fatalSimple(MAKERESULT(Module_Libnx, LibnxError_InitFail_SM));
-    
-    rc = nvInitialize();
-    if (R_FAILED(rc))
-        fatalSimple(MAKERESULT(Module_Libnx, LibnxError_BadGfxInit));
-    
-    rc = timeInitialize();
-    if (R_FAILED(rc))
-        fatalSimple(MAKERESULT(Module_Libnx, LibnxError_InitFail_Time));
-
-    rc = appletInitialize();
-    if (R_FAILED(rc))
-        fatalSimple(MAKERESULT(Module_Libnx, LibnxError_InitFail_AM));
-
-    rc = hidInitialize();
-    if (R_FAILED(rc))
-        fatalSimple(MAKERESULT(Module_Libnx, LibnxError_InitFail_HID));
-    
-    rc = fsInitialize();
-    if (R_FAILED(rc)) 
-        fatalSimple(MAKERESULT(Module_Libnx, LibnxError_InitFail_FS));
-    
-    fsdevMountSdmc();
+    void userAppInit(void);
+    void userAppExit(void);
 }
 
-void __attribute__((weak)) __appExit(void) {
-    timeExit();
-    hidExit();
-    appletExit();
-    nvExit();
-    smExit();
-    fsExit();
-    fsdevUnmountAll();
+void userAppInit(void) {
+    romfsInit();
+}
+
+void userAppExit(void) {
+    romfsExit();
 }
 #endif
 
