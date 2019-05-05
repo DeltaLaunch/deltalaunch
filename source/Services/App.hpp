@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <switch.h>
 #include "Power.hpp"
+#include "../Core/Memory.hpp"
 #include "../Core/Graphics.hpp"
 
 enum Command {

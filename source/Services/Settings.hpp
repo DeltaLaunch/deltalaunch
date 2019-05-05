@@ -45,4 +45,6 @@ class Settings
         static u8 GetAudioVolume();
         static void SetAudioVolume(u8 vol);
         static std::vector<std::string> GetThemeNames();
+        static size_t GetMemAvail();
+        static size_t GetMemUsed();
 };

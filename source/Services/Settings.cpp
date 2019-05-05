@@ -104,3 +104,15 @@ std::vector<std::string> Settings::GetThemeNames() {
 	}
     return names;
 }
+
+size_t Settings::GetMemAvail() {
+    size_t mem_available = 0;
+    svcGetInfo(&mem_available, 6, CUR_PROCESS_HANDLE, 0);
+    return mem_available;
+}
+
+size_t Settings::GetMemUsed() {
+    size_t mem_used = 0;
+    svcGetInfo(&mem_used, 7, CUR_PROCESS_HANDLE, 0);
+    return mem_used;
+}

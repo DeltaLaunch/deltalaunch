@@ -29,7 +29,7 @@ u32 Graphics::winHeight;
 
 void Graphics::Init(std::string name, u32 width, u32 height, std::string font) {
     //Basic SDL init
-    SDL_Init(SDL_INIT_EVERYTHING);
+    SDL_Init(SDL_INIT_VIDEO);
     Window = SDL_CreateWindow(name.c_str(), 0, 0, width, height, 0);
     Rend = SDL_CreateRenderer(Window, -1, SDL_RENDERER_ACCELERATED);
     SDL_SetRenderDrawBlendMode(Rend, SDL_BLENDMODE_BLEND);
@@ -37,7 +37,6 @@ void Graphics::Init(std::string name, u32 width, u32 height, std::string font) {
     IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG);
     TTF_Init();
     SDL_SetRenderDrawColor(Rend, 0xFF, 0xFF, 0xFF, 0xFF);
-    Mix_Init(MIX_INIT_FLAC | MIX_INIT_MOD | MIX_INIT_MP3 | MIX_INIT_OGG);
     Graphics::winWidth = width;
     Graphics::winHeight = height;
     
@@ -67,8 +66,6 @@ void Graphics::Exit() {
     plExit();
     TTF_Quit();
     IMG_Quit();
-    Mix_CloseAudio();
-    Mix_Quit();
     SDL_DestroyRenderer(Rend);
     SDL_DestroyWindow(Window);
     SDL_Quit();

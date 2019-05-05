@@ -16,42 +16,19 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-#include <stdint.h>
-#include <switch.h>
+#pragma once
 
-#include "Core/Engine.hpp"
-
-#ifdef SWITCH
-extern "C"{
-    u32 __nx_applet_type = AppletType_SystemApplet;
-    size_t __nx_heap_size = 0xC000000;
-    
-    void userAppInit(void);
-    void userAppExit(void);
-}
-
-void userAppInit(void) {
-    romfsInit();
-}
-
-void userAppExit(void) {
-    romfsExit();
-}
-#endif
-
-int main(int argc, char* argv[]) {
-    //Qlaunch loop
-    Engine eng(1280, 720);
-    eng.Initialize();
-    while (eng.running) {
-        eng.Clear();
-        eng.Update();
-        eng.Render();
-    }
-    
-    return 0;
-}
+class Memory
+{
+    public:
+		template<typename F>
+        static void RunInManagedHeap(F f) {
+            void *addr;
+            svcSetHeapSize(&addr, Heap);
+            f();
+            svcSetHeapSize(&addr, 0xC000000);
+        }
+        static void SetManagedHeap(size_t heap) { Heap = heap; }
+    private:
+        static size_t Heap;
+};

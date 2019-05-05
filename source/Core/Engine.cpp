@@ -57,11 +57,7 @@ void Engine::Initialize() {
     Graphics::Init(TITLE, Width, Height, baseThemeDir+cfg.Get("Config", "font", "romfs:/Fonts/NintendoStandard.ttf"));
     Graphics::SetDefaultSelCol(cfg.GetInteger("Config", "defaultSelCol", 0xFFCEFF));
 
-    Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 4096);
-    Mix_VolumeMusic(cfg.GetInteger("Background", "bgmVol", 64));
-
     //Setup background
-    bgm = Mix_LoadMUS(cfg.Get("Background", "bgm", "romfs:/Sounds/bgm.mp3").c_str());
     std::vector<std::string> layers;
 	std::string tmp;
 	int lay;for(lay=0; lay < BACKGROUND_LAYERS; lay++) {

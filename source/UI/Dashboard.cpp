@@ -268,7 +268,6 @@ void Dashboard::SetGames() {
             img = IMG_Load_RW(SDL_RWFromMem(data.icon, 0x20000), 1);
             if(game->Icon != nullptr)
                 SDL_DestroyTexture(game->Icon);
-            //game->Icon = SDL_CreateTexture(Graphics::GetRenderer(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, game->Pos.w, game->Pos.h);
             if(img) {
                 game->Icon = Graphics::CreateTexFromSurf(img);
                 SDL_FreeSurface(img);
@@ -313,6 +312,8 @@ void Dashboard::DrawDebugText() {
         Graphics::DrawText(FNT_Debug, X, Y+=s, "Serial: " + Settings::GetSerialNumber());
 		Graphics::DrawText(FNT_Debug, X, Y+=s, "Battery: " + std::to_string(Power::GetBatteryLife()) + "%");
         Graphics::DrawText(FNT_Debug, X, Y+=s, "Touch: X=" + std::to_string(touchPos.px) + "; y=" + std::to_string(touchPos.py));
+        Graphics::DrawText(FNT_Debug, X, Y+=s, "Mem avail: " + std::to_string(Settings::GetMemAvail()));
+        Graphics::DrawText(FNT_Debug, X, Y+=s, "Mem used: " + std::to_string(Settings::GetMemUsed()));
         Graphics::DrawText(FNT_Debug, X, Y+=s, "Ae Message: " + std::to_string(App::lastAeCmd));
 		Graphics::DrawText(FNT_Debug, X, Y+=s, "Sams Message: " + std::to_string(App::lastSamsCmd));
         Graphics::DrawText(FNT_Debug, X, Y+=s, "Last Error: " + std::to_string(lastErr));

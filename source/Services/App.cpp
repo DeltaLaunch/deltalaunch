@@ -27,6 +27,8 @@ u8 App::dashLayer;
 u32 App::lastAeCmd;
 u32 App::lastSamsCmd;
 
+size_t Memory::Heap = 0x10000000;
+
 /*
 *   Application
 */
@@ -143,21 +145,21 @@ bool App::IsGamecardInserted() {
 Result App::LaunchAlbum(u8 arg, bool startupSound) {
     Result rc = 0;
     #ifdef SWITCH
-    ChangeHeap(0x1B000000);
-    LibAppletArgs args;
-    
-    appletCreateLibraryApplet(&currentApplet, AppletId_photoViewer, LibAppletMode_AllForeground);
-    libappletArgsCreate(&args, 0);
-    libappletArgsSetPlayStartupSound(&args, startupSound);
-    libappletArgsPush(&args, &currentApplet);
-    
-    currentApplet.active = true;
-    rc = appletHolderStart(&currentApplet);
-    appletHolderJoin(&currentApplet);
-    
-    appletHolderClose(&currentApplet);
-    currentApplet.active = false;
-    ChangeHeap(0x10000000);
+    Memory::SetManagedHeap(0xA800000);
+    Memory::RunInManagedHeap([&]() {
+        LibAppletArgs args;
+        appletCreateLibraryApplet(&currentApplet, AppletId_photoViewer, LibAppletMode_AllForeground);
+        libappletArgsCreate(&args, 0);
+        libappletArgsSetPlayStartupSound(&args, startupSound);
+        libappletArgsPush(&args, &currentApplet);
+        
+        currentApplet.active = true;
+        rc = appletHolderStart(&currentApplet);
+        appletHolderJoin(&currentApplet);
+        
+        appletHolderClose(&currentApplet);
+        currentApplet.active = false;
+    });
     #endif
     
     return rc;
@@ -263,18 +265,19 @@ Result App::LaunchShop() {
 Result App::LaunchWebsite(std::string url) {
     Result rc = 0;
     #ifdef SWITCH
-    WebCommonConfig config;
-    WebCommonReply reply;
-    WebExitReason exitReason = (WebExitReason)0;
-    ChangeHeap(0x13001000);
-    rc = webPageCreate(&config, url.c_str());
-    if (R_SUCCEEDED(rc)) {
-        currentApplet.active = true;
-        rc = webConfigShow(&config, &reply);
-        currentApplet.active = false;
-        rc = webReplyGetExitReason(&reply, &exitReason);
-    }
-    ChangeHeap(0x10000000);
+    Memory::SetManagedHeap(0x13001000);
+    Memory::RunInManagedHeap([&]() {
+        WebCommonConfig config;
+        WebCommonReply reply;
+        WebExitReason exitReason = (WebExitReason)0;
+        rc = webPageCreate(&config, url.c_str());
+        if (R_SUCCEEDED(rc)) {
+            currentApplet.active = true;
+            rc = webConfigShow(&config, &reply);
+            currentApplet.active = false;
+            rc = webReplyGetExitReason(&reply, &exitReason);
+        }
+    });
     #endif
 
     return rc;
@@ -311,13 +314,15 @@ Result App::ShowError(std::string errText, std::string details, Result rc) {
 Result App::LaunchHbl() {
     Result rc = 0;
     #ifdef SWITCH
-    ChangeHeap(0x5000000);
-    appletCreateLibraryApplet(&currentApplet, AppletId_offlineWeb, LibAppletMode_AllForeground);
-    currentApplet.active = true;
-    rc = appletHolderStart(&currentApplet);
-    appletHolderJoin(&currentApplet);
-    appletHolderClose(&currentApplet);
-    currentApplet.active = false;
+    Memory::SetManagedHeap(0xA800000);
+    Memory::RunInManagedHeap([&]() {
+        appletCreateLibraryApplet(&currentApplet, AppletId_offlineWeb, LibAppletMode_AllForeground);
+        currentApplet.active = true;
+        rc = appletHolderStart(&currentApplet);
+        appletHolderJoin(&currentApplet);
+        appletHolderClose(&currentApplet);
+        currentApplet.active = false;
+    });
     #endif
     
     return rc;

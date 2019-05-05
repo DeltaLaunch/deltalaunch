@@ -56,7 +56,6 @@ class Engine
         void Update();
 		
         Dashboard *dash;
-        Mix_Music *bgm;
         FsStorage romfs;
         static EngineState State;
         bool running;
