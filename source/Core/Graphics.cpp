@@ -33,7 +33,6 @@ void Graphics::Init(std::string name, u32 width, u32 height, std::string font) {
     Window = SDL_CreateWindow(name.c_str(), 0, 0, width, height, 0);
     Rend = SDL_CreateRenderer(Window, -1, SDL_RENDERER_ACCELERATED);
     SDL_SetRenderDrawBlendMode(Rend, SDL_BLENDMODE_BLEND);
-    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "2");
     IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG);
     TTF_Init();
     SDL_SetRenderDrawColor(Rend, 0xFF, 0xFF, 0xFF, 0xFF);
@@ -98,22 +97,6 @@ void Graphics::Rectangle(u32 x, u32 y, u32 w, u32 h, u32 scolor) {
 void Graphics::Rectangle(SDL_Rect pos, u32 scolor) {
     SDL_SetRenderDrawColor(Rend, ((scolor >> 24) & 0xFF), ((scolor >> 16) & 0xFF), ((scolor >> 8) & 0xFF), (scolor & 0xFF));
     SDL_RenderFillRect(Rend, &pos);
-}
-
-void Graphics::DrawTexture(std::string tex, u32 x, u32 y) {
-    SDL_Surface *bgs = IMG_Load(tex.c_str()); //Maybe cache images in the future so not to constantly read SD?
-    if(!bgs) return;
-    SDL_Rect pos;
-    pos.x = x;
-    pos.y = y;
-    pos.w = bgs->w;
-    pos.h = bgs->h;
-    SDL_Texture *t = SDL_CreateTextureFromSurface(Rend, bgs);
-	if(t) {
-		RenderTexture(t, pos);
-		SDL_FreeSurface(bgs);
-	}
-    SDL_DestroyTexture(t);
 }
 
 SDL_Texture *Graphics::CreateTexFromSurf(SDL_Surface *surf) {

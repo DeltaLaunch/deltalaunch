@@ -59,9 +59,9 @@ void Dashboard::Initialize() {
     INIReader cfg(names[0] + ".cfg");
     std::vector<std::tuple<std::string, std::function<Result()>>> ButtonFuncs{
         std::tuple<std::string, std::function<Result()>>{"WebButton", std::bind(App::LaunchWebsite, "https://google.com/")},
-        std::tuple<std::string, std::function<Result()>>{"NewsButton", nullptr},
+        std::tuple<std::string, std::function<Result()>>{"NewsButton", App::LaunchNews},
         std::tuple<std::string, std::function<Result()>>{"ShopButton", App::LaunchShop},
-        std::tuple<std::string, std::function<Result()>>{"AlbumButton", std::bind(App::LaunchAlbum, 1, false)}, //1,false | 2,true
+        std::tuple<std::string, std::function<Result()>>{"AlbumButton", std::bind(App::LaunchAlbum, 2, true)}, //1,false | 2,true
         std::tuple<std::string, std::function<Result()>>{"HomebrewButton", App::LaunchHbl},
         std::tuple<std::string, std::function<Result()>>{"SettingsButton", std::bind(&Dashboard::OpenSettings, this)},
         std::tuple<std::string, std::function<Result()>>{"SleepButton", Power::Reboot},

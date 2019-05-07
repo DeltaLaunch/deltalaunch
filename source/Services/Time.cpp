@@ -22,7 +22,7 @@ std::string Time::GetClock() {
     u64 time = 0;
     TimeCalendarTime calTime;
     TimeCalendarAdditionalInfo info;
-    #ifdef SWITCH
+    #ifdef __SWITCH__
     timeGetCurrentTime(TimeType_Default, &time);
     timeToCalendarTimeWithMyRule(time, &calTime, &info);
     #else

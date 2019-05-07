@@ -20,7 +20,7 @@
 
 s32 Account::GetUserCount() {
     s32 cnt = 0;
-    #ifdef SWITCH
+    #ifdef __SWITCH__
     accountInitialize();
     accountGetUserCount(&cnt);
     accountExit();
@@ -31,7 +31,7 @@ s32 Account::GetUserCount() {
 u128 Account::GetActiveAccount() {
 	u128 userID;
     bool sel;
-    #ifdef SWITCH
+    #ifdef __SWITCH__
 	accountInitialize();
 	Result rc = accountGetActiveUser(&userID, &sel);
 	accountExit();
@@ -44,7 +44,7 @@ u128 Account::GetActiveAccount() {
 #define MAX_USERS 8
 u128 Account::GetFirstAccount() {
     u128 userIDs[MAX_USERS];
-    #ifdef SWITCH
+    #ifdef __SWITCH__
     size_t total = 0;
     accountInitialize();
     accountListAllUsers(userIDs, MAX_USERS, &total);
@@ -87,7 +87,7 @@ Result Account::SetCustomProfileImage(std::string filename) {
 
 u128 Account::TryGetUser() {
     u128 userID;
-    #ifdef SWITCH
+    #ifdef __SWITCH__
     accountInitialize();
     Result rc = accTrySelectUserWithoutInteraction(&userID);
     accountExit();
@@ -99,7 +99,7 @@ u128 Account::TryGetUser() {
 
 SDL_Texture *Account::GetProfileImage(u128 userID) {
     SDL_Texture *tex = NULL;
-    #ifdef SWITCH
+    #ifdef __SWITCH__
     if(userID) {
         AccountProfile acc;
         size_t imgSize = 0;
@@ -120,7 +120,7 @@ SDL_Texture *Account::GetProfileImage(u128 userID) {
 
 Result Account::SetProfilePicture(u128 userId, u8 *jpg, size_t jpgSize) {
 	Result rc = 0;
-    #ifdef SWITCH
+    #ifdef __SWITCH__
 	AccountProfile prof;
 	AccountProfileBase pb;
 	AccountUserData accData;

@@ -44,13 +44,20 @@ class Panel
             Elements.push_back(op); 
         }
         
+        void SetOptText(u32 ind, std::string text) {
+            for(auto elem: Elements) {
+                if(elem->Properties == ELEM_Option) {
+                    elem->SetOption(ind, text);
+                }
+            }
+        }
+        
         void SetImage(u32 ind, SDL_Texture *tex) {
             u32 i = 0;
             for(auto elem: Elements) {
                 if(elem->Properties == ELEM_Image) {
                     if(ind == i) {
-                        SDL_DestroyTexture(elem->Tex);
-                        elem->Tex = tex; 
+                        elem->SetImage(tex);
                     }
                     i++;
                 }

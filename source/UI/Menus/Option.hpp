@@ -35,6 +35,14 @@ class Option: public PanelObjBase
             Properties = ELEM_Option;
         };
         
+        Option(std::string optName, std::string opt, u32 x, u32 y, u32 w, u32 h, u32 col, u32 defaultVal, std::function<Result()> callback) : PanelObjBase(x, y, w, h) {
+            Callback = callback;
+            Opts.push_back(opt);
+            optIndex = defaultVal;
+            Text = optName;
+            Properties = ELEM_Option;
+        };
+        
         ~Option() {
             Opts.clear();
         };
@@ -55,8 +63,12 @@ class Option: public PanelObjBase
             return optIndex; 
         }
         
+        void SetOption(u32 ind, std::string text) override {
+            Opts[ind] = text;
+        }
+        
     private:
-        std::string Text;
         u32 optIndex;
+        std::string Text;
         std::vector<std::string> Opts;
 };

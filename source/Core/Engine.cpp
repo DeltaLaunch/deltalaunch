@@ -23,13 +23,13 @@ MessageBox* MessageBox::instance = nullptr;
 
 Engine::Engine(u32 width, u32 height) {
     //Detect reinx
-    Rnx::Initialize();
     if(!Rnx::IsUsingReiNX()) {
         fatalSimple(0xBADC0DE);
     }
     Rnx::SetHbTidForDelta(0x010000000000100F);
     
-    romfsInit();
+    romfsMountFromFsdev("/ReiNX/titles/0100000000001000/romfs.bin", 0, "romfs");
+    
     Width = width;
     Height = height;
     FILE *fp = fopen("log.txt", "w");
@@ -44,7 +44,6 @@ Engine::~Engine() {
 	delete frndThread;
 	delete samsThread;
     delete dash;
-    Rnx::Exit();
     romfsExit();
     Graphics::Exit();
 }

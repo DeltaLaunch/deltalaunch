@@ -25,7 +25,7 @@
 
 #include "Core/Engine.hpp"
 
-#ifdef SWITCH
+#ifdef __SWITCH__
 extern "C"{
     u32 __nx_applet_type = AppletType_SystemApplet;
     size_t __nx_heap_size = 0xC000000;
@@ -35,11 +35,15 @@ extern "C"{
 }
 
 void userAppInit(void) {
-    romfsInit();
+    nsInitialize();
+    setsysInitialize();
+    Rnx::Initialize();
 }
 
 void userAppExit(void) {
-    romfsExit();
+    nsExit();
+    setsysExit();
+    Rnx::Exit();
 }
 #endif
 

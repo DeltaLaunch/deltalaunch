@@ -55,4 +55,12 @@ class Image: public PanelObjBase
             }
             Graphics::RenderTexture(Tex, p);
         }
+        
+        void SetImage(SDL_Texture *tex) override {
+            if(Tex)
+                SDL_DestroyTexture(Tex);
+            Tex = tex;
+        }
+    private:
+        SDL_Texture *Tex;
 };

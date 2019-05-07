@@ -48,9 +48,16 @@ void SettingsMenu::Initialize() {
     Panels.push_back(lock);
     
     //Internet/network settings
+    optY = 20;
     Buttons.push_back(new Button("Internet", 60, Y+=space, butW, butH, butCol, nullptr));
     Panel *internet = new Panel(panX, panY);
     internet->AddString(0, 0, std::string("View internet settings."));
+    internet->AddElement(new Option("Internet settings", "test", 0, optY+=space, optW, butH, butCol, 0, 
+    []()->Result{
+        Result rc = 0;
+        rc = App::LaunchNetConnect();
+        return rc;
+    }));
     Panels.push_back(internet);
     
     //Manage titles
@@ -71,7 +78,7 @@ void SettingsMenu::Initialize() {
         return rc;
     }));
     std::vector<std::string> pfp {"Use pre-defined image"};
-    user->AddElement(new Option("", pfp, 0, 260+space, 270, butH, butCol, NULL, 
+    user->AddElement(new Option("", pfp, 0, 260+space, 270, butH, butCol, 0, 
     [user]()->Result{
         Result rc = 0;
         //non-custom pfp
@@ -121,15 +128,23 @@ void SettingsMenu::Initialize() {
     sysinfo->AddString(0, 0, std::string("Console specific information."));
     sysinfo->AddString(0, 50, std::string("Firmware: " + Settings::GetFirmwareVersion()));
     sysinfo->AddString(0, 75, std::string("Serial: " + Settings::GetSerialNumber()));
-    std::vector<std::string> nick {Settings::GetDeviceNickname()};
-    sysinfo->AddElement(new Option("Nickname:", nick, 0, 100, optW, butH, butCol, 0, 
+    sysinfo->AddElement(new Option("Nickname:", Settings::GetDeviceNickname(), 0, 100, optW, butH, butCol, 0, 
     [sysinfo]()->Result{
         Result rc = 0;
-        //
+        char out[0xC00] = {0};
+        App::LaunchSwkbd(out, "Nickname", "", "Set name", "");
+        std::string name = std::string(out);
+        //Settings::SetDeviceNickname(name);
+        sysinfo->SetOptText(0, name);
         return rc;
     }));
-    std::vector<std::string> update {"Update"};
-    sysinfo->AddElement(new Option("", update, 0, 400, 190, butH, butCol, 0, 
+    sysinfo->AddElement(new Option("", "Config controllers", 0, 125, optW, butH, butCol, 0, 
+    []()->Result{
+        Result rc = 0;
+        rc = App::LaunchController();
+        return rc;
+    }));
+    sysinfo->AddElement(new Option("", "Update", 0, 400, optW, butH, butCol, 0, 
     []()->Result{
         Result rc = 0;
         //

@@ -35,15 +35,19 @@ class PanelObjBase
             Pos.y = y;
             Pos.w = w;
             Pos.h = h;
-        };
-        virtual ~PanelObjBase() {};
+        }
+        virtual ~PanelObjBase() {}
         
-        virtual void Draw(SDL_Rect pos, bool selected) {};
-        virtual void Run() {};
+        virtual void Draw(SDL_Rect pos, bool selected) {}
+        virtual void Run() {}
         
-        bool HasFunc() { return Callback != nullptr; };
+        //Setters for panel elements
+        virtual void SetOption(u32 ind, std::string text) {}
+        virtual void SetOptions(std::vector<std::string> opts) {}
+        virtual void SetImage(SDL_Texture *tex) {}
         
-        SDL_Texture *Tex;
+        bool HasFunc() { return Callback != nullptr; }
+        
         PanelElement Properties;
         
     protected:

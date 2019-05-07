@@ -34,7 +34,7 @@ size_t Memory::Heap = 0x10000000;
 */
 Result App::LaunchGame(u64 tid, u128 userID) {
     Result rc = 0;
-    #ifdef SWITCH
+    #ifdef __SWITCH__
     AppletStorage aStore;
     
     rc = appCreate(&currentApplication, tid, Create_App);
@@ -96,15 +96,12 @@ Result App::LaunchGame(u64 tid, u128 userID) {
 
 Result App::GetAppRecords(std::vector<NsApplicationRecord> &recs) {
     Result rc = 0;
-    #ifdef SWITCH
+    #ifdef __SWITCH__
     size_t size = 0;
     NsApplicationRecord rec[2000];
-    rc = nsInitialize();
     rc = nsListApplicationRecord(rec, 2000, 0, &size);
-    for(int i = 0; i < (int)size; i++) {
+    for(int i = 0; i < (int)size; i++)
         recs.push_back(rec[i]);
-    }
-    nsExit();
     #endif
     
     return rc;
@@ -112,7 +109,7 @@ Result App::GetAppRecords(std::vector<NsApplicationRecord> &recs) {
 
 bool App::IsVrEnabled() {
     bool b = false;
-    #ifdef SWITCH
+    #ifdef __SWITCH__
     appletIsVrModeEnabled(&b);
     #endif
     return b;
@@ -121,17 +118,15 @@ bool App::IsVrEnabled() {
 NsApplicationControlData App::GetGameControlData(u64 tid, u8 flag) {
     NsApplicationControlData buffer;
     size_t s = 0;
-    #ifdef SWITCH
-    nsInitialize();
+    #ifdef __SWITCH__
     nsGetApplicationControlData(flag, tid, &buffer, 0x20000, &s);
-    nsExit();
     #endif
     return buffer;
 }
 
 bool App::IsGamecardInserted() {
     bool b = false;
-    #ifdef SWITCH
+    #ifdef __SWITCH__
     FsDeviceOperator opt;
     fsOpenDeviceOperator(&opt);
     fsDeviceOperatorIsGameCardInserted(&opt, &b);
@@ -144,19 +139,37 @@ bool App::IsGamecardInserted() {
 */
 Result App::LaunchAlbum(u8 arg, bool startupSound) {
     Result rc = 0;
-    #ifdef SWITCH
+    #ifdef __SWITCH__
     Memory::SetManagedHeap(0xA800000);
     Memory::RunInManagedHeap([&]() {
         LibAppletArgs args;
+        AppletStorage storeIn;
+        Result rc = 0;
+        
         appletCreateLibraryApplet(&currentApplet, AppletId_photoViewer, LibAppletMode_AllForeground);
         libappletArgsCreate(&args, 0);
         libappletArgsSetPlayStartupSound(&args, startupSound);
         libappletArgsPush(&args, &currentApplet);
         
+        u8 stindata = arg;
+        rc = appletCreateStorage(&storeIn, sizeof(stindata));
+        if(R_FAILED(rc)) {
+            appletStorageClose(&storeIn);
+            ShowError("Error launching album", "Error creating storage.", rc);
+        }
+        
+        rc = appletStorageWrite(&storeIn, 0, &stindata, sizeof(stindata));
+        if(R_FAILED(rc)) {
+            appletStorageClose(&storeIn);
+            ShowError("Error launching album", "Error writing storage.", rc);
+        }
+        appletHolderPushInData(&currentApplet, &storeIn);
+        
         currentApplet.active = true;
         rc = appletHolderStart(&currentApplet);
         appletHolderJoin(&currentApplet);
         
+        appletStorageClose(&storeIn);
         appletHolderClose(&currentApplet);
         currentApplet.active = false;
     });
@@ -168,7 +181,7 @@ Result App::LaunchAlbum(u8 arg, bool startupSound) {
 u128 App::LaunchPSelect() {
     Result rc = 0;
     u128 player = 0;
-    #ifdef SWITCH
+    #ifdef __SWITCH__
     AppletStorage storeIn, storeOut;
     LibAppletArgs args;
     
@@ -219,7 +232,7 @@ u128 App::LaunchPSelect() {
 
 Result App::LaunchShop() {
     Result rc = 0;
-    #ifdef SWITCH
+    #ifdef __SWITCH__
     LibAppletArgs args;
     AppletStorage storeIn, storeOut;
     
@@ -264,18 +277,19 @@ Result App::LaunchShop() {
 
 Result App::LaunchWebsite(std::string url) {
     Result rc = 0;
-    #ifdef SWITCH
-    Memory::SetManagedHeap(0x13001000);
+    #ifdef __SWITCH__
+    Memory::SetManagedHeap(0xA800000);
     Memory::RunInManagedHeap([&]() {
         WebCommonConfig config;
         WebCommonReply reply;
-        WebExitReason exitReason = (WebExitReason)0;
+        WebExitReason exitReason = WebExitReason_ExitButton;
         rc = webPageCreate(&config, url.c_str());
         if (R_SUCCEEDED(rc)) {
             currentApplet.active = true;
             rc = webConfigShow(&config, &reply);
+            if (R_SUCCEEDED(rc))
+                rc = webReplyGetExitReason(&reply, &exitReason);
             currentApplet.active = false;
-            rc = webReplyGetExitReason(&reply, &exitReason);
         }
     });
     #endif
@@ -283,8 +297,90 @@ Result App::LaunchWebsite(std::string url) {
     return rc;
 }
 
+Result App::LaunchNews() {
+    Result rc = 0;
+    #ifdef __SWITCH__
+    Memory::SetManagedHeap(0xA800000);
+    Memory::RunInManagedHeap([&]() {
+        WebCommonConfig config;
+        WebCommonReply reply;
+        WebExitReason exitReason = WebExitReason_ExitButton;
+        rc = webNewsCreate(&config, "http://reinx.guide/");
+        if (R_SUCCEEDED(rc)) {
+            currentApplet.active = true;
+            rc = webConfigShow(&config, &reply);
+            if (R_SUCCEEDED(rc))
+                rc = webReplyGetExitReason(&reply, &exitReason);
+            currentApplet.active = false;
+        }
+    });
+    #endif
+
+    return rc;
+}
+
+Result App::LaunchSwkbd(char out[0xc00], std::string title, std::string placehold, std::string oktxt, std::string initTxt) {
+    Result rc;
+    SwkbdConfig kbd;
+    char tempstr[0xc00] = {0};
+    rc = swkbdCreate(&kbd, 0);
+    if(R_SUCCEEDED(rc)) {
+        swkbdConfigMakePresetDefault(&kbd);
+        swkbdConfigSetHeaderText(&kbd, title.c_str());
+        swkbdConfigSetOkButtonText(&kbd, oktxt.c_str());
+        swkbdConfigSetGuideText(&kbd, placehold.c_str());
+        swkbdConfigSetInitialText(&kbd, initTxt.c_str());
+        //swkbdConfigSetTextCheckCallback(&kbd, validate_text);
+        rc = swkbdShow(&kbd, tempstr, sizeof(tempstr));
+        if(R_SUCCEEDED(rc)) {
+            if(tempstr[0] != '\0')
+                strcpy(out, tempstr);
+        }else if(rc != (Result)0x5d59) {
+            ShowError("Software Keyboard Error", "Unknown error, Lookup errorcode for more info", rc);
+        }
+    }else{
+        ShowError("Software Keyboard Error", "Unknown error, Lookup errorcode for more info", rc);
+    }
+    swkbdClose(&kbd);
+    return rc;
+}
+
+Result App::LaunchNetConnect() {
+    Result rc = 0;
+    #ifdef __SWITCH__
+    Memory::SetManagedHeap(0xA800000);
+    Memory::RunInManagedHeap([&]() {
+        appletCreateLibraryApplet(&currentApplet, AppletId_netConnect, LibAppletMode_AllForeground);
+        currentApplet.active = true;
+        rc = appletHolderStart(&currentApplet);
+        appletHolderJoin(&currentApplet);
+        appletHolderClose(&currentApplet);
+        currentApplet.active = false;
+    });
+    #endif
+    
+    return rc;
+}
+
+Result App::LaunchController() {
+    Result rc = 0;
+    #ifdef __SWITCH__
+    Memory::SetManagedHeap(0xA800000);
+    Memory::RunInManagedHeap([&]() {
+        appletCreateLibraryApplet(&currentApplet, AppletId_controller, LibAppletMode_AllForeground);
+        currentApplet.active = true;
+        rc = appletHolderStart(&currentApplet);
+        appletHolderJoin(&currentApplet);
+        appletHolderClose(&currentApplet);
+        currentApplet.active = false;
+    });
+    #endif
+    
+    return rc;
+}
+
 Result App::ShowError(std::string errText, std::string details, Result rc) {
-    #ifdef SWITCH
+    #ifdef __SWITCH__
     AppletStorage errStor;
     LibAppletArgs args;
 
@@ -313,7 +409,7 @@ Result App::ShowError(std::string errText, std::string details, Result rc) {
 
 Result App::LaunchHbl() {
     Result rc = 0;
-    #ifdef SWITCH
+    #ifdef __SWITCH__
     Memory::SetManagedHeap(0xA800000);
     Memory::RunInManagedHeap([&]() {
         appletCreateLibraryApplet(&currentApplet, AppletId_offlineWeb, LibAppletMode_AllForeground);
@@ -335,7 +431,7 @@ Result App::CommandHandler(u32 cmd) {
     switch(cmd) {
         case CMD_Home:
         {
-            #ifdef SWITCH
+            #ifdef __SWITCH__
             if(currentApplication.active) {
                 appletHolderRequestExit(&currentApplication);
             }

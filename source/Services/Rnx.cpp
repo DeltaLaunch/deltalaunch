@@ -22,7 +22,7 @@ static Service g_rnxSrv;
 static u64 g_rnxRefCnt;
 
 bool Rnx::IsUsingReiNX() {
-    #ifdef SWITCH
+    #ifdef __SWITCH__
     if (serviceIsActive(&g_rnxSrv)) return true;
     #endif
     return false;
@@ -30,7 +30,7 @@ bool Rnx::IsUsingReiNX() {
 
 Result Rnx::Initialize() {
     Result rc = 0;
-    #ifdef SWITCH
+    #ifdef __SWITCH__
     atomicIncrement64(&g_rnxRefCnt);
     if (serviceIsActive(&g_rnxSrv)) return 0;
     rc = smGetService(&g_rnxSrv, "rnx");
@@ -39,7 +39,7 @@ Result Rnx::Initialize() {
 }
 
 void Rnx::Exit() {
-    #ifdef SWITCH
+    #ifdef __SWITCH__
     if (atomicDecrement64(&g_rnxRefCnt) == 0) {
         serviceClose(&g_rnxSrv);
     }
@@ -48,7 +48,7 @@ void Rnx::Exit() {
 
 Result Rnx::SetHbTidForDelta(u64 tid) {
     Result rc = 0;
-    #ifdef SWITCH
+    #ifdef __SWITCH__
     IpcCommand c;
     ipcInitialize(&c);
     struct Raw

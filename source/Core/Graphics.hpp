@@ -57,7 +57,6 @@ class Graphics
         static void DrawText(FontSize fntsize, u32 x, u32 y, std::string str);
         static void DrawText(FontSize fntsize, u32 x, u32 y, std::string str, u32 col);
         static void DrawText(FontSize fntsize, u32 x, u32 y, std::string str, u32 col, u32 wrap);
-        static void DrawTexture(std::string tex, u32 x, u32 y);
         static void RenderTexture(SDL_Texture *tex, SDL_Rect pos);
         static SDL_Renderer *GetRenderer() { return Rend; }
         static SDL_Surface *BufToSurf(void *buf, size_t size);
