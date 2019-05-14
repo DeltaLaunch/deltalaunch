@@ -54,9 +54,9 @@ void Dashboard::Initialize() {
     //Create buttons to add to dash
     unsigned x = 230;       //padding on edges
     unsigned space = 100;   //space inbetween
-    std::vector<std::string> names = Settings::GetThemeNames();
-    std::string baseThemeDir = names[0] + std::string("/");
-    INIReader cfg(names[0] + ".cfg");
+    std::string thmPath = Settings::GetCurrentTheme();
+    INIReader cfg(thmPath != "" ? (thmPath + ".cfg") : "");
+    cfg.SetBasePath(std::string(thmPath+"/"));
     std::vector<std::tuple<std::string, std::function<Result()>>> ButtonFuncs{
         std::tuple<std::string, std::function<Result()>>{"WebButton", std::bind(App::LaunchWebsite, "https://google.com/")},
         std::tuple<std::string, std::function<Result()>>{"NewsButton", App::LaunchNews},
@@ -68,8 +68,8 @@ void Dashboard::Initialize() {
     };
     for(u32 but = 0; but < ButtonFuncs.size(); but++) {
         Buttons.push_back(new Button(
-            baseThemeDir + cfg.Get(std::get<0>(ButtonFuncs.at(but)), "sprite", "romfs:/Graphics/Icons/" + std::get<0>(ButtonFuncs.at(but)) + ".png"), 
-            baseThemeDir + cfg.Get(std::get<0>(ButtonFuncs.at(but)), "sprite_select", "romfs:/Graphics/Icons/" + std::get<0>(ButtonFuncs.at(but)) + "_select.png"), 
+            cfg.Get(std::get<0>(ButtonFuncs.at(but)), "sprite", "romfs:/Graphics/Icons/" + std::get<0>(ButtonFuncs.at(but)) + ".png"), 
+            cfg.Get(std::get<0>(ButtonFuncs.at(but)), "sprite_select", "romfs:/Graphics/Icons/" + std::get<0>(ButtonFuncs.at(but)) + "_select.png"), 
             cfg.GetInteger(std::get<0>(ButtonFuncs.at(but)), "x", x+=space), 
             cfg.GetInteger(std::get<0>(ButtonFuncs.at(but)), "y", 600), 
             std::get<1>(ButtonFuncs.at(but))
@@ -77,9 +77,8 @@ void Dashboard::Initialize() {
     }
     
     //Setup folder sprite
-    SDL_Surface *img = IMG_Load((baseThemeDir + cfg.Get("Folders", "icon", "romfs:/Graphics/Folder.png")).c_str());
-    folderIcon = Graphics::CreateTexFromSurf(img);
-    if(!folderIcon) fatalSimple(0xBADC0DE);
+    SDL_Surface *img = IMG_Load(cfg.Get("Folders", "icon", "romfs:/Graphics/Folder.png").c_str());
+    if(img) folderIcon = Graphics::CreateTexFromSurf(img);
     
     std::vector<NsApplicationRecord> recs;
     App::GetAppRecords(recs);

@@ -63,6 +63,5 @@ class Engine
         ThreadManager *frndThread;
 		ThreadManager *samsThread;
 		ThreadManager *aemThread;
-        std::string baseThemeDir;
         u32 Width, Height;
 };

@@ -40,14 +40,14 @@ void Menu::IncrementSelect() {
     if(menuOpt < Buttons.size()-1)
         menuOpt++;
     else
-        menuOpt = 0;
+        menuOpt = Buttons.size()-1;
 }
 
 void Menu::DecrementSelect() {
     if(menuOpt > 0)
         menuOpt--;
     else
-        menuOpt = Buttons.size()-1;
+        menuOpt = 0;
 }
 
 void Menu::SetBackground(std::string tex) {

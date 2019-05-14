@@ -26,7 +26,6 @@ TTF_Font *Graphics::smallFont;
 u32 Graphics::defaultSelCol;
 u32 Graphics::winWidth;
 u32 Graphics::winHeight;
-std::string Graphics::baseThemeDir;
 
 void Graphics::Init(std::string name, u32 width, u32 height, std::string font) {
     //Basic SDL init
@@ -39,7 +38,6 @@ void Graphics::Init(std::string name, u32 width, u32 height, std::string font) {
     SDL_SetRenderDrawColor(Rend, 0xFF, 0xFF, 0xFF, 0xFF);
     Graphics::winWidth = width;
     Graphics::winHeight = height;
-    Logger::write(font);
     
     if(font == "") {
         Result rc = 0;
@@ -52,13 +50,13 @@ void Graphics::Init(std::string name, u32 width, u32 height, std::string font) {
         }
     } 
     else {
-        debugFont = TTF_OpenFont((baseThemeDir+font).c_str(), 14);
-        hdrFont = TTF_OpenFont((baseThemeDir+font).c_str(), 28);
-        smallFont = TTF_OpenFont((baseThemeDir+font).c_str(), 20);
+        debugFont = TTF_OpenFont(font.c_str(), 14);
+        hdrFont = TTF_OpenFont(font.c_str(), 28);
+        smallFont = TTF_OpenFont(font.c_str(), 20);
     }
     
     appletRequestForeground();
-    //appletSetHandlesRequestToDisplay(true);
+    appletSetHandlesRequestToDisplay(true);
 }
 
 void Graphics::Exit() {
@@ -163,7 +161,6 @@ void Graphics::DrawButton(SDL_Rect Pos, std::string Text, ButtonType butType) {
         }
         case BTN_Selected_Lay1:
         {
-            
             SDL_Rect pos; 
             pos.x = Pos.x-5; pos.y = Pos.y-5;
             pos.w = Pos.w+10; pos.h = Pos.h+10;

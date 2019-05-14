@@ -34,14 +34,14 @@ void Panel::IncrementSelect() {
     if(optSelect < Elements.size()-1)
         optSelect++;
     else
-        optSelect = 0;
+        optSelect = Elements.size()-1;
 }
 
 void Panel::DecrementSelect() {
     if(optSelect > 0)
         optSelect--;
     else
-        optSelect = Elements.size()-1;
+        optSelect = 0;
 }
 
 void Panel::Update(u32 kDown, bool selected) {
@@ -54,8 +54,8 @@ void Panel::Update(u32 kDown, bool selected) {
         ind++;
     }
     if(selected){        
-        if(kDown & KEY_DUP) IncrementSelect();
-        if(kDown & KEY_DDOWN) DecrementSelect();
+        if(kDown & KEY_DUP) DecrementSelect();
+        if(kDown & KEY_DDOWN) IncrementSelect();
         if(kDown & KEY_A) {
             if(Elements[optSelect]->HasFunc())
                 Elements[optSelect]->Run();

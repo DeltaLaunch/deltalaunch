@@ -24,7 +24,6 @@
 #include <switch.h>
 #include <stdint.h>
 #include <string>
-#include "Logger.hpp"
 
 #define GREY 0x4C4C4CFF
 
@@ -68,12 +67,9 @@ class Graphics
         static u32 GetDefaultButCol() { return GREY; }
         static u32 GetWinWidth() { return winWidth; }
         static u32 GetWinHeight() { return winHeight; }
-        static void SetBaseThemeDir(std::string dir) { baseThemeDir = dir; }
-        static std::string GetBaseThemeDir() { return baseThemeDir; }
         static void Render();
         static void Clear();
     private:
-        static std::string baseThemeDir;
         static u32 defaultSelCol;
         static u32 winWidth;
         static u32 winHeight;

@@ -20,6 +20,7 @@
 
 SelectType Settings::gameSelType;
 GameAreaType Settings::gameAreaType;
+u32 Settings::currentTheme;
 
 std::string Settings::GetFirmwareVersion() {
     SetSysFirmwareVersion firm;
@@ -98,12 +99,14 @@ void Settings::SetAudioVolume(u8 vol) {
     #endif
 }
 
-std::vector<std::string> Settings::GetThemeNames() {
+std::string Settings::GetCurrentTheme() {
     std::vector<std::string> names;
-    for (const auto & entry : std::experimental::filesystem::v1::directory_iterator("/Themes")) {
+    std::string path = "/Themes";
+    if (!std::experimental::filesystem::exists(path)) return "";
+    for (const auto & entry : std::experimental::filesystem::v1::directory_iterator(path)) {
         names.push_back(entry.path().string());
 	}
-    return names;
+    return names.empty() ? "" : names[currentTheme];
 }
 
 size_t Settings::GetMemAvail() {

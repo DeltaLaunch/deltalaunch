@@ -46,7 +46,8 @@ class Settings
         static void SetLockScreenFlag(u8 flag);
         static u8 GetAudioVolume();
         static void SetAudioVolume(u8 vol);
-        static std::vector<std::string> GetThemeNames();
+        static std::string GetCurrentTheme();
         static size_t GetMemAvail();
         static size_t GetMemUsed();
+        static u32 currentTheme;
 };

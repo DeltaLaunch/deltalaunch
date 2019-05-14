@@ -27,9 +27,7 @@ Engine::Engine(u32 width, u32 height) {
         fatalSimple(0xBADC0DE);
     }
     Rnx::SetHbTidForDelta(0x010000000000100F);
-    
     romfsMountFromFsdev("/ReiNX/titles/0100000000001000/romfs.bin", 0, "romfs");
-    
     Width = width;
     Height = height;
     running = true;
@@ -45,10 +43,9 @@ Engine::~Engine() {
 
 void Engine::Initialize() {
     //Read config file
-    std::vector<std::string> names = Settings::GetThemeNames();
-    baseThemeDir = names[0] + std::string("/");
-    Graphics::SetBaseThemeDir(baseThemeDir);
-    INIReader cfg(names[0] + ".cfg");
+    std::string thmPath = Settings::GetCurrentTheme();
+    INIReader cfg(thmPath != "" ? (thmPath + ".cfg") : "");
+    cfg.SetBasePath(std::string(thmPath+"/"));
     Graphics::Init(TITLE, Width, Height, cfg.Get("Config", "font", ""));
     Graphics::SetDefaultSelCol(cfg.GetInteger("Config", "defaultSelCol", 0xFFCEFF));
 
@@ -59,7 +56,7 @@ void Engine::Initialize() {
 		tmp = cfg.Get("Background", "layer"+ std::to_string(lay), "");
         if(lay == 0 && tmp == "") tmp = "romfs:/Graphics/Wallpaper.png";
 		if(tmp == "") continue;
-		layers.push_back(baseThemeDir + tmp);
+		layers.push_back(tmp);
 	}
     
     //Init dashboard
@@ -68,9 +65,9 @@ void Engine::Initialize() {
     dash = new Dashboard(Width, Height);
     dash->Initialize();
     dash->SetWallpaper(layers);
-    dash->SetLockScreen(baseThemeDir + cfg.Get("Config", "lockscreen_image", "romfs:/Graphics/Lock.png"));
-    dash->SetOverlay(baseThemeDir + cfg.Get("BatteryOverlay", "battery", "romfs:/Graphics/Overlay/Battery.png"), batPos, clkPos);
-	dash->settings->SetBackground(baseThemeDir + cfg.Get("Config", "menus", "romfs:/Graphics/Menu.png"));
+    dash->SetLockScreen(cfg.Get("Config", "lockscreen_image", "romfs:/Graphics/Lock.png"));
+    dash->SetOverlay(cfg.Get("BatteryOverlay", "battery", "romfs:/Graphics/Overlay/Battery.png"), batPos, clkPos);
+	dash->settings->SetBackground(cfg.Get("Config", "menus", "romfs:/Graphics/Menu.png"));
     State = (Settings::GetLockScreenFlag() ? STATE_LOCKSCREEN : STATE_DASHBOARD);
 	layers.clear();
     

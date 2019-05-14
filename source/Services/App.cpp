@@ -140,7 +140,7 @@ bool App::IsGamecardInserted() {
 Result App::LaunchAlbum(u8 arg, bool startupSound) {
     Result rc = 0;
     #ifdef __SWITCH__
-    Memory::SetManagedHeap(0xA800000);
+    Memory::SetManagedHeap(0xB000000);
     Memory::RunInManagedHeap([&]() {
         LibAppletArgs args;
         AppletStorage storeIn;

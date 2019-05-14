@@ -323,6 +323,8 @@ public:
     // Return the result of ini_parse(), i.e., 0 on success, line number of
     // first error on parse error, or -1 on file open error.
     int ParseError() const;
+    
+    void SetBasePath(std::string path);
 
     // Return the list of sections found in ini file
     const std::set<std::string>& Sections() const;
@@ -347,6 +349,7 @@ public:
 
 protected:
     int _error;
+    std::string basePath;
     std::map<std::string, std::string> _values;
     std::set<std::string> _sections;
     static std::string MakeKey(std::string section, std::string name);
@@ -376,6 +379,10 @@ inline int INIReader::ParseError() const
     return _error;
 }
 
+inline void INIReader::SetBasePath(std::string path) {
+    basePath = path;
+}
+
 inline const std::set<string>& INIReader::Sections() const
 {
     return _sections;
@@ -384,7 +391,7 @@ inline const std::set<string>& INIReader::Sections() const
 inline string INIReader::Get(string section, string name, string default_value) const
 {
     string key = MakeKey(section, name);
-    return _values.count(key) ? _values.at(key) : default_value;
+    return _values.count(key) ? (basePath + _values.at(key)) : default_value;
 }
 
 inline long INIReader::GetInteger(string section, string name, long default_value) const
