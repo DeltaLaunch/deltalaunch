@@ -36,12 +36,14 @@ extern "C"{
 
 void userAppInit(void) {
     nsInitialize();
+    plInitialize();
     setsysInitialize();
     Rnx::Initialize();
 }
 
 void userAppExit(void) {
     nsExit();
+    plExit();
     setsysExit();
     Rnx::Exit();
 }

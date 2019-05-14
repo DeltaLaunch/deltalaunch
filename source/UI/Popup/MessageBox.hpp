@@ -25,6 +25,11 @@
 #include "../../Services/Hid.hpp"
 #include "../Menus/Button.hpp"
 
+enum MsgType {
+    MSGBOX_OK,
+    MSGBOX_YESNO,
+};
+
 class MessageBox
 {
     public:
@@ -32,6 +37,13 @@ class MessageBox
             Title = title;
             Body = body;
             visible = true;
+            msgType = MSGBOX_OK;
+        }
+        void Show(std::string title, std::string body, MsgType type){
+            Title = title;
+            Body = body;
+            visible = true;
+            msgType = type;
         }
         
         void Update() {
@@ -44,11 +56,23 @@ class MessageBox
             Graphics::BorderedRectangle(pos, Graphics::GetDefaultButCol(), 0xFF, 5);
             Graphics::Rectangle(pos.x+10, pos.y+50, pos.w-20, 3, 0xFF);
             Graphics::DrawText(FNT_Small, pos.x+20, pos.y+12, Title, 0xFFFFFFFF, pos.w);
-            Graphics::DrawText(FNT_Small, pos.x+15, pos.y+80, Body, 0xFFFFFFFF, pos.w);
-            Graphics::DrawButton(Buttons[0]->Pos, Buttons[0]->Text, BTN_Unselected);
-            Graphics::DrawButton(Buttons[1]->Pos, Buttons[1]->Text, BTN_Unselected);
-            if(Hid::Input & KEY_LEFT) selected = (selected) ? 0 : 1;
-            if(Hid::Input & KEY_RIGHT) selected = (!selected) ? 0 : 1;
+            Graphics::DrawText(FNT_Small, pos.x+20, pos.y+80, Body, 0xFFFFFFFF, pos.w);
+            switch(msgType) {
+                case MSGBOX_OK:
+                {
+                    Graphics::DrawButton(Buttons[0]->Pos, Buttons[0]->Text, BTN_Selected_Lay1);
+                    break;
+                }
+                case MSGBOX_YESNO:
+                {
+                    Graphics::DrawButton(Buttons[1]->Pos, Buttons[1]->Text, selected ? BTN_Unselected : BTN_Selected_Lay1);
+                    Graphics::DrawButton(Buttons[2]->Pos, Buttons[2]->Text, selected ? BTN_Selected_Lay1 : BTN_Unselected);
+                    break;
+                }
+            }
+            
+            if(Hid::Input & KEY_LEFT) selected = 0;
+            if(Hid::Input & KEY_RIGHT) selected = 1;
             if(Hid::Input & KEY_A){
                 visible = false;
             }
@@ -71,8 +95,10 @@ class MessageBox
             pos.h = height/2;
             pos.x = (wid/2) - (pos.w/2);
             pos.y = (height/2) - (pos.h/2);
-            Buttons.push_back(new Button("Ok", pos.x+50, pos.y+200, 20, 10, 0x888888FF, nullptr));
-            Buttons.push_back(new Button("Cancel", pos.x+80, pos.y+200, 20, 10, 0x888888FF, nullptr));
+            u32 butW = 150, butH = 50;
+            Buttons.push_back(new Button("Ok", pos.x+pos.w-butW-20, pos.y+pos.h-butH-20, butW, butH, 0x888888FF, nullptr));
+            Buttons.push_back(new Button("No", pos.x+pos.w-butW-20, pos.y+pos.h-butH-20, butW, butH, 0x888888FF, nullptr));
+            Buttons.push_back(new Button("Yes", pos.x+pos.w-((butW+20)*2), pos.y+pos.h-butH-20, butW, butH, 0x888888FF, nullptr));
             selected = 0;
             visible = false;
         };
@@ -81,6 +107,7 @@ class MessageBox
         SDL_Rect pos;
         bool visible;
         u8 selected;
+        MsgType msgType;
         std::string Title, Body;
         std::vector<Button*> Buttons;
 };

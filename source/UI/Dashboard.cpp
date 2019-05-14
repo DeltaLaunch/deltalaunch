@@ -102,7 +102,8 @@ void Dashboard::Initialize() {
 void Dashboard::UpdateDash() { 
     if(Hid::Input & KEY_A) ActivateDash();
 	if(Hid::Input & KEY_LSTICK)  debugInfo = !debugInfo;
-	if(Hid::Input & KEY_MINUS) msgBox->Show("Test", "hello");
+	if(Hid::Input & KEY_MINUS) msgBox->Show("Test", "hello", MSGBOX_OK);
+    if(Hid::Input & KEY_PLUS) msgBox->Show("Test 2", "testing....", MSGBOX_YESNO);
 	if((Hid::Input & KEY_DLEFT) || (Hid::Input & KEY_LSTICK_LEFT)) DecrementDashSel();
 	if((Hid::Input & KEY_DRIGHT) || (Hid::Input & KEY_LSTICK_RIGHT)) IncrementDashSel();
 	if((Hid::Input & KEY_DUP) || (Hid::Input & KEY_LSTICK_UP)) App::dashLayer = 0;

@@ -39,6 +39,7 @@ class Settings
         static GameAreaType gameAreaType;
         static std::string GetFirmwareVersion();
         static std::string GetDeviceNickname();
+        static u64 GetSystemLangCode();
         static void SetDeviceNickname(std::string nick);
 		static std::string GetSerialNumber();
         static u8 GetLockScreenFlag();

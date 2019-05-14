@@ -26,6 +26,7 @@ TTF_Font *Graphics::smallFont;
 u32 Graphics::defaultSelCol;
 u32 Graphics::winWidth;
 u32 Graphics::winHeight;
+std::string Graphics::baseThemeDir;
 
 void Graphics::Init(std::string name, u32 width, u32 height, std::string font) {
     //Basic SDL init
@@ -38,19 +39,22 @@ void Graphics::Init(std::string name, u32 width, u32 height, std::string font) {
     SDL_SetRenderDrawColor(Rend, 0xFF, 0xFF, 0xFF, 0xFF);
     Graphics::winWidth = width;
     Graphics::winHeight = height;
+    Logger::write(font);
     
-    plInitialize();
     if(font == "") {
+        Result rc = 0;
         PlFontData fnt;
-        plGetSharedFontByType(&fnt, PlSharedFontType_Standard);
-        debugFont = TTF_OpenFontRW(SDL_RWFromMem(fnt.address, fnt.size), 1, 14);
-        hdrFont = TTF_OpenFontRW(SDL_RWFromMem(fnt.address, fnt.size), 1, 28);
-        smallFont = TTF_OpenFontRW(SDL_RWFromMem(fnt.address, fnt.size), 1, 20);
+        rc = plGetSharedFontByType(&fnt, PlSharedFontType_Standard);
+        if(R_SUCCEEDED(rc)) {
+            debugFont = TTF_OpenFontRW(SDL_RWFromMem(fnt.address, fnt.size), 1, 14);
+            hdrFont = TTF_OpenFontRW(SDL_RWFromMem(fnt.address, fnt.size), 1, 28);
+            smallFont = TTF_OpenFontRW(SDL_RWFromMem(fnt.address, fnt.size), 1, 20);
+        }
     } 
     else {
-        debugFont = TTF_OpenFont(font.c_str(), 14);
-        hdrFont = TTF_OpenFont(font.c_str(), 28);
-        smallFont = TTF_OpenFont(font.c_str(), 20);
+        debugFont = TTF_OpenFont((baseThemeDir+font).c_str(), 14);
+        hdrFont = TTF_OpenFont((baseThemeDir+font).c_str(), 28);
+        smallFont = TTF_OpenFont((baseThemeDir+font).c_str(), 20);
     }
     
     appletRequestForeground();
@@ -62,7 +66,6 @@ void Graphics::Exit() {
     TTF_CloseFont(debugFont);
 	TTF_CloseFont(hdrFont);
 	TTF_CloseFont(smallFont);
-    plExit();
     TTF_Quit();
     IMG_Quit();
     SDL_DestroyRenderer(Rend);

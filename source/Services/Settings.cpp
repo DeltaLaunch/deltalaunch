@@ -55,6 +55,15 @@ std::string Settings::GetDeviceNickname() {
     return str;
 }
 
+u64 Settings::GetSystemLangCode() {
+    Result rc = 0;
+    u64 code = 0;
+    #ifdef __SWITCH__
+    rc = setGetSystemLanguage(&code);
+    #endif
+    return R_SUCCEEDED(rc) ? code : 0;
+}
+
 void Settings::SetDeviceNickname(std::string nick) {
     #ifdef __SWITCH__
     //setsysSetDeviceNickname((char*)nick.c_str());

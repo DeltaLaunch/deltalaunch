@@ -31,7 +31,7 @@ SettingsMenu::~SettingsMenu() {
 void SettingsMenu::Initialize() {
     panX = 500;
     panY = 100;
-    u32 Y = 40, butW = 210, butH = 50, butCol = 0x202020FF, optW = 280, optY = 20;
+    u32 Y = 40, butW = 210, butH = 50, butCol = 0x202020FF, optW = 300, optY = 20;
     u32 space = 15+butH;
     
     //Toggle lock screen
@@ -78,7 +78,7 @@ void SettingsMenu::Initialize() {
         return rc;
     }));
     std::vector<std::string> pfp {"Use pre-defined image"};
-    user->AddElement(new Option("", pfp, 0, 260+space, 270, butH, butCol, 0, 
+    user->AddElement(new Option("", pfp, 0, 260+space, optW, butH, butCol, 0, 
     [user]()->Result{
         Result rc = 0;
         //non-custom pfp
@@ -128,7 +128,8 @@ void SettingsMenu::Initialize() {
     sysinfo->AddString(0, 0, std::string("Console specific information."));
     sysinfo->AddString(0, 50, std::string("Firmware: " + Settings::GetFirmwareVersion()));
     sysinfo->AddString(0, 75, std::string("Serial: " + Settings::GetSerialNumber()));
-    sysinfo->AddElement(new Option("Nickname:", Settings::GetDeviceNickname(), 0, 100, optW, butH, butCol, 0, 
+    Y = 100;
+    sysinfo->AddElement(new Option("Nickname:", Settings::GetDeviceNickname(), 0, Y+=space, optW, butH, butCol, 0, 
     [sysinfo]()->Result{
         Result rc = 0;
         char out[0xC00] = {0};
@@ -138,7 +139,7 @@ void SettingsMenu::Initialize() {
         sysinfo->SetOptText(0, name);
         return rc;
     }));
-    sysinfo->AddElement(new Option("", "Config controllers", 0, 125, optW, butH, butCol, 0, 
+    sysinfo->AddElement(new Option("", "Config controllers", 0, Y+=space, optW, butH, butCol, 0, 
     []()->Result{
         Result rc = 0;
         rc = App::LaunchController();

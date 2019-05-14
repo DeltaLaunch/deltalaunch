@@ -32,11 +32,6 @@ Engine::Engine(u32 width, u32 height) {
     
     Width = width;
     Height = height;
-    FILE *fp = fopen("log.txt", "w");
-    for (const auto & entry : std::experimental::filesystem::v1::directory_iterator("romfs:/")) {
-        fwrite(entry.path().string().c_str(), strlen(entry.path().string().c_str()), 1, fp);
-	}
-    fclose(fp);
     running = true;
 }
 
@@ -52,8 +47,9 @@ void Engine::Initialize() {
     //Read config file
     std::vector<std::string> names = Settings::GetThemeNames();
     baseThemeDir = names[0] + std::string("/");
+    Graphics::SetBaseThemeDir(baseThemeDir);
     INIReader cfg(names[0] + ".cfg");
-    Graphics::Init(TITLE, Width, Height, baseThemeDir+cfg.Get("Config", "font", "romfs:/Fonts/NintendoStandard.ttf"));
+    Graphics::Init(TITLE, Width, Height, cfg.Get("Config", "font", ""));
     Graphics::SetDefaultSelCol(cfg.GetInteger("Config", "defaultSelCol", 0xFFCEFF));
 
     //Setup background
