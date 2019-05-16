@@ -35,6 +35,7 @@ class Hid
 		static bool IsTouched(SDL_Rect pos);
         static touchPosition GetTouchPos();
 		static bool IsLongPress();
+        static bool IsGpioPressed(GpioPadSession *but, GpioPadName name);
 		static void InitGpioButton(GpioPadSession *but, GpioPadName name);
 		static void CloseGpioButton(GpioPadSession *but);
 };

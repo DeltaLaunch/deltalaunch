@@ -31,7 +31,7 @@ SettingsMenu::~SettingsMenu() {
 void SettingsMenu::Initialize() {
     panX = 500;
     panY = 100;
-    u32 Y = 40, butW = 210, butH = 50, butCol = 0x202020FF, optW = 300, optY = 20;
+    u32 Y = 40, butW = 210, butH = 50, butCol = 0x202020FF, optW = 320, optY = 20;
     u32 space = 15+butH;
     
     //Toggle lock screen

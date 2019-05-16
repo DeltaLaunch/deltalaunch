@@ -56,6 +56,12 @@ bool Hid::IsLongPress() {
 	return false;
 }
 
+bool Hid::IsGpioPressed(GpioPadSession *but, GpioPadName name) {
+    GpioValue gval = GpioValue_High;
+    gpioPadGetValue(but, &gval);
+    return (gval == GpioValue_Low);
+}
+
 void Hid::InitGpioButton(GpioPadSession *but, GpioPadName name) {
 	gpioOpenSession(but, name);
 }

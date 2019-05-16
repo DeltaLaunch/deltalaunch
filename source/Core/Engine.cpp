@@ -22,15 +22,29 @@ EngineState Engine::State = STATE_DASHBOARD;
 MessageBox* MessageBox::instance = nullptr;
 
 Engine::Engine(u32 width, u32 height) {
+    //Setup vars
+    screenPos.x = screenPos.y = 0;
+    screenPos.w = width;
+    screenPos.h = height;
+    running = true;
+    
+    //Mount romfs
+    romfsMountFromFsdev("/ReiNX/titles/0100000000001000/romfs.bin", 0, "romfs");
+    
     //Detect reinx
     if(!Rnx::IsUsingReiNX()) {
-        fatalSimple(0xBADC0DE);
+        Graphics::Init("", screenPos.w, screenPos.h, "");
+        SDL_Surface *surf = IMG_Load("romfs:/Graphics/BSOD.png");
+        SDL_Texture *tex = Graphics::CreateTexFromSurf(surf);
+        Graphics::RenderTexture(tex, screenPos);
+        SDL_FreeSurface(surf);
+        SDL_DestroyTexture(tex);
+        Graphics::Render();
+        while(!Hid::GetInput());
+        Power::Shutdown();
     }
-    Rnx::SetHbTidForDelta(0x010000000000100F);
-    romfsMountFromFsdev("/ReiNX/titles/0100000000001000/romfs.bin", 0, "romfs");
-    Width = width;
-    Height = height;
-    running = true;
+    else
+        Rnx::SetHbTidForDelta(0x010000000000100F);
 }
 
 Engine::~Engine() {
@@ -42,11 +56,12 @@ Engine::~Engine() {
 }
 
 void Engine::Initialize() {
+    
     //Read config file
     std::string thmPath = Settings::GetCurrentTheme();
     INIReader cfg(thmPath != "" ? (thmPath + ".cfg") : "");
     cfg.SetBasePath(std::string(thmPath+"/"));
-    Graphics::Init(TITLE, Width, Height, cfg.Get("Config", "font", ""));
+    Graphics::Init(TITLE, screenPos.w, screenPos.h, cfg.Get("Config", "font", ""));
     Graphics::SetDefaultSelCol(cfg.GetInteger("Config", "defaultSelCol", 0xFFCEFF));
 
     //Setup background
@@ -62,7 +77,7 @@ void Engine::Initialize() {
     //Init dashboard
     SDL_Rect batPos; batPos.x = cfg.GetInteger("BatteryOverlay", "x", 1180); batPos.y = cfg.GetInteger("BatteryOverlay", "y", 14);
     SDL_Rect clkPos; clkPos.x = cfg.GetInteger("ClockOverlay", "x", 1110); clkPos.y = cfg.GetInteger("ClockOverlay", "y", 14);
-    dash = new Dashboard(Width, Height);
+    dash = new Dashboard(screenPos.w, screenPos.h);
     dash->Initialize();
     dash->SetWallpaper(layers);
     dash->SetLockScreen(cfg.Get("Config", "lockscreen_image", "romfs:/Graphics/Lock.png"));
@@ -71,8 +86,8 @@ void Engine::Initialize() {
     State = (Settings::GetLockScreenFlag() ? STATE_LOCKSCREEN : STATE_DASHBOARD);
 	layers.clear();
     
-    //appletLoadAndApplyIdlePolicySettings();
-    //appletAllowToEnterSleep();
+    appletLoadAndApplyIdlePolicySettings();
+    appletAllowToEnterSleep();
 
 	//Start threads
     frndThread = new ThreadManager(Threads::FriendThread);

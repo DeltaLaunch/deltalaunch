@@ -63,5 +63,5 @@ class Engine
         ThreadManager *frndThread;
 		ThreadManager *samsThread;
 		ThreadManager *aemThread;
-        u32 Width, Height;
+        SDL_Rect screenPos; 
 };
