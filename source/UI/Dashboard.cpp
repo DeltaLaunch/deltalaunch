@@ -37,6 +37,7 @@ Dashboard::Dashboard(u32 width, u32 height) {
 	SetPos.x=SetPos.y=0; SetPos.w=Width; SetPos.h=Height;
 	settings = new SettingsMenu(SetPos);
     settings->Initialize();
+    Hid::TouchInit();
 }
 
 Dashboard::~Dashboard() {
@@ -98,7 +99,8 @@ void Dashboard::Initialize() {
 /*
 *   Draw/Set Graphics
 */
-void Dashboard::UpdateDash() { 
+void Dashboard::UpdateDash() {
+    Hid::TouchProcess();
     if(Hid::Input & KEY_A) ActivateDash();
 	if(Hid::Input & KEY_LSTICK)  debugInfo = !debugInfo;
 	if(Hid::Input & KEY_MINUS) msgBox->Show("Test", "hello", MSGBOX_OK);
@@ -107,7 +109,7 @@ void Dashboard::UpdateDash() {
 	if((Hid::Input & KEY_DRIGHT) || (Hid::Input & KEY_LSTICK_RIGHT)) IncrementDashSel();
 	if((Hid::Input & KEY_DUP) || (Hid::Input & KEY_LSTICK_UP)) App::dashLayer = 0;
 	if((Hid::Input & KEY_DDOWN) || (Hid::Input & KEY_LSTICK_DOWN)) App::dashLayer = 1;
-	if(Hid::IsTouched(GameIconArea)) {
+	if(Hid::IsMoving(GameIconArea)) {
 		if(lastPosX != 0) 
 			OffsetGameIcons(Hid::GetTouchPos().px - lastPosX);
 		lastPosX = Hid::GetTouchPos().px;
@@ -118,7 +120,7 @@ void Dashboard::UpdateDash() {
     //Check button interactions
     for(auto button: Buttons) {
         //Detect touch selection
-        if(Hid::IsTouched(button->Pos) && !settings->IsOpen()) {
+        if((Hid::IsTouched(button->Pos) && !Hid::IsMoving()) && !settings->IsOpen()) {
             lastErr = button->Run();
 			if(lastErr) App::ShowError("An Error has occurred!", "Error code: " + std::to_string(lastErr), lastErr);
             appletRequestForeground();
@@ -130,7 +132,7 @@ void Dashboard::UpdateDash() {
     for(auto entry: GameEntries) {
         //Detect touch selection
         if(!settings->IsOpen() && Hid::IsTouched(entry->Pos)) {
-            if (ind == App::gameSelectInd) {
+            if (ind == App::gameSelectInd && !Hid::IsMoving()) {
                 //Game
                 if(entry->GetTitleId() && entry->FolderID == 0) {
                     lastErr = entry->Run();

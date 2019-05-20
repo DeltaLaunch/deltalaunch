@@ -86,7 +86,7 @@ void Engine::Initialize() {
     State = (Settings::GetLockScreenFlag() ? STATE_LOCKSCREEN : STATE_DASHBOARD);
 	layers.clear();
     
-    appletLoadAndApplyIdlePolicySettings();
+    //appletLoadAndApplyIdlePolicySettings();
     appletAllowToEnterSleep();
 
 	//Start threads

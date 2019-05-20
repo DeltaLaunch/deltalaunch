@@ -19,41 +19,49 @@
 #include "Hid.hpp"
 
 u64 Hid::Input;
+TouchInfo Hid::touchInfo;
 
 u64 Hid::GetInput() {
     hidScanInput();
     return hidKeysDown(CONTROLLER_P1_AUTO);
 }
 
-bool Hid::IsTouched(){
-    if(hidTouchCount() < 1) return false;
-    touchPosition touchPos;
-    hidTouchRead(&touchPos, 0);
-    return (touchPos.px != 0 && touchPos.py != 0);
+void Hid::TouchInit() {
+    touchInfo.state = TouchInfo::TouchNone;
+    touchInfo.tapType = TouchInfo::TapNone;
 }
 
-bool Hid::IsTouched(SDL_Rect pos){
-    if(hidTouchCount() < 1) return false;
-    touchPosition touchPos;
-    hidTouchRead(&touchPos, 0);
-    return ((int)touchPos.px >= pos.x && (int)touchPos.px <= (pos.x + pos.w) && (int)touchPos.py >= pos.y && (int)touchPos.py <= (pos.y + pos.h));
-}
+void Hid::TouchProcess() {
+    touchPosition currentTouch;
+    u32 touches = hidTouchCount();
+    
+    if (touches >= 1)
+        hidTouchRead(&currentTouch, 0);
+        
+    u64 current_time;
+    timeGetCurrentTime(TimeType_UserSystemClock, &current_time);
+    
+    // On touch start.
+    if (touches == 1 && (touchInfo.state == TouchInfo::TouchNone || touchInfo.state == TouchInfo::TouchEnded)) {
+        touchInfo.state = TouchInfo::TouchStart;
+        touchInfo.firstTouch = currentTouch;
+        touchInfo.prevTouch = currentTouch;
+        touchInfo.tapType = TouchInfo::TapShort;
+        touchInfo.touchStart = current_time;
+    }
+    // On touch moving.
+    else if (touches >= 1 && touchInfo.state != TouchInfo::TouchNone) {
+        touchInfo.state = TouchInfo::TouchMoving;
+        touchInfo.prevTouch = currentTouch;
 
-touchPosition Hid::GetTouchPos() {
-    touchPosition touchPos;
-    hidTouchRead(&touchPos, 0);
-    return touchPos;
-}
-
-bool Hid::IsLongPress() {
-	touchPosition touchPos;
-    hidTouchRead(&touchPos, 0);
-	int i = svcGetSystemTick();
-    while(touchPos.px != 0 && touchPos.py != 0) {
-		if(svcGetSystemTick() - i >= LONGPRESS_MS) return true;
-		hidTouchRead(&touchPos, 0);
-	}
-	return false;
+        if (touchInfo.tapType != TouchInfo::TapNone && (abs((double)(touchInfo.firstTouch.px - currentTouch.px)) > TAP_MOVEMENT_GAP || abs((double)(touchInfo.firstTouch.py - currentTouch.py)) > TAP_MOVEMENT_GAP))
+            touchInfo.tapType = TouchInfo::TapNone;
+        else if (touchInfo.tapType == TouchInfo::TapShort && current_time - touchInfo.touchStart >= LONG_TAP_PERIOD)
+            touchInfo.tapType = TouchInfo::TapLong;
+    }
+    // On touch end.
+    else
+        touchInfo.state = (touchInfo.state == TouchInfo::TouchMoving) ? TouchInfo::TouchEnded : TouchInfo::TouchNone;
 }
 
 bool Hid::IsGpioPressed(GpioPadSession *but, GpioPadName name) {
