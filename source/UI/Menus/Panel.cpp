@@ -46,7 +46,7 @@ void Panel::DecrementSelect() {
 
 void Panel::Update(u32 kDown, bool selected) {
     for(int s = 0; s < (int)Strings.size(); s++) {
-        Graphics::DrawText(FNT_Small, std::get<0>(Strings.at(s))+Pos.x, std::get<1>(Strings.at(s))+Pos.y, std::get<2>(Strings.at(s)));
+        Graphics::DrawText(Fonts::FONT_SMALL, std::get<0>(Strings.at(s))+Pos.x, std::get<1>(Strings.at(s))+Pos.y, std::get<2>(Strings.at(s)));
     }
     unsigned ind = 0;
     for(auto elem: Elements) {

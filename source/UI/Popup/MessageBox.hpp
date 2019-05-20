@@ -55,8 +55,8 @@ class MessageBox
             Graphics::Rectangle(p, 0x50);
             Graphics::BorderedRectangle(pos, Graphics::GetDefaultButCol(), 0xFF, 5);
             Graphics::Rectangle(pos.x+10, pos.y+50, pos.w-20, 3, 0xFF);
-            Graphics::DrawText(FNT_Small, pos.x+20, pos.y+12, Title, 0xFFFFFFFF, pos.w);
-            Graphics::DrawText(FNT_Small, pos.x+20, pos.y+80, Body, 0xFFFFFFFF, pos.w);
+            Graphics::DrawText(Fonts::FONT_SMALL, pos.x+20, pos.y+12, Title, 0xFFFFFFFF, pos.w);
+            Graphics::DrawText(Fonts::FONT_SMALL, pos.x+20, pos.y+80, Body, 0xFFFFFFFF, pos.w);
             switch(msgType) {
                 case MSGBOX_OK:
                 {

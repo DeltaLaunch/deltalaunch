@@ -214,7 +214,7 @@ void Dashboard::DrawGames() {
                 SDL_Rect pos = entry->Pos; 
                 pos.x -= 5; pos.y -= 5; pos.w += 10; pos.h += 10;
                 Graphics::Rectangle(pos, Graphics::GetDefaultSelCol());
-                if(gameRows == 1) Graphics::DrawText(FNT_Small, pos.x, pos.y-25, entry->GetName(), Graphics::GetDefaultSelCol());
+                if(gameRows == 1) Graphics::DrawText(Fonts::FONT_SMALL, pos.x, pos.y-25, entry->GetName(), Graphics::GetDefaultSelCol());
             }
             
             //Draw either game icon or backer
@@ -289,7 +289,7 @@ void Dashboard::SetGames() {
 
 void Dashboard::DrawOverlay() {
 	Graphics::RenderTexture(Battery, BatPos);
-    Graphics::DrawText(FNT_Small, ClkPos.x, ClkPos.y, Time::GetClock());
+    Graphics::DrawText(Fonts::FONT_SMALL, ClkPos.x, ClkPos.y, Time::GetClock());
 }
 
 void Dashboard::SetOverlay(std::string battery, SDL_Rect batPos, SDL_Rect clkPos) {
@@ -307,16 +307,16 @@ void Dashboard::DrawDebugText() {
         touchPosition touchPos;
         hidTouchRead(&touchPos, 0);
         u32 X = 14,  Y = 0, s = 14;
-        Graphics::DrawText(FNT_Debug, X, Y+=s, "DeltaLaunch alpha!");
-        Graphics::DrawText(FNT_Debug, X, Y+=s, "Firmware: " + Settings::GetFirmwareVersion());
-        Graphics::DrawText(FNT_Debug, X, Y+=s, "Serial: " + Settings::GetSerialNumber());
-		Graphics::DrawText(FNT_Debug, X, Y+=s, "Battery: " + std::to_string(Power::GetBatteryLife()) + "%");
-        Graphics::DrawText(FNT_Debug, X, Y+=s, "Touch: X=" + std::to_string(touchPos.px) + "; y=" + std::to_string(touchPos.py));
-        Graphics::DrawText(FNT_Debug, X, Y+=s, "Mem avail: " + std::to_string(Settings::GetMemAvail()));
-        Graphics::DrawText(FNT_Debug, X, Y+=s, "Mem used: " + std::to_string(Settings::GetMemUsed()));
-        Graphics::DrawText(FNT_Debug, X, Y+=s, "Ae Message: " + std::to_string(App::lastAeCmd));
-		Graphics::DrawText(FNT_Debug, X, Y+=s, "Sams Message: " + std::to_string(App::lastSamsCmd));
-        Graphics::DrawText(FNT_Debug, X, Y+=s, "Last Error: " + std::to_string(lastErr));
+        Graphics::DrawText(Fonts::FONT_TINY, X, Y+=s, "DeltaLaunch alpha!");
+        Graphics::DrawText(Fonts::FONT_TINY, X, Y+=s, "Firmware: " + Settings::GetFirmwareVersion());
+        Graphics::DrawText(Fonts::FONT_TINY, X, Y+=s, "Serial: " + Settings::GetSerialNumber());
+		Graphics::DrawText(Fonts::FONT_TINY, X, Y+=s, "Battery: " + std::to_string(Power::GetBatteryLife()) + "%");
+        Graphics::DrawText(Fonts::FONT_TINY, X, Y+=s, "Touch: X=" + std::to_string(touchPos.px) + "; y=" + std::to_string(touchPos.py));
+        Graphics::DrawText(Fonts::FONT_TINY, X, Y+=s, "Mem avail: " + std::to_string(Settings::GetMemAvail()));
+        Graphics::DrawText(Fonts::FONT_TINY, X, Y+=s, "Mem used: " + std::to_string(Settings::GetMemUsed()));
+        Graphics::DrawText(Fonts::FONT_TINY, X, Y+=s, "Ae Message: " + std::to_string(App::lastAeCmd));
+		Graphics::DrawText(Fonts::FONT_TINY, X, Y+=s, "Sams Message: " + std::to_string(App::lastSamsCmd));
+        Graphics::DrawText(Fonts::FONT_TINY, X, Y+=s, "Last Error: " + std::to_string(lastErr));
         Y = 0;
     }
 }

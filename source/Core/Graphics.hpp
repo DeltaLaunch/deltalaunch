@@ -24,14 +24,10 @@
 #include <switch.h>
 #include <stdint.h>
 #include <string>
+#include "Font.hpp"
 
 #define GREY 0x4C4C4CFF
-
-enum FontSize {
-    FNT_Small,
-    FNT_Big,
-    FNT_Debug
-}; 
+#define WHITE 0xFFFFFFFF
 
 enum ButtonType {
     BTN_Unselected,
@@ -47,6 +43,7 @@ class Graphics
         static TTF_Font *debugFont;
 		static TTF_Font *hdrFont;
 		static TTF_Font *smallFont;
+        
         static void Init(std::string name, u32 width, u32 height, std::string font);
         static void Exit();
 		static void ClearScreen();
@@ -54,9 +51,7 @@ class Graphics
         static void Rectangle(u32 x, u32 y, u32 w, u32 h, u32 scolor);
         static void Rectangle(SDL_Rect pos, u32 scolor);
         static SDL_Texture *CreateTexFromSurf(SDL_Surface *surf);
-        static void DrawText(FontSize fntsize, u32 x, u32 y, std::string str);
-        static void DrawText(FontSize fntsize, u32 x, u32 y, std::string str, u32 col);
-        static void DrawText(FontSize fntsize, u32 x, u32 y, std::string str, u32 col, u32 wrap);
+        static void DrawText(u8 fntsize, u32 x, u32 y, std::string str, u32 col = WHITE, u32 wrap = winWidth);
         static void RenderTexture(SDL_Texture *tex, SDL_Rect pos);
         static SDL_Renderer *GetRenderer() { return Rend; }
         static SDL_Surface *BufToSurf(void *buf, size_t size);
@@ -73,4 +68,5 @@ class Graphics
         static u32 defaultSelCol;
         static u32 winWidth;
         static u32 winHeight;
+        static Context ctxt;
 };

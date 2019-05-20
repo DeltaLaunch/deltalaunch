@@ -26,6 +26,7 @@ TTF_Font *Graphics::smallFont;
 u32 Graphics::defaultSelCol;
 u32 Graphics::winWidth;
 u32 Graphics::winHeight;
+Context Graphics::ctxt;
 
 void Graphics::Init(std::string name, u32 width, u32 height, std::string font) {
     //Basic SDL init
@@ -38,21 +39,10 @@ void Graphics::Init(std::string name, u32 width, u32 height, std::string font) {
     SDL_SetRenderDrawColor(Rend, 0xFF, 0xFF, 0xFF, 0xFF);
     Graphics::winWidth = width;
     Graphics::winHeight = height;
-    
-    if(font == "") {
-        Result rc = 0;
-        PlFontData fnt;
-        rc = plGetSharedFontByType(&fnt, PlSharedFontType_Standard);
-        if(R_SUCCEEDED(rc)) {
-            debugFont = TTF_OpenFontRW(SDL_RWFromMem(fnt.address, fnt.size), 1, 14);
-            hdrFont = TTF_OpenFontRW(SDL_RWFromMem(fnt.address, fnt.size), 1, 28);
-            smallFont = TTF_OpenFontRW(SDL_RWFromMem(fnt.address, fnt.size), 1, 20);
-        }
-    } 
-    else {
-        debugFont = TTF_OpenFont(font.c_str(), 14);
-        hdrFont = TTF_OpenFont(font.c_str(), 28);
-        smallFont = TTF_OpenFont(font.c_str(), 20);
+    Graphics::ctxt = Context();
+
+    if(font != "") {
+        //TODO
     }
     
     appletRequestForeground();
@@ -109,54 +99,18 @@ void Graphics::RenderTexture(SDL_Texture *tex, SDL_Rect pos) {
     SDL_RenderCopy(Rend, tex, NULL, &pos);
 }
 
-void Graphics::DrawText(FontSize fntsize, u32 x, u32 y, std::string str) {
-    DrawText(fntsize, x, y, str, 0xFFFFFFFF, winWidth);
-}
-
-void Graphics::DrawText(FontSize fntsize, u32 x, u32 y, std::string str, u32 col) {
-    DrawText(fntsize, x, y, str, col, winWidth);
-}
-
-void Graphics::DrawText(FontSize fntsize, u32 x, u32 y, std::string str, u32 col, u32 wrap) {
-    SDL_Color scolor;
-    scolor.r = (col >> 24)&0xFF; scolor.g = (col >> 16)&0xFF; scolor.b = (col >> 8)&0xFF; scolor.a = col&0xFF;
-    SDL_Surface *surface;
-    
-    switch(fntsize) {
-        case FNT_Small:
-            surface = TTF_RenderUTF8_Blended_Wrapped(smallFont, str.c_str(), scolor, wrap);
-            break;
-        case FNT_Big:
-            surface = TTF_RenderUTF8_Blended_Wrapped(hdrFont, str.c_str(), scolor, wrap);
-            break;
-        case FNT_Debug:
-            surface = TTF_RenderUTF8_Blended_Wrapped(debugFont, str.c_str(), scolor, wrap);
-            break;
-    }
-    if (!surface) return;
-
-    SDL_SetSurfaceAlphaMod(surface, 0xFF);
-    SDL_Texture *texture = SDL_CreateTextureFromSurface(Rend, surface);
-
-    if (texture) {
-        SDL_Rect pos;
-        pos.x = x;
-        pos.y = y;
-        pos.w = surface->w;
-        pos.h = surface->h;
-        SDL_RenderCopy(Rend, texture, NULL, &pos);
-        SDL_DestroyTexture(texture);
-    }
-    SDL_FreeSurface(surface);
+void Graphics::DrawText(u8 fntsize, u32 x, u32 y, std::string str, u32 col, u32 wrap) {
+    ctxt.color = col;
+    ctxt.sizeIndex = fntsize;
+    fonts().draw(Rend, x, y, str, ctxt);
 }
 
 void Graphics::DrawButton(SDL_Rect Pos, std::string Text, ButtonType butType) {
-    int tHight = 0;
-    TTF_SizeText(smallFont, Text.c_str(), NULL, &tHight);
+    int tHight = Fonts::FONT_SIZE_SMALL;
     switch(butType) {
         case BTN_Unselected:
         {
-            Graphics::DrawText(FNT_Small, Pos.x + 12, Pos.y + (Pos.h/2) - (tHight/2), Text);
+            Graphics::DrawText(Fonts::FONT_SMALL, Pos.x + 12, Pos.y + (Pos.h/2) - (tHight/2), Text);
             break;
         }
         case BTN_Selected_Lay1:
@@ -166,32 +120,31 @@ void Graphics::DrawButton(SDL_Rect Pos, std::string Text, ButtonType butType) {
             pos.w = Pos.w+10; pos.h = Pos.h+10;
             Graphics::Rectangle(pos, GetDefaultSelCol());
             Graphics::Rectangle(Pos, GetDefaultButCol());
-            Graphics::DrawText(FNT_Small, Pos.x + 12, Pos.y + (Pos.h/2) - (tHight/2), Text, GetDefaultSelCol());
+            Graphics::DrawText(Fonts::FONT_SMALL, Pos.x + 12, Pos.y + (Pos.h/2) - (tHight/2), Text, GetDefaultSelCol());
             break;
         }
         case BTN_Selected_Lay2:
         {
-            Graphics::DrawText(FNT_Small, Pos.x + 12, Pos.y + (Pos.h/2) - (tHight/2), Text, GetDefaultSelCol());
+            Graphics::DrawText(Fonts::FONT_SMALL, Pos.x + 12, Pos.y + (Pos.h/2) - (tHight/2), Text, GetDefaultSelCol());
             break;
         }
     }
 }
 
 void Graphics::DrawOption(SDL_Rect Pos, std::string Text, std::string OptionText, bool isSel) {
-    int tHight = 0, tWid = 0;
-    TTF_SizeText(smallFont, Text.c_str(), &tWid, &tHight);
+    int tHight = Fonts::FONT_SIZE_SMALL;
     if(isSel) {
         SDL_Rect pos; 
         pos.x = Pos.x-5; pos.y = Pos.y-5;
         pos.w = Pos.w+10; pos.h = Pos.h+10;
         Graphics::Rectangle(pos, GetDefaultSelCol());
         Graphics::Rectangle(Pos, GetDefaultButCol());
-        Graphics::DrawText(FNT_Small, Pos.x + 10, Pos.y + (Pos.h/2) - (tHight/2), Text);
-        Graphics::DrawText(FNT_Small, Pos.x + ((Text != "") ? 200 : 40), Pos.y + (Pos.h/2) - (tHight/2), OptionText, GetDefaultSelCol());
+        Graphics::DrawText(Fonts::FONT_SMALL, Pos.x + 10, Pos.y + (Pos.h/2) - (tHight/2), Text);
+        Graphics::DrawText(Fonts::FONT_SMALL, Pos.x + ((Text != "") ? 200 : 40), Pos.y + (Pos.h/2) - (tHight/2), OptionText, GetDefaultSelCol());
     }
     else {
-        Graphics::DrawText(FNT_Small, Pos.x + 10, Pos.y + (Pos.h/2) - (tHight/2), Text);
-        Graphics::DrawText(FNT_Small, Pos.x + ((Text != "") ? 200 : 40), Pos.y + (Pos.h/2) - (tHight/2), OptionText);
+        Graphics::DrawText(Fonts::FONT_SMALL, Pos.x + 10, Pos.y + (Pos.h/2) - (tHight/2), Text);
+        Graphics::DrawText(Fonts::FONT_SMALL, Pos.x + ((Text != "") ? 200 : 40), Pos.y + (Pos.h/2) - (tHight/2), OptionText);
     }
 }
 
