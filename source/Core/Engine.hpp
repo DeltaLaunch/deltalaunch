@@ -29,6 +29,7 @@
 #include "../Core/Graphics.hpp"
 #include "../Core/Audio.hpp"
 #include "../Core/INI.hpp"
+#include "../Core/Memory.hpp"
 #include "../UI/Dashboard.hpp"
 #include "../UI/Forms.hpp"
 #include "../UI/Game.hpp"
@@ -48,7 +49,7 @@ enum EngineState {
 class Engine
 {
     public:
-        Engine(u32 width, u32 height);
+        Engine(u32 width, u32 height, size_t heapSize);
         ~Engine();
         void Initialize();
         void Render();

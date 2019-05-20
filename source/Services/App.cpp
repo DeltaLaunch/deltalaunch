@@ -27,8 +27,6 @@ u8 App::dashLayer;
 u32 App::lastAeCmd;
 u32 App::lastSamsCmd;
 
-size_t Memory::Heap = 0x10000000;
-
 /*
 *   Application
 */
@@ -140,8 +138,7 @@ bool App::IsGamecardInserted() {
 Result App::LaunchAlbum(u8 arg, bool startupSound) {
     Result rc = 0;
     #ifdef __SWITCH__
-    Memory::SetManagedHeap(0xB000000);
-    Memory::RunInManagedHeap([&]() {
+    Memory::RunInManagedHeap(0xB000000, [&]() {
         LibAppletArgs args;
         AppletStorage storeIn;
         Result rc = 0;
@@ -278,8 +275,7 @@ Result App::LaunchShop() {
 Result App::LaunchWebsite(std::string url) {
     Result rc = 0;
     #ifdef __SWITCH__
-    Memory::SetManagedHeap(0xA800000);
-    Memory::RunInManagedHeap([&]() {
+    Memory::RunInManagedHeap(0xA800000, [&]() {
         WebCommonConfig config;
         WebCommonReply reply;
         WebExitReason exitReason = WebExitReason_ExitButton;
@@ -300,8 +296,7 @@ Result App::LaunchWebsite(std::string url) {
 Result App::LaunchNews() {
     Result rc = 0;
     #ifdef __SWITCH__
-    Memory::SetManagedHeap(0xA800000);
-    Memory::RunInManagedHeap([&]() {
+    Memory::RunInManagedHeap(0xA800000, [&]() {
         WebCommonConfig config;
         WebCommonReply reply;
         WebExitReason exitReason = WebExitReason_ExitButton;
@@ -348,8 +343,7 @@ Result App::LaunchSwkbd(char out[0xc00], std::string title, std::string placehol
 Result App::LaunchNetConnect() {
     Result rc = 0;
     #ifdef __SWITCH__
-    Memory::SetManagedHeap(0xA800000);
-    Memory::RunInManagedHeap([&]() {
+    Memory::RunInManagedHeap(0xA800000, [&]() {
         appletCreateLibraryApplet(&currentApplet, AppletId_netConnect, LibAppletMode_AllForeground);
         currentApplet.active = true;
         rc = appletHolderStart(&currentApplet);
@@ -365,8 +359,7 @@ Result App::LaunchNetConnect() {
 Result App::LaunchController() {
     Result rc = 0;
     #ifdef __SWITCH__
-    Memory::SetManagedHeap(0xA800000);
-    Memory::RunInManagedHeap([&]() {
+    Memory::RunInManagedHeap(0xA800000, [&]() {
         appletCreateLibraryApplet(&currentApplet, AppletId_controller, LibAppletMode_AllForeground);
         currentApplet.active = true;
         rc = appletHolderStart(&currentApplet);
@@ -410,8 +403,7 @@ Result App::ShowError(std::string errText, std::string details, Result rc) {
 Result App::LaunchHbl() {
     Result rc = 0;
     #ifdef __SWITCH__
-    Memory::SetManagedHeap(0xA800000);
-    Memory::RunInManagedHeap([&]() {
+    Memory::RunInManagedHeap(0xA800000, [&]() {
         appletCreateLibraryApplet(&currentApplet, AppletId_offlineWeb, LibAppletMode_AllForeground);
         currentApplet.active = true;
         rc = appletHolderStart(&currentApplet);

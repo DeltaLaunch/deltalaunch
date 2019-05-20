@@ -18,17 +18,18 @@
 
 #pragma once
 
+#include <functional>
+
 class Memory
 {
     public:
-		template<typename F>
-        static void RunInManagedHeap(F f) {
+        static void RunInManagedHeap(size_t newHeap, std::function<void()> f) {
             void *addr;
-            svcSetHeapSize(&addr, Heap);
+            svcSetHeapSize(&addr, newHeap);
             f();
-            svcSetHeapSize(&addr, 0xC000000);
+            svcSetHeapSize(&addr, Heap);
         }
-        static void SetManagedHeap(size_t heap) { Heap = heap; }
+        static void SetDeltaHeap(size_t heap) { Heap = heap; };
     private:
         static size_t Heap;
 };

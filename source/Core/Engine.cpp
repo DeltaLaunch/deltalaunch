@@ -20,9 +20,11 @@
 
 EngineState Engine::State = STATE_DASHBOARD;
 MessageBox* MessageBox::instance = nullptr;
+size_t Memory::Heap;
 
-Engine::Engine(u32 width, u32 height) {
+Engine::Engine(u32 width, u32 height, size_t heapSize) {
     //Setup vars
+    Memory::SetDeltaHeap(heapSize);
     screenPos.x = screenPos.y = 0;
     screenPos.w = width;
     screenPos.h = height;
