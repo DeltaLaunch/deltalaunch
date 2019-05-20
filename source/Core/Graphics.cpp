@@ -20,9 +20,6 @@
 
 SDL_Renderer *Graphics::Rend;
 SDL_Window *Graphics::Window;
-TTF_Font *Graphics::debugFont;
-TTF_Font *Graphics::hdrFont;
-TTF_Font *Graphics::smallFont;
 u32 Graphics::defaultSelCol;
 u32 Graphics::winWidth;
 u32 Graphics::winHeight;
@@ -42,7 +39,7 @@ void Graphics::Init(std::string name, u32 width, u32 height, std::string font) {
     Graphics::ctxt = Context();
 
     if(font != "") {
-        //TODO
+        ctxt.font = TTF_OpenFont(font.c_str(), 14);
     }
     
     appletRequestForeground();
@@ -51,9 +48,6 @@ void Graphics::Init(std::string name, u32 width, u32 height, std::string font) {
 
 void Graphics::Exit() {
     appletSetHandlesRequestToDisplay(false);
-    TTF_CloseFont(debugFont);
-	TTF_CloseFont(hdrFont);
-	TTF_CloseFont(smallFont);
     TTF_Quit();
     IMG_Quit();
     SDL_DestroyRenderer(Rend);

@@ -179,49 +179,51 @@ u128 App::LaunchPSelect() {
     Result rc = 0;
     u128 player = 0;
     #ifdef __SWITCH__
-    AppletStorage storeIn, storeOut;
-    LibAppletArgs args;
-    
-    rc = appletCreateLibraryApplet(&currentApplet, AppletId_playerSelect, LibAppletMode_AllForeground);
-    if(R_FAILED(rc)) {
-        ShowError("Error launching player select", "Error creating lib applet.", rc);
-    }
-    
-    libappletArgsCreate(&args, 0);
-    libappletArgsPush(&args, &currentApplet);
-    
-    u8 stindata[0xa0] = { 0 };
-    
-    rc = appletCreateStorage(&storeIn, sizeof(stindata));
-    if(R_FAILED(rc)) {
+    Memory::RunInManagedHeap(0x10000000, [&]() {
+        AppletStorage storeIn, storeOut;
+        LibAppletArgs args;
+        
+        rc = appletCreateLibraryApplet(&currentApplet, AppletId_playerSelect, LibAppletMode_AllForeground);
+        if(R_FAILED(rc)) {
+            ShowError("Error launching player select", "Error creating lib applet.", rc);
+        }
+        
+        libappletArgsCreate(&args, 0);
+        libappletArgsPush(&args, &currentApplet);
+        
+        u8 stindata[0xa0] = { 0 };
+        
+        rc = appletCreateStorage(&storeIn, sizeof(stindata));
+        if(R_FAILED(rc)) {
+            appletStorageClose(&storeIn);
+            ShowError("Error launching player select", "Error creating storage.", rc);
+        }
+        
+        rc = appletStorageWrite(&storeIn, 0, stindata, sizeof(stindata));
+        if(R_FAILED(rc)) {
+            appletStorageClose(&storeIn);
+            ShowError("Error launching player select", "Error writing storage.", rc);
+        }
+        appletHolderPushInData(&currentApplet, &storeIn);
+        
+        currentApplet.active = true;
+        rc = appletHolderStart(&currentApplet);
+        appletHolderJoin(&currentApplet);
+        if(R_FAILED(rc)) {
+            ShowError("Error launching player select", "Error starting applet.", rc);
+        }
+        else {
+            appletHolderPopOutData(&currentApplet, &storeOut);
+            u8 buf[0x18] = {0};
+            appletStorageRead(&storeOut, 0, buf, 0x18);
+            player = *(u128*)&buf[8];
+        }
         appletStorageClose(&storeIn);
-        ShowError("Error launching player select", "Error creating storage.", rc);
-    }
+        appletStorageClose(&storeOut);
+        appletHolderClose(&currentApplet);
+        currentApplet.active = false;
+    });
     
-    rc = appletStorageWrite(&storeIn, 0, stindata, sizeof(stindata));
-    if(R_FAILED(rc)) {
-        appletStorageClose(&storeIn);
-        ShowError("Error launching player select", "Error writing storage.", rc);
-    }
-    appletHolderPushInData(&currentApplet, &storeIn);
-    
-    currentApplet.active = true;
-    rc = appletHolderStart(&currentApplet);
-    appletHolderJoin(&currentApplet);
-    if(R_FAILED(rc)) {
-        ShowError("Error launching player select", "Error starting applet.", rc);
-    }
-    else {
-        appletHolderPopOutData(&currentApplet, &storeOut);
-        u8 buf[0x18] = {0};
-        appletStorageRead(&storeOut, 0, buf, 0x18);
-        player = *(u128*)&buf[8];
-    }
-    appletStorageClose(&storeIn);
-    appletStorageClose(&storeOut);
-    appletHolderClose(&currentApplet);
-    appletRequestForeground();
-    currentApplet.active = false;
     #endif
     
     return player;
@@ -343,7 +345,7 @@ Result App::LaunchSwkbd(char out[0xc00], std::string title, std::string placehol
 Result App::LaunchNetConnect() {
     Result rc = 0;
     #ifdef __SWITCH__
-    Memory::RunInManagedHeap(0xA800000, [&]() {
+    Memory::RunInManagedHeap(0xB000000, [&]() {
         appletCreateLibraryApplet(&currentApplet, AppletId_netConnect, LibAppletMode_AllForeground);
         currentApplet.active = true;
         rc = appletHolderStart(&currentApplet);
@@ -359,7 +361,7 @@ Result App::LaunchNetConnect() {
 Result App::LaunchController() {
     Result rc = 0;
     #ifdef __SWITCH__
-    Memory::RunInManagedHeap(0xA800000, [&]() {
+    Memory::RunInManagedHeap(0xB000000, [&]() {
         appletCreateLibraryApplet(&currentApplet, AppletId_controller, LibAppletMode_AllForeground);
         currentApplet.active = true;
         rc = appletHolderStart(&currentApplet);

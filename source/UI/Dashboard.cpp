@@ -121,6 +121,7 @@ void Dashboard::UpdateDash() {
         if(Hid::IsTouched(button->Pos) && !settings->IsOpen()) {
             lastErr = button->Run();
 			if(lastErr) App::ShowError("An Error has occurred!", "Error code: " + std::to_string(lastErr), lastErr);
+            appletRequestForeground();
 		}
     }
     
@@ -135,6 +136,7 @@ void Dashboard::UpdateDash() {
                     lastErr = entry->Run();
                     if(lastErr) 
                         App::ShowError("An Error has occurred!", "Error code: " + std::to_string(lastErr), lastErr);
+                    appletRequestForeground();
                 }
                 //Folder
                 else if(entry->FolderID != 0) {

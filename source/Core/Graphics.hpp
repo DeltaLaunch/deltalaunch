@@ -40,9 +40,6 @@ class Graphics
     public:
         static SDL_Renderer *Rend;
         static SDL_Window *Window;
-        static TTF_Font *debugFont;
-		static TTF_Font *hdrFont;
-		static TTF_Font *smallFont;
         
         static void Init(std::string name, u32 width, u32 height, std::string font);
         static void Exit();
