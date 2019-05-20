@@ -403,7 +403,7 @@ Result App::ShowError(std::string errText, std::string details, Result rc) {
 Result App::LaunchHbl() {
     Result rc = 0;
     #ifdef __SWITCH__
-    Memory::RunInManagedHeap(0xA800000, [&]() {
+    Memory::RunInManagedHeap(0xB000000, [&]() {
         appletCreateLibraryApplet(&currentApplet, AppletId_offlineWeb, LibAppletMode_AllForeground);
         currentApplet.active = true;
         rc = appletHolderStart(&currentApplet);

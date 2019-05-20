@@ -30,7 +30,6 @@
 #ifdef __SWITCH__
 extern "C"{
     u32 __nx_applet_type = AppletType_SystemApplet;
-    size_t __nx_heap_size = HEAP_SIZE;
     
     void userAppInit(void);
     void userAppExit(void);
@@ -53,7 +52,7 @@ void userAppExit(void) {
 
 int main(int argc, char* argv[]) {
     //Qlaunch loop
-    Engine eng(1280, 720, HEAP_SIZE);
+    Engine eng(1280, 720);
     eng.Initialize();
     while (eng.running) {
         eng.Clear();

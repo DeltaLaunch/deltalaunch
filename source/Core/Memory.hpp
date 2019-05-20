@@ -25,11 +25,23 @@ class Memory
     public:
         static void RunInManagedHeap(size_t newHeap, std::function<void()> f) {
             void *addr;
-            svcSetHeapSize(&addr, newHeap);
+            Result rc = 0;
+            rc = svcSetHeapSize(&addr, newHeap);
+            if (R_FAILED(rc)) fatalSimple(MAKERESULT(Module_Libnx, LibnxError_HeapAllocFailed));
             f();
-            svcSetHeapSize(&addr, Heap);
+            rc = svcSetHeapSize(&addr, GetMaxHeap());
+            if (R_FAILED(rc)) fatalSimple(MAKERESULT(Module_Libnx, LibnxError_HeapAllocFailed));
         }
-        static void SetDeltaHeap(size_t heap) { Heap = heap; };
     private:
-        static size_t Heap;
+        static size_t GetMaxHeap() {
+            size_t size = 0;
+            size_t mem_available = 0, mem_used = 0;
+            svcGetInfo(&mem_available, 6, CUR_PROCESS_HANDLE, 0);
+            svcGetInfo(&mem_used, 7, CUR_PROCESS_HANDLE, 0);
+            if (mem_available > mem_used+0x200000)
+                size = (mem_available - mem_used - 0x200000) & ~0x1FFFFF;
+            if (size==0)
+                size = 0x2000000*16;
+            return size;
+        }
 };
