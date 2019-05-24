@@ -44,19 +44,23 @@ void Panel::DecrementSelect() {
         optSelect = 0;
 }
 
-void Panel::Update(u32 kDown, bool selected) {
-    for(int s = 0; s < (int)Strings.size(); s++) {
-        Graphics::DrawText(Fonts::FONT_SMALL, std::get<0>(Strings.at(s))+Pos.x, std::get<1>(Strings.at(s))+Pos.y, std::get<2>(Strings.at(s)));
-    }
+void Panel::Update(bool selected) {
     unsigned ind = 0;
+    
+    for(auto str: Strings) {
+        Graphics::DrawText(Fonts::FONT_SMALL, std::get<0>(Strings.at(ind))+Pos.x, std::get<1>(Strings.at(ind))+Pos.y, std::get<2>(Strings.at(ind)));
+        ind++;
+    }
+    
+    ind = 0;
     for(auto elem: Elements) {
         elem->Draw(Pos, (ind == optSelect) && selected);
         ind++;
     }
     if(selected){        
-        if(kDown & KEY_DUP) DecrementSelect();
-        if(kDown & KEY_DDOWN) IncrementSelect();
-        if(kDown & KEY_A) {
+        if(Hid::Input & KEY_DUP) DecrementSelect();
+        if(Hid::Input & KEY_DDOWN) IncrementSelect();
+        if(Hid::Input & KEY_A) {
             if(Elements[optSelect]->HasFunc())
                 Elements[optSelect]->Run();
         }

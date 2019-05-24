@@ -29,18 +29,20 @@ Menu::Menu(std::string title, SDL_Rect pos) {
 }
 
 Menu::~Menu() {
-    for(auto button: Buttons) {
-        delete button;
+    for(auto mel: MenuElements) {
+        delete mel;
     }
-    Buttons.clear();
+    MenuElements.clear();
     SDL_DestroyTexture(Sprite);
 }
 
 void Menu::IncrementSelect() {
-    if(menuOpt < Buttons.size()-1)
-        menuOpt++;
-    else
-        menuOpt = Buttons.size()-1;
+    if(!MenuElements.empty()) {
+        if(menuOpt < MenuElements.size()-1)
+            menuOpt++;
+        else
+            menuOpt = MenuElements.size()-1;
+    }
 }
 
 void Menu::DecrementSelect() {

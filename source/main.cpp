@@ -25,11 +25,10 @@
 
 #include "Core/Engine.hpp"
 
-#define HEAP_SIZE 0x10000000
-
 #ifdef __SWITCH__
 extern "C"{
     u32 __nx_applet_type = AppletType_SystemApplet;
+    size_t __nx_heap_size = 0xB200000;
     
     void userAppInit(void);
     void userAppExit(void);

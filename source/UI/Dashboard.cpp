@@ -37,6 +37,8 @@ Dashboard::Dashboard(u32 width, u32 height) {
 	SetPos.x=SetPos.y=0; SetPos.w=Width; SetPos.h=Height;
 	settings = new SettingsMenu(SetPos);
     settings->Initialize();
+    news = new NewsMenu(SetPos);
+    news->Initialize();
     Hid::TouchInit();
 }
 
@@ -60,7 +62,7 @@ void Dashboard::Initialize() {
     cfg.SetBasePath(std::string(thmPath+"/"));
     std::vector<std::tuple<std::string, std::function<Result()>>> ButtonFuncs{
         std::tuple<std::string, std::function<Result()>>{"WebButton", std::bind(App::LaunchWebsite, "https://google.com/")},
-        std::tuple<std::string, std::function<Result()>>{"NewsButton", App::LaunchNews},
+        std::tuple<std::string, std::function<Result()>>{"NewsButton", std::bind(&Dashboard::OpenNews, this)},
         std::tuple<std::string, std::function<Result()>>{"ShopButton", App::LaunchShop},
         std::tuple<std::string, std::function<Result()>>{"AlbumButton", std::bind(App::LaunchAlbum, 2, true)}, //1,false | 2,true
         std::tuple<std::string, std::function<Result()>>{"HomebrewButton", App::LaunchHbl},
@@ -94,6 +96,25 @@ void Dashboard::Initialize() {
             GameEntries.push_back(new GameFolder(folderIcon, fold++));
 	}
     SetGames();
+    
+    //Setup overlay
+    std::vector<std::string> layers;
+	std::string tmp;
+	int lay;for(lay=0; lay < BACKGROUND_LAYERS; lay++) {
+		tmp = cfg.Get("Background", "layer"+ std::to_string(lay), "");
+        if(lay == 0 && tmp == "") tmp = "romfs:/Graphics/Wallpaper.png";
+		if(tmp == "") continue;
+		layers.push_back(tmp);
+	}
+    SDL_Rect batPos; batPos.x = cfg.GetInteger("BatteryOverlay", "x", 1180); batPos.y = cfg.GetInteger("BatteryOverlay", "y", 14);
+    SDL_Rect clkPos; clkPos.x = cfg.GetInteger("ClockOverlay", "x", 1110); clkPos.y = cfg.GetInteger("ClockOverlay", "y", 14);
+    SetWallpaper(layers);
+    SetLockScreen(cfg.Get("Config", "lockscreen_image", "romfs:/Graphics/Lock.png"));
+    SetOverlay(cfg.Get("BatteryOverlay", "battery", "romfs:/Graphics/Overlay/Battery.png"), batPos, clkPos);
+	settings->SetBackground(cfg.Get("Config", "menus", "romfs:/Graphics/Menu.png"));
+    news->SetBackground(cfg.Get("Config", "menus", "romfs:/Graphics/Menu.png"));
+    
+    layers.clear();
 }
 
 /*
@@ -120,7 +141,7 @@ void Dashboard::UpdateDash() {
     //Check button interactions
     for(auto button: Buttons) {
         //Detect touch selection
-        if((Hid::IsTouched(button->Pos) && !Hid::IsMoving()) && !settings->IsOpen()) {
+        if((Hid::IsTouched(button->Pos) && !Hid::IsMoving()) && !IsMenuOpen()) {
             lastErr = button->Run();
 			if(lastErr) App::ShowError("An Error has occurred!", "Error code: " + std::to_string(lastErr), lastErr);
             appletRequestForeground();
@@ -131,7 +152,7 @@ void Dashboard::UpdateDash() {
     u32 ind = 0;
     for(auto entry: GameEntries) {
         //Detect touch selection
-        if(!settings->IsOpen() && Hid::IsTouched(entry->Pos)) {
+        if(!IsMenuOpen() && Hid::IsTouched(entry->Pos)) {
             if (ind == App::gameSelectInd && !Hid::IsMoving()) {
                 //Game
                 if(entry->GetTitleId() && entry->FolderID == 0) {
@@ -376,6 +397,17 @@ Result Dashboard::CloseSettings() {
 	return 0;
 }
 
-void Dashboard::UpdateSettings() {
-	settings->Update();
+Result Dashboard::OpenNews() {
+	news->Show();
+	return 0;
+}
+
+Result Dashboard::CloseNews() {
+	news->Hide();
+	return 0;
+}
+
+void Dashboard::UpdateMenus() {
+	news->Update();
+    settings->Update();
 }

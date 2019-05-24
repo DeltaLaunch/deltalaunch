@@ -21,25 +21,26 @@
 #include <switch.h>
 #include <functional>
 
-enum PanelElement {
+enum Element {
+    ELEM_None,
     ELEM_Image,
     ELEM_Button,
     ELEM_Option
 };
 
-class PanelObjBase
+class UIElement
 {
     public:
-        PanelObjBase(u32 x, u32 y, u32 w, u32 h) {
+        UIElement(u32 x, u32 y, u32 w, u32 h) {
             Pos.x = x;
             Pos.y = y;
             Pos.w = w;
             Pos.h = h;
         }
-        virtual ~PanelObjBase() {}
+        virtual ~UIElement() {}
         
         virtual void Draw(SDL_Rect pos, bool selected) {}
-        virtual void Run() {}
+        virtual Result Run() { return 0; }
         
         //Setters for panel elements
         virtual void SetOption(u32 ind, std::string text) {}
@@ -48,9 +49,9 @@ class PanelObjBase
         
         bool HasFunc() { return Callback != nullptr; }
         
-        PanelElement Properties;
-        
-    protected:
+        Element Properties;
         SDL_Rect Pos;
+        std::string Text;
+    protected:
         std::function<Result()> Callback;
 };

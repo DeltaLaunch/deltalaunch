@@ -37,12 +37,10 @@
 #include "../Services/Power.hpp"
 #include "../Services/Settings.hpp"
 
-#define BACKGROUND_LAYERS 99
-
 enum EngineState {
 	STATE_LOCKSCREEN,
 	STATE_DASHBOARD,
-	STATE_SETTINGS
+	STATE_MENU
 };
 
 class Engine

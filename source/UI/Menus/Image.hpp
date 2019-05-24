@@ -19,28 +19,23 @@
 #pragma once
 #include <SDL2/SDL.h>
 #include <switch.h>
-#include "PanelObjBase.hpp"
+#include "UIElement.hpp"
 
-class Image: public PanelObjBase
+class Image: public UIElement
 {
     public:
-        Image(u32 x, u32 y, u32 w, u32 h, SDL_Texture *tex, std::function<Result()> callback) : PanelObjBase(x, y, w, h) {
+        Image(u32 x, u32 y, u32 w, u32 h, SDL_Texture *tex, std::function<Result()> callback = nullptr) : UIElement(x, y, w, h) {
             Tex = tex;
             Properties = ELEM_Image;
             Callback = callback;
         }
         
-        Image(u32 x, u32 y, u32 w, u32 h, SDL_Texture *tex) : PanelObjBase(x, y, w, h) {
-            Tex = tex;
-            Properties = ELEM_Image;
-        };
-        
         ~Image() {
             SDL_DestroyTexture(Tex);
         };
         
-        void Run() override {
-            Callback();
+        Result Run() override {
+            return Callback();
         }
         
         void Draw(SDL_Rect pos, bool selected) override {

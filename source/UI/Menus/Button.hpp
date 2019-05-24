@@ -22,23 +22,60 @@
 #include <functional>
 #include <string>
 #include <switch.h>
+#include "UIElement.hpp"
 #include "../../Core/Graphics.hpp"
 
-class Button
+class Button: public UIElement
 {
     public:
-        Button(std::string sprite, std::string spriteSel, u32 x, u32 y, std::function<Result()> callback);
-        Button(std::string text, u32 x, u32 y, u32 w, u32 h, u32 col, std::function<Result()> callback);
-        ~Button();
-        Result Run();
-        bool HasFunc() { return Callback != nullptr; }
+        Button(std::string sprite, std::string spriteSel, u32 x, u32 y, std::function<Result()> callback = nullptr) : UIElement(x, y, 0, 0) {
+            Pos.x = x; Pos.y = y;
+            Callback = callback;
+            Properties = ELEM_Button;
+            Sprite = nullptr;
+            if(sprite != "") {
+                SDL_Surface *img = IMG_Load(sprite.c_str());
+                Sprite = Graphics::CreateTexFromSurf(img);
+                if(img) {
+                    Pos.w = img->w;
+                    Pos.h = img->h;
+                    SDL_FreeSurface(img);
+                }
+            }
+            SpriteSelect = nullptr;
+            if(spriteSel != "") {
+                SDL_Surface *img = IMG_Load(spriteSel.c_str());
+                SpriteSelect = Graphics::CreateTexFromSurf(img);
+                if(img) {
+                    SDL_FreeSurface(img);
+                }
+            }
+        }
+        
+        Button(std::string text, u32 x, u32 y, u32 w, u32 h, u32 col, std::function<Result()> callback = nullptr) : UIElement(x, y, w, h) {
+            Pos.x = x; Pos.y = y;
+            Pos.w = w; Pos.h = h;
+            Callback = callback;
+            Properties = ELEM_Button;
+            Color = col;
+            Sprite = nullptr;
+            SpriteSelect = nullptr;
+            Text = text;
+        }
+        
+        ~Button() {
+            if(Sprite) SDL_DestroyTexture(Sprite);
+            if(SpriteSelect) SDL_DestroyTexture(SpriteSelect);
+        }
+        
+        Result Run() override {
+            Result res = 0;
+            if(Callback != nullptr) res = Callback();
+            return res;
+        }
         
         //vars
-        SDL_Rect Pos;
         SDL_Texture *Sprite;
 		SDL_Texture *SpriteSelect;
         u32 Color;
-        std::string Text;
-    private:
-        std::function<Result()> Callback;
 };

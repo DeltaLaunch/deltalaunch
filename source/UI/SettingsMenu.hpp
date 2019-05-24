@@ -38,15 +38,11 @@ class SettingsMenu: public Menu
         void DrawButtons();
 		
 		//Overrides
-		void Update();
-		void Activate();
-		void Back();
+		void Update() override;
         
 		u8 gameRows;
         
     private:
         u32 panX, panY;
         u32 Width, Height;
-        SDL_Texture *bg;
-        std::vector<Panel*> Panels;
 };

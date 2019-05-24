@@ -19,23 +19,21 @@
 #include "SettingsMenu.hpp"
 
 SettingsMenu::SettingsMenu(SDL_Rect pos) : Menu("Settings", pos){
-    plInitialize();
 	menuOpt = 0;
 }
 
 SettingsMenu::~SettingsMenu() {
     for(auto pan: Panels) delete pan;
-    plExit();
 }
 
 void SettingsMenu::Initialize() {
     panX = 500;
     panY = 100;
-    u32 Y = 40, butW = 280, butH = 50, butCol = 0x202020FF, optW = 350, optY = 20;
+    u32 Y = 40, butW = 280, butH = 50, butCol = Graphics::GetDefaultSelCol(), optW = 350, optY = 20;
     u32 space = 15+butH;
     
     //Toggle lock screen
-    Buttons.push_back(new Button("Lock Screen", 60, Y+=space, butW, butH, butCol, nullptr));
+    MenuElements.push_back(new Button("Lock Screen", 60, Y+=space, butW, butH, butCol, nullptr));
     Panel *lock = new Panel(panX, panY);
     lock->AddString(0, 0, std::string("Toggle the lock screen flag."));
     std::vector<std::string> lck {"Off", "On"};
@@ -49,7 +47,7 @@ void SettingsMenu::Initialize() {
     
     //Internet/network settings
     optY = 20;
-    Buttons.push_back(new Button("Internet", 60, Y+=space, butW, butH, butCol, nullptr));
+    MenuElements.push_back(new Button("Internet", 60, Y+=space, butW, butH, butCol, nullptr));
     Panel *internet = new Panel(panX, panY);
     internet->AddString(0, 0, std::string("View internet settings."));
     internet->AddElement(new Option("Internet settings", "test", 0, optY+=space, optW, butH, butCol, 0, 
@@ -61,13 +59,13 @@ void SettingsMenu::Initialize() {
     Panels.push_back(internet);
     
     //Manage titles
-    Buttons.push_back(new Button("Data Management", 60, Y+=space, butW, butH, butCol, nullptr));
+    MenuElements.push_back(new Button("Data Management", 60, Y+=space, butW, butH, butCol, nullptr));
     Panel *dataMan = new Panel(panX, panY);
     dataMan->AddString(0, 0, std::string("Manage your data."));
     Panels.push_back(dataMan);
     
     //User customization
-    Buttons.push_back(new Button("Users", 60, Y+=space, butW, butH, butCol, nullptr));
+    MenuElements.push_back(new Button("Users", 60, Y+=space, butW, butH, butCol, nullptr));
     Panel *user = new Panel(panX, panY);
     user->AddString(0, 0, std::string("Edit user profiles."));
     user->AddElement(new Image(0, 40, 256, 256, Account::GetProfileImage(Account::GetFirstAccount()), 
@@ -87,7 +85,7 @@ void SettingsMenu::Initialize() {
     Panels.push_back(user);
     
     //Mechanics of how the UI works
-    Buttons.push_back(new Button("Look and Feel", 60, Y+=space, butW, butH, butCol, nullptr));
+    MenuElements.push_back(new Button("Look and Feel", 60, Y+=space, butW, butH, butCol, nullptr));
     Panel *look = new Panel(panX, panY);
     look->AddString(0, 0, std::string("Change look and feel."));
     optY=20;
@@ -111,19 +109,19 @@ void SettingsMenu::Initialize() {
     Panels.push_back(look);
     
     //Themes
-    Buttons.push_back(new Button("Themes", 60, Y+=space, butW, butH, butCol, nullptr));
+    MenuElements.push_back(new Button("Themes", 60, Y+=space, butW, butH, butCol));
     Panel *theme = new Panel(panX, panY);
     theme->AddString(0, 0, std::string("Change current theme."));
     Panels.push_back(theme);
     
     //TV settings
-    Buttons.push_back(new Button("TV Settings", 60, Y+=space, butW, butH, butCol, nullptr));
+    MenuElements.push_back(new Button("TV Settings", 60, Y+=space, butW, butH, butCol));
     Panel *tvSet = new Panel(panX, panY);
     tvSet->AddString(0, 0, std::string("Manage your TV settings."));
     Panels.push_back(tvSet);
     
     //System information and updates
-    Buttons.push_back(new Button("System Info", 60, Y+=space, butW, butH, butCol, nullptr));
+    MenuElements.push_back(new Button("System Info", 60, Y+=space, butW, butH, butCol));
     Panel *sysinfo = new Panel(panX, panY);
     sysinfo->AddString(0, 0, std::string("Console specific information."));
     sysinfo->AddString(0, 50, std::string("Firmware: " + Settings::GetFirmwareVersion()));
@@ -159,7 +157,7 @@ void SettingsMenu::Initialize() {
 */
 void SettingsMenu::DrawButtons() {
     int ind = 0;
-    for(auto button: Buttons) {
+    for(auto button: MenuElements) {
         Graphics::DrawButton(button->Pos, button->Text, ((ind != menuOpt)) ? BTN_Unselected : (!currLayer ? BTN_Selected_Lay1 : BTN_Selected_Lay2));
         ind++;
     }
@@ -168,22 +166,14 @@ void SettingsMenu::DrawButtons() {
 /*
 *   Trigger events
 */
-void SettingsMenu::Activate() {
-    if(!currLayer && Panels[menuOpt]->ElementCnt() > 0) currLayer++;
-}
-
-void SettingsMenu::Back() {
-	if(!currLayer) Hide();
-	else currLayer--;
-}
-
-void SettingsMenu::Update() {    
+void SettingsMenu::Update() {
+    if(!IsOpen()) return;
     Graphics::RenderTexture(Sprite, Pos);
     Graphics::DrawText(Fonts::FONT_LARGE, 30, 25, GetTitle());
     DrawButtons();
-    Panels[menuOpt]->Update(Hid::Input, (bool)currLayer);
+    Panels[menuOpt]->Update((bool)currLayer);
     if(Hid::Input & KEY_A) Activate();
-	if(Hid::Input & KEY_B) Back();
 	if(Hid::Input & KEY_DUP && !currLayer) DecrementSelect();
 	if(Hid::Input & KEY_DDOWN && !currLayer) IncrementSelect();
+    if(Hid::Input & KEY_B) Back();
 }

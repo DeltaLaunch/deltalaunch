@@ -17,19 +17,17 @@
 */
 
 #pragma once
+#include <switch.h>
+#include <string>
+#include <curl/curl.h>
 
-#include <functional>
-
-class Memory
+class Network
 {
+    enum RequestMethod {
+        HTTP_GET,
+        HTTP_POST
+    };
+    
     public:
-        static void RunInManagedHeap(size_t newHeap, std::function<void()> f) {
-            void *addr;
-            //svcSetHeapSize(&addr, newHeap);
-            f();
-            //svcSetHeapSize(&addr, Heap);
-        }
-        static void SetDeltaHeap(size_t heap) { Heap = heap; };
-    private:
-        static size_t Heap;
+        static CURLcode Request(std::string url, RequestMethod method, std::string postdata = "");
 };

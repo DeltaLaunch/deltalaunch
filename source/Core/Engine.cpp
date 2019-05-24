@@ -29,7 +29,7 @@ Engine::Engine(u32 width, u32 height) {
     running = true;
     
     //Mount romfs
-    romfsMountFromFsdev("/ReiNX/titles/0100000000001000/romfs.bin", 0, "romfs");
+    romfsMountFromFsdev("/ReiNX/titles/0100000000001000/romfs.bin", 0, "romfs"); //shit will actually crash here if not using reinx
     
     //Detect reinx
     if(!Rnx::IsUsingReiNX()) {
@@ -43,8 +43,8 @@ Engine::Engine(u32 width, u32 height) {
         while(!Hid::GetInput());
         Power::Shutdown();
     }
-    else
-        Rnx::SetHbTidForDelta(0x010000000000100F);
+    
+    Rnx::SetHbTidForDelta(0x010000000000100F);
 }
 
 Engine::~Engine() {
@@ -64,27 +64,11 @@ void Engine::Initialize() {
     Graphics::Init(TITLE, screenPos.w, screenPos.h, cfg.Get("Config", "font", ""));
     Graphics::SetDefaultSelCol(cfg.GetInteger("Config", "defaultSelCol", 0xFFCEFF));
 
-    //Setup background
-    std::vector<std::string> layers;
-	std::string tmp;
-	int lay;for(lay=0; lay < BACKGROUND_LAYERS; lay++) {
-		tmp = cfg.Get("Background", "layer"+ std::to_string(lay), "");
-        if(lay == 0 && tmp == "") tmp = "romfs:/Graphics/Wallpaper.png";
-		if(tmp == "") continue;
-		layers.push_back(tmp);
-	}
-    
     //Init dashboard
-    SDL_Rect batPos; batPos.x = cfg.GetInteger("BatteryOverlay", "x", 1180); batPos.y = cfg.GetInteger("BatteryOverlay", "y", 14);
-    SDL_Rect clkPos; clkPos.x = cfg.GetInteger("ClockOverlay", "x", 1110); clkPos.y = cfg.GetInteger("ClockOverlay", "y", 14);
     dash = new Dashboard(screenPos.w, screenPos.h);
     dash->Initialize();
-    dash->SetWallpaper(layers);
-    dash->SetLockScreen(cfg.Get("Config", "lockscreen_image", "romfs:/Graphics/Lock.png"));
-    dash->SetOverlay(cfg.Get("BatteryOverlay", "battery", "romfs:/Graphics/Overlay/Battery.png"), batPos, clkPos);
-	dash->settings->SetBackground(cfg.Get("Config", "menus", "romfs:/Graphics/Menu.png"));
+    
     State = (Settings::GetLockScreenFlag() ? STATE_LOCKSCREEN : STATE_DASHBOARD);
-	layers.clear();
     
     //appletLoadAndApplyIdlePolicySettings();
     appletAllowToEnterSleep();
@@ -136,18 +120,19 @@ void Engine::Update() {
                 dash->UpdateDash();
             }
             
-            
             //Check state
-            if(dash->settings->IsOpen()) State = STATE_SETTINGS;
-            else State = STATE_DASHBOARD;
+            if(dash->IsMenuOpen()) 
+                State = STATE_MENU;
+            else 
+                State = STATE_DASHBOARD;
             
             break;
         }
-        case STATE_SETTINGS:
+        case STATE_MENU:
         {
-            if(!dash->settings->IsOpen())
+            dash->UpdateMenus();
+            if(!dash->IsMenuOpen())
                 State = STATE_DASHBOARD;
-            dash->UpdateSettings();
             break;
         }
     }

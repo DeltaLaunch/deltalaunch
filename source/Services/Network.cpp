@@ -16,20 +16,17 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
+#include "Network.hpp"
 
-#include <functional>
-
-class Memory
-{
-    public:
-        static void RunInManagedHeap(size_t newHeap, std::function<void()> f) {
-            void *addr;
-            //svcSetHeapSize(&addr, newHeap);
-            f();
-            //svcSetHeapSize(&addr, Heap);
-        }
-        static void SetDeltaHeap(size_t heap) { Heap = heap; };
-    private:
-        static size_t Heap;
-};
+CURLcode Network::Request(std::string url, RequestMethod method, std::string postdata) {
+    CURL *curl = curl_easy_init();
+    CURLcode res;
+    if(curl) {
+        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+        if(method == HTTP_POST)
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postdata.c_str());
+        res = curl_easy_perform(curl);
+        curl_easy_cleanup(curl);
+    }
+    return res;
+}

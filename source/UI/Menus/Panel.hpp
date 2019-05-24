@@ -27,7 +27,7 @@
 #include "Button.hpp"
 #include "Option.hpp"
 #include "Image.hpp"
-#include "PanelObjBase.hpp"
+#include "UIElement.hpp"
 #include "../../Core/Graphics.hpp"
 #include "../../Services/Hid.hpp"
 
@@ -40,7 +40,7 @@ class Panel
         void AddString(u32 x, u32 y, std::string str) { 
             Strings.push_back(std::tuple<u32, u32, std::string>(x,y,str)); 
         }
-        void AddElement(PanelObjBase *op) { 
+        void AddElement(UIElement *op) { 
             Elements.push_back(op); 
         }
         
@@ -64,7 +64,7 @@ class Panel
             }
         }
         
-        void Update(u32 kDown, bool selected);
+        void Update(bool selected);
         
         void IncrementSelect();
         void DecrementSelect();
@@ -76,6 +76,6 @@ class Panel
     private:
         SDL_Rect Pos;
         u32 optSelect;
-        std::vector<PanelObjBase*> Elements;
+        std::vector<UIElement*> Elements;
         std::vector<std::tuple<u32, u32, std::string>> Strings;
 };

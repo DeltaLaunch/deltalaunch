@@ -27,6 +27,7 @@
 #include "Game.hpp"
 #include "GameFolder.hpp"
 #include "SettingsMenu.hpp"
+#include "NewsMenu.hpp"
 #include "../Core/Graphics.hpp"
 #include "../Core/INI.hpp"
 #include "../Services/Hid.hpp"
@@ -36,6 +37,8 @@
 #include "../Services/Power.hpp"
 #include "../Services/App.hpp"
 #include "../Services/Hid.hpp"
+
+#define BACKGROUND_LAYERS 99
 
 class Dashboard
 {
@@ -54,7 +57,6 @@ class Dashboard
         void SetGames();
         void DrawOverlay();
         void SetOverlay(std::string battery, SDL_Rect batPos, SDL_Rect clkPos);
-        void UpdateSettings();
         void DrawDebugText();
         
         //Interactions
@@ -69,9 +71,15 @@ class Dashboard
 		//Menus
 		Result OpenSettings();
 		Result CloseSettings();
+        Result OpenNews();
+		Result CloseNews();
+        void UpdateMenus();
+        
+        bool IsMenuOpen() { return (settings->IsOpen() || news->IsOpen()); }
 
 		u8 gameRows;
 		SettingsMenu *settings;
+        NewsMenu *news;
         MessageBox *msgBox;
     private:
         u32 Width, Height;

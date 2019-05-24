@@ -22,12 +22,12 @@
 #include <functional>
 #include <vector>
 #include <switch.h>
-#include "PanelObjBase.hpp"
+#include "UIElement.hpp"
 
-class Option: public PanelObjBase
+class Option: public UIElement
 {
     public:
-        Option(std::string optName, std::vector<std::string> opts, u32 x, u32 y, u32 w, u32 h, u32 col, u32 defaultVal, std::function<Result()> callback) : PanelObjBase(x, y, w, h) {
+        Option(std::string optName, std::vector<std::string> opts, u32 x, u32 y, u32 w, u32 h, u32 col, u32 defaultVal, std::function<Result()> callback) : UIElement(x, y, w, h) {
             Callback = callback;
             Opts = opts;
             optIndex = defaultVal;
@@ -35,7 +35,7 @@ class Option: public PanelObjBase
             Properties = ELEM_Option;
         };
         
-        Option(std::string optName, std::string opt, u32 x, u32 y, u32 w, u32 h, u32 col, u32 defaultVal, std::function<Result()> callback) : PanelObjBase(x, y, w, h) {
+        Option(std::string optName, std::string opt, u32 x, u32 y, u32 w, u32 h, u32 col, u32 defaultVal, std::function<Result()> callback) : UIElement(x, y, w, h) {
             Callback = callback;
             Opts.push_back(opt);
             optIndex = defaultVal;
@@ -54,9 +54,11 @@ class Option: public PanelObjBase
             Graphics::DrawOption(p, Text, !Opts.empty() ? Opts.at(optIndex) : "", selected);
         }
         
-        void Run() override { 
-            if(Callback != nullptr && R_SUCCEEDED(Callback())) 
+        Result Run() override {
+            Result rc = 0;
+            if(Callback != nullptr && R_SUCCEEDED(rc = Callback())) 
                 optIndex = ((!Opts.empty() && optIndex >= Opts.size()-1) ? 0 : optIndex+1);
+            return rc;
         }
         
         u32 GetOptIndex() { 
@@ -69,6 +71,5 @@ class Option: public PanelObjBase
         
     private:
         u32 optIndex;
-        std::string Text;
         std::vector<std::string> Opts;
 };

@@ -17,19 +17,28 @@
 */
 
 #pragma once
+#include <SDL2/SDL.h>
+#include <switch.h>
+#include "Game.hpp"
+#include "Forms.hpp"
+#include "../Core/Graphics.hpp"
+#include "../Services/Time.hpp"
+#include "../Services/Hid.hpp"
 
-#include <functional>
-
-class Memory
+class NewsMenu: public Menu
 {
     public:
-        static void RunInManagedHeap(size_t newHeap, std::function<void()> f) {
-            void *addr;
-            //svcSetHeapSize(&addr, newHeap);
-            f();
-            //svcSetHeapSize(&addr, Heap);
-        }
-        static void SetDeltaHeap(size_t heap) { Heap = heap; };
+        NewsMenu(SDL_Rect pos);
+        ~NewsMenu();
+        void Initialize();
+		
+        //Draw/set
+        void DrawButtons();
+        
+		//Overrides
+		void Update() override;
+        
     private:
-        static size_t Heap;
+        u32 Width, Height;
+        std::vector<SDL_Texture*> Pics;
 };

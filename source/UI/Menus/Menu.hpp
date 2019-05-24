@@ -21,6 +21,7 @@
 #include <string>
 #include <switch.h>
 #include "Button.hpp"
+#include "Panel.hpp"
 #include "../../Core/Graphics.hpp"
 
 class Menu
@@ -36,24 +37,30 @@ class Menu
 		u32 GetSelection() {return menuOpt;}
 		void SetSelection(u16 sel) {menuOpt = sel;}
 		std::string GetTitle() { return Title; }
-		void AddButton(Button *button) { Buttons.push_back(button); }
+		void AddElement(UIElement *elem) { MenuElements.push_back(elem); }
 		void Show() { Visible = true; }
 		void Hide() { Visible = false; }
 		void SetBackground(std::string tex);
 		
 		//Overrides
 		virtual void Update() {}
-		virtual void Activate() {}
-		virtual void Back() {}
+		virtual void Activate() { 
+            if(!currLayer && Panels[menuOpt]->ElementCnt() > 0) 
+                currLayer++;
+        }
+		virtual void Back() { 
+            if(!currLayer) Hide();
+            else currLayer--; 
+        }
         
         SDL_Rect Pos;
 		u32 Color;
 		SDL_Texture *Sprite;
 		u16 menuOpt, currLayer;
-		bool running;
-	private:
-		std::string Title;
-        bool Visible;
+		bool running;		
     protected:
-        std::vector<Button*> Buttons;
+        std::string Title;
+        bool Visible;
+        std::vector<UIElement*> MenuElements;
+        std::vector<Panel*> Panels;
 };
