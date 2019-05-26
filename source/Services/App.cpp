@@ -138,38 +138,35 @@ bool App::IsGamecardInserted() {
 Result App::LaunchAlbum(u8 arg, bool startupSound) {
     Result rc = 0;
     #ifdef __SWITCH__
-    Memory::RunInManagedHeap(0xB000000, [&]() {
-        LibAppletArgs args;
-        AppletStorage storeIn;
-        Result rc = 0;
-        
-        appletCreateLibraryApplet(&currentApplet, AppletId_photoViewer, LibAppletMode_AllForeground);
-        libappletArgsCreate(&args, 0);
-        libappletArgsSetPlayStartupSound(&args, startupSound);
-        libappletArgsPush(&args, &currentApplet);
-        
-        u8 stindata = arg;
-        rc = appletCreateStorage(&storeIn, sizeof(stindata));
-        if(R_FAILED(rc)) {
-            appletStorageClose(&storeIn);
-            ShowError("Error launching album", "Error creating storage.", rc);
-        }
-        
-        rc = appletStorageWrite(&storeIn, 0, &stindata, sizeof(stindata));
-        if(R_FAILED(rc)) {
-            appletStorageClose(&storeIn);
-            ShowError("Error launching album", "Error writing storage.", rc);
-        }
-        appletHolderPushInData(&currentApplet, &storeIn);
-        
-        currentApplet.active = true;
-        rc = appletHolderStart(&currentApplet);
-        appletHolderJoin(&currentApplet);
-        
+    LibAppletArgs args;
+    AppletStorage storeIn;
+    
+    appletCreateLibraryApplet(&currentApplet, AppletId_photoViewer, LibAppletMode_AllForeground);
+    libappletArgsCreate(&args, 0);
+    libappletArgsSetPlayStartupSound(&args, startupSound);
+    libappletArgsPush(&args, &currentApplet);
+    
+    u8 stindata = arg;
+    rc = appletCreateStorage(&storeIn, sizeof(stindata));
+    if(R_FAILED(rc)) {
         appletStorageClose(&storeIn);
-        appletHolderClose(&currentApplet);
-        currentApplet.active = false;
-    });
+        ShowError("Error launching album", "Error creating storage.", rc);
+    }
+    
+    rc = appletStorageWrite(&storeIn, 0, &stindata, sizeof(stindata));
+    if(R_FAILED(rc)) {
+        appletStorageClose(&storeIn);
+        ShowError("Error launching album", "Error writing storage.", rc);
+    }
+    appletHolderPushInData(&currentApplet, &storeIn);
+    
+    currentApplet.active = true;
+    rc = appletHolderStart(&currentApplet);
+    appletHolderJoin(&currentApplet);
+    
+    appletStorageClose(&storeIn);
+    appletHolderClose(&currentApplet);
+    currentApplet.active = false;
     #endif
     
     return rc;
@@ -179,50 +176,48 @@ u128 App::LaunchPSelect() {
     Result rc = 0;
     u128 player = 0;
     #ifdef __SWITCH__
-    Memory::RunInManagedHeap(0x10000000, [&]() {
-        AppletStorage storeIn, storeOut;
-        LibAppletArgs args;
-        
-        rc = appletCreateLibraryApplet(&currentApplet, AppletId_playerSelect, LibAppletMode_AllForeground);
-        if(R_FAILED(rc)) {
-            ShowError("Error launching player select", "Error creating lib applet.", rc);
-        }
-        
-        libappletArgsCreate(&args, 0);
-        libappletArgsPush(&args, &currentApplet);
-        
-        u8 stindata[0xa0] = { 0 };
-        
-        rc = appletCreateStorage(&storeIn, sizeof(stindata));
-        if(R_FAILED(rc)) {
-            appletStorageClose(&storeIn);
-            ShowError("Error launching player select", "Error creating storage.", rc);
-        }
-        
-        rc = appletStorageWrite(&storeIn, 0, stindata, sizeof(stindata));
-        if(R_FAILED(rc)) {
-            appletStorageClose(&storeIn);
-            ShowError("Error launching player select", "Error writing storage.", rc);
-        }
-        appletHolderPushInData(&currentApplet, &storeIn);
-        
-        currentApplet.active = true;
-        rc = appletHolderStart(&currentApplet);
-        appletHolderJoin(&currentApplet);
-        if(R_FAILED(rc)) {
-            ShowError("Error launching player select", "Error starting applet.", rc);
-        }
-        else {
-            appletHolderPopOutData(&currentApplet, &storeOut);
-            u8 buf[0x18] = {0};
-            appletStorageRead(&storeOut, 0, buf, 0x18);
-            player = *(u128*)&buf[8];
-        }
+    AppletStorage storeIn, storeOut;
+    LibAppletArgs args;
+    
+    rc = appletCreateLibraryApplet(&currentApplet, AppletId_playerSelect, LibAppletMode_AllForeground);
+    if(R_FAILED(rc)) {
+        ShowError("Error launching player select", "Error creating lib applet.", rc);
+    }
+    
+    libappletArgsCreate(&args, 0);
+    libappletArgsPush(&args, &currentApplet);
+    
+    u8 stindata[0xa0] = { 0 };
+    
+    rc = appletCreateStorage(&storeIn, sizeof(stindata));
+    if(R_FAILED(rc)) {
         appletStorageClose(&storeIn);
-        appletStorageClose(&storeOut);
-        appletHolderClose(&currentApplet);
-        currentApplet.active = false;
-    });
+        ShowError("Error launching player select", "Error creating storage.", rc);
+    }
+    
+    rc = appletStorageWrite(&storeIn, 0, stindata, sizeof(stindata));
+    if(R_FAILED(rc)) {
+        appletStorageClose(&storeIn);
+        ShowError("Error launching player select", "Error writing storage.", rc);
+    }
+    appletHolderPushInData(&currentApplet, &storeIn);
+    
+    currentApplet.active = true;
+    rc = appletHolderStart(&currentApplet);
+    appletHolderJoin(&currentApplet);
+    if(R_FAILED(rc)) {
+        ShowError("Error launching player select", "Error starting applet.", rc);
+    }
+    else {
+        appletHolderPopOutData(&currentApplet, &storeOut);
+        u8 buf[0x18] = {0};
+        appletStorageRead(&storeOut, 0, buf, 0x18);
+        player = *(u128*)&buf[8];
+    }
+    appletStorageClose(&storeIn);
+    appletStorageClose(&storeOut);
+    appletHolderClose(&currentApplet);
+    currentApplet.active = false;
     
     #endif
     
@@ -232,7 +227,7 @@ u128 App::LaunchPSelect() {
 Result App::LaunchShop() {
     Result rc = 0;
     #ifdef __SWITCH__
-    LibAppletArgs args;
+    /*LibAppletArgs args;
     AppletStorage storeIn, storeOut;
     
     appletCreateLibraryApplet(&currentApplet, AppletId_shop, LibAppletMode_AllForeground);
@@ -268,7 +263,7 @@ Result App::LaunchShop() {
     appletStorageClose(&storeIn);
     appletStorageClose(&storeOut);
     appletHolderClose(&currentApplet);
-    currentApplet.active = false;
+    currentApplet.active = false;*/
     #endif
     
     return rc;
@@ -277,40 +272,17 @@ Result App::LaunchShop() {
 Result App::LaunchWebsite(std::string url) {
     Result rc = 0;
     #ifdef __SWITCH__
-    Memory::RunInManagedHeap(0xA800000, [&]() {
-        WebCommonConfig config;
-        WebCommonReply reply;
-        WebExitReason exitReason = WebExitReason_ExitButton;
-        rc = webPageCreate(&config, url.c_str());
-        if (R_SUCCEEDED(rc)) {
-            currentApplet.active = true;
-            rc = webConfigShow(&config, &reply);
-            if (R_SUCCEEDED(rc))
-                rc = webReplyGetExitReason(&reply, &exitReason);
-            currentApplet.active = false;
-        }
-    });
-    #endif
-
-    return rc;
-}
-
-Result App::LaunchNews() {
-    Result rc = 0;
-    #ifdef __SWITCH__
-    Memory::RunInManagedHeap(0xA800000, [&]() {
-        WebCommonConfig config;
-        WebCommonReply reply;
-        WebExitReason exitReason = WebExitReason_ExitButton;
-        rc = webNewsCreate(&config, "http://reinx.guide/");
-        if (R_SUCCEEDED(rc)) {
-            currentApplet.active = true;
-            rc = webConfigShow(&config, &reply);
-            if (R_SUCCEEDED(rc))
-                rc = webReplyGetExitReason(&reply, &exitReason);
-            currentApplet.active = false;
-        }
-    });
+    WebCommonConfig config;
+    WebCommonReply reply;
+    WebExitReason exitReason = WebExitReason_ExitButton;
+    rc = webPageCreate(&config, url.c_str());
+    if (R_SUCCEEDED(rc)) {
+        currentApplet.active = true;
+        rc = webConfigShow(&config, &reply);
+        if (R_SUCCEEDED(rc))
+            rc = webReplyGetExitReason(&reply, &exitReason);
+        currentApplet.active = false;
+    }
     #endif
 
     return rc;
@@ -345,14 +317,12 @@ Result App::LaunchSwkbd(char out[0xc00], std::string title, std::string placehol
 Result App::LaunchNetConnect() {
     Result rc = 0;
     #ifdef __SWITCH__
-    Memory::RunInManagedHeap(0xB000000, [&]() {
-        appletCreateLibraryApplet(&currentApplet, AppletId_netConnect, LibAppletMode_AllForeground);
-        currentApplet.active = true;
-        rc = appletHolderStart(&currentApplet);
-        appletHolderJoin(&currentApplet);
-        appletHolderClose(&currentApplet);
-        currentApplet.active = false;
-    });
+    appletCreateLibraryApplet(&currentApplet, AppletId_netConnect, LibAppletMode_AllForeground);
+    currentApplet.active = true;
+    rc = appletHolderStart(&currentApplet);
+    appletHolderJoin(&currentApplet);
+    appletHolderClose(&currentApplet);
+    currentApplet.active = false;
     #endif
     
     return rc;
@@ -361,14 +331,12 @@ Result App::LaunchNetConnect() {
 Result App::LaunchController() {
     Result rc = 0;
     #ifdef __SWITCH__
-    Memory::RunInManagedHeap(0xB000000, [&]() {
-        appletCreateLibraryApplet(&currentApplet, AppletId_controller, LibAppletMode_AllForeground);
-        currentApplet.active = true;
-        rc = appletHolderStart(&currentApplet);
-        appletHolderJoin(&currentApplet);
-        appletHolderClose(&currentApplet);
-        currentApplet.active = false;
-    });
+    appletCreateLibraryApplet(&currentApplet, AppletId_controller, LibAppletMode_AllForeground);
+    currentApplet.active = true;
+    rc = appletHolderStart(&currentApplet);
+    appletHolderJoin(&currentApplet);
+    appletHolderClose(&currentApplet);
+    currentApplet.active = false;
     #endif
     
     return rc;
@@ -405,14 +373,12 @@ Result App::ShowError(std::string errText, std::string details, Result rc) {
 Result App::LaunchHbl() {
     Result rc = 0;
     #ifdef __SWITCH__
-    Memory::RunInManagedHeap(0xA800000, [&]() {
-        appletCreateLibraryApplet(&currentApplet, AppletId_offlineWeb, LibAppletMode_AllForeground);
-        currentApplet.active = true;
-        rc = appletHolderStart(&currentApplet);
-        appletHolderJoin(&currentApplet);
-        appletHolderClose(&currentApplet);
-        currentApplet.active = false;
-    });
+    appletCreateLibraryApplet(&currentApplet, AppletId_offlineWeb, LibAppletMode_AllForeground);
+    currentApplet.active = true;
+    rc = appletHolderStart(&currentApplet);
+    appletHolderJoin(&currentApplet);
+    appletHolderClose(&currentApplet);
+    currentApplet.active = false;
     #endif
     
     return rc;

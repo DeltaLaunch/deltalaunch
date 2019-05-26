@@ -27,25 +27,64 @@
 class Menu
 {
     public:
-		Menu(std::string title, SDL_Rect pos);
-		virtual ~Menu();
+		Menu(std::string title, SDL_Rect pos) {
+            Title = title;
+            Pos = pos;
+            Visible = false;
+            currLayer = 0;
+            menuOpt = 0;
+            Sprite = nullptr;
+            running = true;
+            msgBox = MessageBox::getInstance();
+        }
+		virtual ~Menu() {
+            for(auto pan: Panels) 
+                delete pan;
+            for(auto mel: MenuElements)
+                delete mel;
+            MenuElements.clear();
+            SDL_DestroyTexture(Sprite);
+        }
 		
 		//Getters/Setters
+        void IncrementSelect() {
+            if(!MenuElements.empty()) {
+                if(menuOpt < MenuElements.size()-1)
+                    menuOpt++;
+                else
+                    menuOpt = MenuElements.size()-1;
+            }
+        }
+		void DecrementSelect() {
+            if(menuOpt > 0)
+                menuOpt--;
+            else
+                menuOpt = 0;
+        }
+        void SetBackground(std::string tex) {
+            SDL_Surface *img = IMG_Load(tex.c_str());
+            Sprite = Graphics::CreateTexFromSurf(img);
+            if(img) {
+                Pos.w = img->w;
+                Pos.h = img->h;
+                SDL_FreeSurface(img);
+            }
+        }
         bool IsOpen() { return Visible; }
-        void IncrementSelect();
-		void DecrementSelect();
 		u32 GetSelection() {return menuOpt;}
 		void SetSelection(u16 sel) {menuOpt = sel;}
 		std::string GetTitle() { return Title; }
 		void AddElement(UIElement *elem) { MenuElements.push_back(elem); }
+        
 		void Show() { Visible = true; }
 		void Hide() { Visible = false; }
-		void SetBackground(std::string tex);
+		
 		
 		//Overrides
 		virtual void Update() {}
 		virtual void Activate() { 
-            if(!currLayer && Panels[menuOpt]->ElementCnt() > 0) 
+            if(!currLayer && MenuElements[menuOpt]->HasFunc()) MenuElements[menuOpt]->Run();
+            else if(!currLayer && Panels[menuOpt]->ElementCnt() > 0) 
                 currLayer++;
         }
 		virtual void Back() { 
@@ -63,4 +102,5 @@ class Menu
         bool Visible;
         std::vector<UIElement*> MenuElements;
         std::vector<Panel*> Panels;
+        MessageBox *msgBox;
 };

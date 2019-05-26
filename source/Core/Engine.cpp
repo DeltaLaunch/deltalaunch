@@ -112,13 +112,7 @@ void Engine::Update() {
             dash->DrawGames();
             dash->DrawOverlay();
             dash->DrawDebugText();
-            if(dash->msgBox->IsOpen()) {
-                dash->msgBox->Update();
-            }
-            else {
-                //Get user input
-                dash->UpdateDash();
-            }
+            dash->UpdateDash();
             
             //Check state
             if(dash->IsMenuOpen()) 

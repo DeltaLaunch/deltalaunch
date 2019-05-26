@@ -25,9 +25,9 @@ class Memory
     public:
         static void RunInManagedHeap(size_t newHeap, std::function<void()> f) {
             void *addr;
-            //svcSetHeapSize(&addr, newHeap);
+            svcSetHeapSize(&addr, newHeap);
             f();
-            //svcSetHeapSize(&addr, Heap);
+            svcSetHeapSize(&addr, Heap);
         }
         static void SetDeltaHeap(size_t heap) { Heap = heap; };
     private:

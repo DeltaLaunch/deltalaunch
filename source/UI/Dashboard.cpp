@@ -106,13 +106,14 @@ void Dashboard::Initialize() {
 		if(tmp == "") continue;
 		layers.push_back(tmp);
 	}
-    SDL_Rect batPos; batPos.x = cfg.GetInteger("BatteryOverlay", "x", 1180); batPos.y = cfg.GetInteger("BatteryOverlay", "y", 14);
-    SDL_Rect clkPos; clkPos.x = cfg.GetInteger("ClockOverlay", "x", 1110); clkPos.y = cfg.GetInteger("ClockOverlay", "y", 14);
+    BatPos.x = cfg.GetInteger("BatteryOverlay", "x", 1190); BatPos.y = cfg.GetInteger("BatteryOverlay", "y", 14);
+    ClkPos.x = cfg.GetInteger("ClockOverlay", "x", 1110); ClkPos.y = cfg.GetInteger("ClockOverlay", "y", 14);
     SetWallpaper(layers);
     SetLockScreen(cfg.Get("Config", "lockscreen_image", "romfs:/Graphics/Lock.png"));
-    SetOverlay(cfg.Get("BatteryOverlay", "battery", "romfs:/Graphics/Overlay/Battery.png"), batPos, clkPos);
 	settings->SetBackground(cfg.Get("Config", "menus", "romfs:/Graphics/Menu.png"));
     news->SetBackground(cfg.Get("Config", "menus", "romfs:/Graphics/Menu.png"));
+    msgBox->SetTexture(cfg.Get("Config", "popups", "romfs:/Graphics/Popup.png"));
+    Battery = Graphics::CreateTexFromString(cfg.Get("BatteryOverlay", "battery", "romfs:/Graphics/Overlay/Battery.png"));
     
     layers.clear();
 }
@@ -124,7 +125,7 @@ void Dashboard::UpdateDash() {
     Hid::TouchProcess();
     if(Hid::Input & KEY_A) ActivateDash();
 	if(Hid::Input & KEY_LSTICK)  debugInfo = !debugInfo;
-	if(Hid::Input & KEY_MINUS) msgBox->Show("Test", "hello", MSGBOX_OK);
+	if(Hid::Input & KEY_MINUS) ;
     if(Hid::Input & KEY_PLUS) msgBox->Show("Test 2", "testing....", MSGBOX_YESNO);
 	if((Hid::Input & KEY_DLEFT) || (Hid::Input & KEY_LSTICK_LEFT)) DecrementDashSel();
 	if((Hid::Input & KEY_DRIGHT) || (Hid::Input & KEY_LSTICK_RIGHT)) IncrementDashSel();
@@ -313,18 +314,15 @@ void Dashboard::SetGames() {
 }
 
 void Dashboard::DrawOverlay() {
-	Graphics::RenderTexture(Battery, BatPos);
+    BatPos.w = 53*6; BatPos.h = 25;
+    SDL_Rect spritePos = BatPos;
+    spritePos.w = BatPos.w/6;
+    spritePos.h = spritePos.h;
+    spritePos.x = spritePos.w * (Power::GetBatteryLife()/20);
+    spritePos.y = 0;
+    
+	Graphics::RenderTexture(Battery, BatPos, &spritePos);
     Graphics::DrawText(Fonts::FONT_SMALL, ClkPos.x, ClkPos.y, Time::GetClock());
-}
-
-void Dashboard::SetOverlay(std::string battery, SDL_Rect batPos, SDL_Rect clkPos) {
-    SDL_Surface *img = IMG_Load(battery.c_str());
-    BatPos = batPos;
-	BatPos.w = img->w; BatPos.h = img->h;
-    ClkPos = clkPos;
-	Battery = SDL_CreateTexture(Graphics::GetRenderer(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, img->w, img->h);
-    Battery = SDL_CreateTextureFromSurface(Graphics::GetRenderer(), img);
-    SDL_FreeSurface(img);
 }
 
 void Dashboard::DrawDebugText() {

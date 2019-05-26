@@ -56,7 +56,6 @@ class Dashboard
 		void DrawGames();
         void SetGames();
         void DrawOverlay();
-        void SetOverlay(std::string battery, SDL_Rect batPos, SDL_Rect clkPos);
         void DrawDebugText();
         
         //Interactions

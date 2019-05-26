@@ -46,7 +46,6 @@ class App
         static u128 LaunchPSelect();
 		static Result LaunchShop();
         static Result LaunchWebsite(std::string url);
-        static Result LaunchNews();
         static Result LaunchNetConnect();
         static Result LaunchController();
         static Result LaunchSwkbd(char out[0xc00], std::string title, std::string placehold, std::string oktxt, std::string initTxt);

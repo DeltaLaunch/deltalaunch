@@ -19,11 +19,12 @@
 #include "NewsMenu.hpp"
 
 NewsMenu::NewsMenu(SDL_Rect pos) : Menu("News", pos){
-	menuOpt = 0;
+	panX = 500;
+    panY = 100;
 }
 
 NewsMenu::~NewsMenu() {
-    for(auto pan: Panels) delete pan;
+    //
 }
 
 void NewsMenu::Initialize() {
@@ -36,8 +37,12 @@ void NewsMenu::Initialize() {
     Pics.push_back(Account::GetProfileImage(Account::GetFirstAccount()));
     
     for(int i = 0; i < Pics.size(); i++) {
-        Panel *articles = new Panel(500, 100);
-        MenuElements.push_back(new Image(20, Y+(i*space), imgW, imgH, Pics[i]));
+        Panel *articles = new Panel(panX, panY);
+        MenuElements.push_back(new Image(20, Y+(i*space), imgW, imgH, Pics[i], 
+        [&]()->Result{
+            msgBox->Show("Test", "hello "+std::to_string(i), MSGBOX_OK);
+            return 0;
+        }));
         articles->AddString(10, 0, std::string("Fake news ") + std::to_string(i) + std::string("!"));
         Panels.push_back(articles);
     }

@@ -30,33 +30,67 @@ enum MsgType {
     MSGBOX_YESNO,
 };
 
+enum DialogResult {
+    RESULT_OK,
+    RESULT_ABORT,
+    RESULT_NO,
+    RESULT_YES
+};
+
 class MessageBox
 {
     public:
-        void Show(std::string title, std::string body) {
+        void Show(std::string title, std::string body, MsgType type = MSGBOX_OK){
             Title = title;
             Body = body;
-            visible = true;
-            msgType = MSGBOX_OK;
-        }
-        void Show(std::string title, std::string body, MsgType type){
-            Title = title;
-            Body = body;
-            visible = true;
             msgType = type;
+            
+            //Draw backdrop
+            screen.x = screen.y = 0;
+            screen.w = Graphics::GetWinWidth();
+            screen.h = Graphics::GetWinHeight();
+            
+            //Update form
+            while(Update());
         }
         
-        void Update() {
-            SDL_Rect p;
+        void SetTexture(std::string file) {
+            bgTex = Graphics::CreateTexFromString(file);
+        }
+        
+        static MessageBox* getInstance() {
+            if (instance == nullptr)
+                instance = new MessageBox();
+            return instance;
+        };
+        
+        DialogResult MsgResult;
+        
+    private:
+        static MessageBox* instance;
+        
+        MessageBox() {
+            u32 wid = Graphics::GetWinWidth();
+            u32 height = Graphics::GetWinHeight();
+            pos.w = wid/2;
+            pos.h = height/2;
+            pos.x = (wid/2) - (pos.w/2);
+            pos.y = (height/2) - (pos.h/2);
+            u32 butW = 150, butH = 50;
+            Buttons.push_back(new Button("Ok", pos.x+pos.w-butW-25, pos.y+pos.h-butH-25, butW, butH, 0x888888FF, nullptr));
+            Buttons.push_back(new Button("No", pos.x+pos.w-butW-25, pos.y+pos.h-butH-25, butW, butH, 0x888888FF, nullptr));
+            Buttons.push_back(new Button("Yes", pos.x+pos.w-((butW+25)*2), pos.y+pos.h-butH-25, butW, butH, 0x888888FF, nullptr));
+            selected = 0;
+        };
+        
+        int Update() {
             
-            p.x = p.y = 0;
-            p.w = Graphics::GetWinWidth();
-            p.h = Graphics::GetWinHeight();
-            Graphics::Rectangle(p, 0x50);
-            Graphics::BorderedRectangle(pos, Graphics::GetDefaultButCol(), 0xFF, 5);
-            Graphics::Rectangle(pos.x+10, pos.y+50, pos.w-20, 3, 0xFF);
-            Graphics::DrawText(Fonts::FONT_SMALL, pos.x+20, pos.y+12, Title, 0xFFFFFFFF, pos.w);
-            Graphics::DrawText(Fonts::FONT_SMALL, pos.x+20, pos.y+80, Body, 0xFFFFFFFF, pos.w);
+            Hid::Input = Hid::GetInput();
+            
+            Graphics::RenderTexture(bgTex, pos);
+            Graphics::DrawText(Fonts::FONT_SMALL, pos.x+25, pos.y+18, Title, 0xFFFFFFFF, pos.w);
+            Graphics::DrawText(Fonts::FONT_SMALL, pos.x+25, pos.y+80, Body, 0xFFFFFFFF, pos.w);
+            
             switch(msgType) {
                 case MSGBOX_OK:
                 {
@@ -71,42 +105,22 @@ class MessageBox
                 }
             }
             
-            if(Hid::Input & KEY_LEFT) selected = 0;
-            if(Hid::Input & KEY_RIGHT) selected = 1;
+            if(Hid::Input & KEY_LEFT) selected = (msgType == MSGBOX_YESNO) ? 1 : 0; //TODO: ugly. plz fix
+            if(Hid::Input & KEY_RIGHT) selected = 0;
             if(Hid::Input & KEY_A){
-                visible = false;
+                MsgResult = (msgType == MSGBOX_YESNO) ? (DialogResult)(RESULT_NO + selected) : RESULT_OK;
+                return 0;
             }
+            Graphics::Render();
+            return 1;
         }
         
-        bool IsOpen() { return visible; }
-        
-        static MessageBox* getInstance() {
-            if (instance == nullptr)
-                instance = new MessageBox();
-            return instance;
-        };
-        
-    private:
-        static MessageBox* instance;
-        MessageBox() {
-            u32 wid = Graphics::GetWinWidth();
-            u32 height = Graphics::GetWinHeight();
-            pos.w = wid/2;
-            pos.h = height/2;
-            pos.x = (wid/2) - (pos.w/2);
-            pos.y = (height/2) - (pos.h/2);
-            u32 butW = 150, butH = 50;
-            Buttons.push_back(new Button("Ok", pos.x+pos.w-butW-20, pos.y+pos.h-butH-20, butW, butH, 0x888888FF, nullptr));
-            Buttons.push_back(new Button("No", pos.x+pos.w-butW-20, pos.y+pos.h-butH-20, butW, butH, 0x888888FF, nullptr));
-            Buttons.push_back(new Button("Yes", pos.x+pos.w-((butW+20)*2), pos.y+pos.h-butH-20, butW, butH, 0x888888FF, nullptr));
-            selected = 0;
-            visible = false;
-        };
         MessageBox(const MessageBox&);
         MessageBox& operator=(const MessageBox&);
         SDL_Rect pos;
-        bool visible;
+        SDL_Rect screen;
         u8 selected;
+        SDL_Texture *bgTex;
         MsgType msgType;
         std::string Title, Body;
         std::vector<Button*> Buttons;

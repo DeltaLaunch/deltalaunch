@@ -84,13 +84,23 @@ void Graphics::Rectangle(SDL_Rect pos, u32 scolor) {
     SDL_RenderFillRect(Rend, &pos);
 }
 
+SDL_Texture *Graphics::CreateTexFromString(std::string file) {
+    SDL_Surface *surf = IMG_Load(file.c_str());
+    if(!surf) return NULL;
+    return CreateTexFromSurf(surf);
+}
+
 SDL_Texture *Graphics::CreateTexFromSurf(SDL_Surface *surf) {
     return SDL_CreateTextureFromSurface(Rend, surf);
 }
 
-void Graphics::RenderTexture(SDL_Texture *tex, SDL_Rect pos) {
+void Graphics::RenderTexture(SDL_Texture *tex, SDL_Rect pos, SDL_Rect *clip) {
 	if(!tex) return;
-    SDL_RenderCopy(Rend, tex, NULL, &pos);
+    if( clip != NULL ) {
+        pos.w = clip->w;
+        pos.h = clip->h;
+    }
+    SDL_RenderCopy(Rend, tex, clip, &pos);
 }
 
 void Graphics::DrawText(u8 fntsize, u32 x, u32 y, std::string str, u32 col, u32 wrap) {

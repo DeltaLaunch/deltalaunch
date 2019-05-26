@@ -39,6 +39,7 @@ class NewsMenu: public Menu
 		void Update() override;
         
     private:
+        u32 panX, panY;
         u32 Width, Height;
         std::vector<SDL_Texture*> Pics;
 };

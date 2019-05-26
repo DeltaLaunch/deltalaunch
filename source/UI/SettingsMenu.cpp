@@ -19,16 +19,16 @@
 #include "SettingsMenu.hpp"
 
 SettingsMenu::SettingsMenu(SDL_Rect pos) : Menu("Settings", pos){
-	menuOpt = 0;
+	//Panel location
+    panX = 500;
+    panY = 100;
 }
 
 SettingsMenu::~SettingsMenu() {
-    for(auto pan: Panels) delete pan;
+    //
 }
 
 void SettingsMenu::Initialize() {
-    panX = 500;
-    panY = 100;
     u32 Y = 40, butW = 280, butH = 50, butCol = Graphics::GetDefaultSelCol(), optW = 350, optY = 20;
     u32 space = 15+butH;
     

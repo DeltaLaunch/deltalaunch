@@ -47,10 +47,12 @@ class Graphics
         static void BorderedRectangle(SDL_Rect pos, u32 foreCol, u32 bordCol, u8 bordThick);
         static void Rectangle(u32 x, u32 y, u32 w, u32 h, u32 scolor);
         static void Rectangle(SDL_Rect pos, u32 scolor);
+        static SDL_Texture *CreateTexFromString(std::string file);
         static SDL_Texture *CreateTexFromSurf(SDL_Surface *surf);
         static void DrawText(u8 fntsize, u32 x, u32 y, std::string str, u32 col = WHITE, u32 wrap = winWidth);
-        static void RenderTexture(SDL_Texture *tex, SDL_Rect pos);
+        static void RenderTexture(SDL_Texture *tex, SDL_Rect pos, SDL_Rect *clip = NULL);
         static SDL_Renderer *GetRenderer() { return Rend; }
+        static SDL_Texture *GetRenderTex() { return SDL_GetRenderTarget(Rend); }
         static SDL_Surface *BufToSurf(void *buf, size_t size);
         static void DrawButton(SDL_Rect Pos, std::string Text, ButtonType butType);
         static void DrawOption(SDL_Rect Pos, std::string Text, std::string OptionText, bool isSel);
