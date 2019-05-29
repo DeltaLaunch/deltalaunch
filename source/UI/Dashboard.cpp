@@ -38,7 +38,6 @@ Dashboard::Dashboard(u32 width, u32 height) {
 	settings = new SettingsMenu(SetPos);
     settings->Initialize();
     news = new NewsMenu(SetPos);
-    news->Initialize();
     Hid::TouchInit();
 }
 
@@ -97,6 +96,12 @@ void Dashboard::Initialize() {
 	}
     SetGames();
     
+    //News
+    SDL_Texture *tex = Graphics::CreateTexFromString("romfs:/Graphics/reinxnews.png");
+    news->AddStory("Story 1", "something something news. something something games and shit.1", tex);
+    news->AddStory("Story 2", "something something news. something something games and shit.2", tex);
+    news->AddStory("Story 3", "something something news. something something games and shit.3", tex);
+    
     //Setup overlay
     std::vector<std::string> layers;
 	std::string tmp;
@@ -126,7 +131,7 @@ void Dashboard::UpdateDash() {
     if(Hid::Input & KEY_A) ActivateDash();
 	if(Hid::Input & KEY_LSTICK)  debugInfo = !debugInfo;
 	if(Hid::Input & KEY_MINUS) ;
-    if(Hid::Input & KEY_PLUS) msgBox->Show("Test 2", "testing....", MSGBOX_YESNO);
+    if(Hid::Input & KEY_PLUS) msgBox->Show("Test 2", Network::Request("http://reinx.guide/api/news?_format=json", Network::HTTP_GET), MSGBOX_YESNO);
 	if((Hid::Input & KEY_DLEFT) || (Hid::Input & KEY_LSTICK_LEFT)) DecrementDashSel();
 	if((Hid::Input & KEY_DRIGHT) || (Hid::Input & KEY_LSTICK_RIGHT)) IncrementDashSel();
 	if((Hid::Input & KEY_DUP) || (Hid::Input & KEY_LSTICK_UP)) App::dashLayer = 0;
@@ -144,7 +149,8 @@ void Dashboard::UpdateDash() {
         //Detect touch selection
         if((Hid::IsTouched(button->Pos) && !Hid::IsMoving()) && !IsMenuOpen()) {
             lastErr = button->Run();
-			if(lastErr) App::ShowError("An Error has occurred!", "Error code: " + std::to_string(lastErr), lastErr);
+			if(lastErr) 
+                App::ShowError("An Error has occurred!", "Error code: " + std::to_string(lastErr), lastErr);
             appletRequestForeground();
 		}
     }
@@ -233,48 +239,89 @@ void Dashboard::DrawButtons() {
 void Dashboard::DrawGames() {
 	unsigned ind = 0;
 	for(auto entry: GameEntries) {
-        //Classic outline format
-        if(Settings::gameSelType == SELECT_OUTLINE) {
-            //Draw selection outline
-            if(ind == App::gameSelectInd && App::dashLayer == 0) {
-                SDL_Rect pos = entry->Pos; 
-                pos.x -= 5; pos.y -= 5; pos.w += 10; pos.h += 10;
-                Graphics::Rectangle(pos, Graphics::GetDefaultSelCol());
-                if(gameRows == 1) Graphics::DrawText(Fonts::FONT_SMALL, pos.x, pos.y-25, entry->GetName(), Graphics::GetDefaultSelCol());
+        switch(Settings::gameSelType) {
+            //Classic outline format
+            default:
+            case SELECT_OUTLINE:
+            {
+                //Draw selection outline
+                if(ind == App::gameSelectInd && App::dashLayer == 0) {
+                    SDL_Rect pos = entry->Pos; 
+                    pos.x -= 5; pos.y -= 5; pos.w += 10; pos.h += 10;
+                    Graphics::Rectangle(pos, Graphics::GetDefaultSelCol());
+                    if(gameRows == 1) Graphics::DrawText(Fonts::FONT_SMALL, pos.x, pos.y-25, entry->GetName(), Graphics::GetDefaultSelCol());
+                }
+                
+                //Draw either game icon or backer
+                if(entry->Icon != nullptr) {
+                    Graphics::RenderTexture(entry->Icon, entry->Pos);
+                } 
+                else {
+                    Graphics::Rectangle(entry->Pos, 0x70);
+                }
+                break;
             }
-            
-            //Draw either game icon or backer
-            if(entry->Icon != nullptr) {
-                Graphics::RenderTexture(entry->Icon, entry->Pos);
-            } 
-            else {
-                Graphics::Rectangle(entry->Pos, 0x70);
+            //Diff sizes; selected is highlighted
+            case SELECT_SIZEDIFF:
+            {
+                //Draw game bigger
+                if(ind == App::gameSelectInd && App::dashLayer == 0) {
+                    SDL_Rect pos = entry->Pos; 
+                    pos.x -= 20; pos.y -= 20; pos.w += 40; pos.h += 40;
+                    Graphics::RenderTexture(entry->Icon, pos);
+                }
+                else {
+                    //Draw either game icon or backer
+                    if(entry->GetTitleId() != 0) {
+                        SDL_Rect pos = entry->Pos;
+                        if(ind > App::gameSelectInd && App::dashLayer == 0) pos.x += 20;
+                        if(ind < App::gameSelectInd && App::dashLayer == 0) pos.x -= 20;
+                        Graphics::RenderTexture(entry->Icon, entry->Pos);
+                    }
+                    Graphics::Rectangle(entry->Pos, 0x70);
+                }
+                break;
+            }
+            //PS4 style
+            case SELECT_PSSTYLE:
+            {
+                SDL_Rect p;
+                p.w = p.h = 128;
+                p.x = GameEntries[0]->Pos.x + (ind*128);
+                p.y = GameEntries[0]->Pos.y;
+                    
+                //Draw selection outline
+                if(ind == App::gameSelectInd && App::dashLayer == 0) {
+                    SDL_Rect pos = p; 
+                    pos.h = entry->Pos.h + 40; pos.w = entry->Pos.w;
+                    Graphics::Rectangle(pos, 0x666666FF);
+                    pos.h = entry->Pos.h;
+                    Graphics::RenderTexture(entry->Icon, pos);
+                    Graphics::DrawText(Fonts::FONT_SMALL, pos.x + 105, pos.y + pos.h + 8, "Start", 0xFFFFFFFF);
+                    if(gameRows == 1) Graphics::DrawText(Fonts::FONT_SMALL, pos.x + pos.w + 20, pos.y + pos.h + 8, entry->GetName(), Graphics::GetDefaultSelCol());
+                }
+                else {
+                    //Draw either game icon or backer
+                    if(ind >= App::gameSelectInd && App::dashLayer == 0) p.x += 128;
+                    if(entry->Icon != nullptr) {
+                        Graphics::RenderTexture(entry->Icon, p);
+                    } 
+                    else {
+                        Graphics::Rectangle(p, 0x70);
+                    }
+                }
+                break;
             }
         }
-		//Or draw size diff mode
-		if(Settings::gameSelType == SELECT_SIZEDIFF) {
-            //Draw game bigger
-            if(ind == App::gameSelectInd && App::dashLayer == 0) {
-                SDL_Rect pos = entry->Pos; 
-                pos.x -= 20; pos.y -= 20; pos.w += 40; pos.h += 40;
-                Graphics::RenderTexture(entry->Icon, pos);
-            }
-            else {
-                //Draw either game icon or backer
-                if(entry->GetTitleId() != 0) {
-                    Graphics::RenderTexture(entry->Icon, entry->Pos);
-                }
-                Graphics::Rectangle(entry->Pos, 0x70);
-            }
-		}
 		ind++;
 	}
 }
 
 void Dashboard::SetGames() {
-    GameIconArea.x = 120; GameIconArea.y = 110;
-    GameIconArea.w = 1080; GameIconArea.h = 450;
+    
     u32 normalPortraitSize = 256;
+    GameIconArea.x = 120; GameIconArea.y = 110;
+    GameIconArea.w = 1080; GameIconArea.h = normalPortraitSize;
     
     //Create game images
 	std::vector<NsApplicationRecord> recs;

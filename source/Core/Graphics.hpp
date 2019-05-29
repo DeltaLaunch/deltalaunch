@@ -41,7 +41,7 @@ class Graphics
         static SDL_Renderer *Rend;
         static SDL_Window *Window;
         
-        static void Init(std::string name, u32 width, u32 height, std::string font);
+        static void Init(SDL_Rect pos);
         static void Exit();
 		static void ClearScreen();
         static void BorderedRectangle(SDL_Rect pos, u32 foreCol, u32 bordCol, u8 bordThick);
@@ -49,7 +49,7 @@ class Graphics
         static void Rectangle(SDL_Rect pos, u32 scolor);
         static SDL_Texture *CreateTexFromString(std::string file);
         static SDL_Texture *CreateTexFromSurf(SDL_Surface *surf);
-        static void DrawText(u8 fntsize, u32 x, u32 y, std::string str, u32 col = WHITE, u32 wrap = winWidth);
+        static void DrawText(u8 fntsize, u32 x, u32 y, std::string str, u32 col = WHITE, u32 wrap = Screen.w);
         static void RenderTexture(SDL_Texture *tex, SDL_Rect pos, SDL_Rect *clip = NULL);
         static SDL_Renderer *GetRenderer() { return Rend; }
         static SDL_Texture *GetRenderTex() { return SDL_GetRenderTarget(Rend); }
@@ -59,13 +59,12 @@ class Graphics
         static u32 GetDefaultSelCol() { return defaultSelCol; }
         static void SetDefaultSelCol(u32 col) { defaultSelCol = col; }
         static u32 GetDefaultButCol() { return GREY; }
-        static u32 GetWinWidth() { return winWidth; }
-        static u32 GetWinHeight() { return winHeight; }
+        static u32 GetWinWidth() { return Screen.w; }
+        static u32 GetWinHeight() { return Screen.h; }
         static void Render();
         static void Clear();
     private:
         static u32 defaultSelCol;
-        static u32 winWidth;
-        static u32 winHeight;
         static Context ctxt;
+        static SDL_Rect Screen;
 };

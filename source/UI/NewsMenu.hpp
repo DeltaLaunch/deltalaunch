@@ -30,7 +30,7 @@ class NewsMenu: public Menu
     public:
         NewsMenu(SDL_Rect pos);
         ~NewsMenu();
-        void Initialize();
+        void AddStory(std::string title, std::string body, SDL_Texture *img);
 		
         //Draw/set
         void DrawButtons();
@@ -41,5 +41,4 @@ class NewsMenu: public Menu
     private:
         u32 panX, panY;
         u32 Width, Height;
-        std::vector<SDL_Texture*> Pics;
 };

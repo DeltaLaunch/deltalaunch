@@ -23,11 +23,10 @@
 
 class Network
 {
-    enum RequestMethod {
-        HTTP_GET,
-        HTTP_POST
-    };
-    
     public:
-        static CURLcode Request(std::string url, RequestMethod method, std::string postdata = "");
+        enum RequestMethod {
+            HTTP_GET,
+            HTTP_POST
+        };
+        static std::string Request(std::string url, RequestMethod method, std::string postdata = "");
 };

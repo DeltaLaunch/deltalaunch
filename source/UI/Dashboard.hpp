@@ -37,6 +37,7 @@
 #include "../Services/Power.hpp"
 #include "../Services/App.hpp"
 #include "../Services/Hid.hpp"
+#include "../Services/Network.hpp"
 
 #define BACKGROUND_LAYERS 99
 

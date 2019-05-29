@@ -23,17 +23,16 @@ MessageBox* MessageBox::instance = nullptr;
 
 Engine::Engine(u32 width, u32 height) {
     //Setup vars
-    screenPos.x = screenPos.y = 0;
+    screenPos.x = 0;
+    screenPos.y = 0;
     screenPos.w = width;
     screenPos.h = height;
     running = true;
     
-    //Mount romfs
-    romfsMountFromFsdev("/ReiNX/titles/0100000000001000/romfs.bin", 0, "romfs"); //shit will actually crash here if not using reinx
-    
     //Detect reinx
     if(!Rnx::IsUsingReiNX()) {
-        Graphics::Init("", screenPos.w, screenPos.h, "");
+        romfsMountFromFsdev("/atmosphere/titles/0100000000001000/romfs.bin", 0, "romfs");
+        Graphics::Init(screenPos);
         SDL_Surface *surf = IMG_Load("romfs:/Graphics/BSOD.png");
         SDL_Texture *tex = Graphics::CreateTexFromSurf(surf);
         Graphics::RenderTexture(tex, screenPos);
@@ -43,6 +42,9 @@ Engine::Engine(u32 width, u32 height) {
         while(!Hid::GetInput());
         Power::Shutdown();
     }
+    
+    //Mount romfs
+    romfsMountFromFsdev("/ReiNX/titles/0100000000001000/romfs.bin", 0, "romfs");
     
     Rnx::SetHbTidForDelta(0x010000000000100F);
 }
@@ -61,7 +63,7 @@ void Engine::Initialize() {
     std::string thmPath = Settings::GetCurrentTheme();
     INIReader cfg(thmPath != "" ? (thmPath + ".cfg") : "");
     cfg.SetBasePath(std::string(thmPath+"/"));
-    Graphics::Init(TITLE, screenPos.w, screenPos.h, cfg.Get("Config", "font", ""));
+    Graphics::Init(screenPos);
     Graphics::SetDefaultSelCol(cfg.GetInteger("Config", "defaultSelCol", 0xFFCEFF));
 
     //Init dashboard

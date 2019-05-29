@@ -18,15 +18,33 @@
 
 #include "Network.hpp"
 
-CURLcode Network::Request(std::string url, RequestMethod method, std::string postdata) {
+static std::string readBuffer;
+
+static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp) {
+    size_t realsize = size * nmemb;
+    readBuffer.append((char*)contents, realsize);
+    return realsize;
+}
+
+std::string Network::Request(std::string url, RequestMethod method, std::string postdata) {
     CURL *curl = curl_easy_init();
     CURLcode res;
+    long httpCode = 0;
+    std::string outStr;
     if(curl) {
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
         if(method == HTTP_POST)
             curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postdata.c_str());
         res = curl_easy_perform(curl);
+        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
         curl_easy_cleanup(curl);
+        
+        if(res != CURLE_OK) return "Curl error.";
+        if(httpCode != 200) return std::string("Error: " + httpCode);
+        else {
+            outStr = readBuffer;
+        }
     }
-    return res;
+    return outStr;
 }

@@ -39,11 +39,6 @@ Result Game::Run() {
         u128 userid = Account::GetActiveAccount();
         if(userid == 0) return 0;
         rc = App::LaunchGame(TitleId, userid);
-        //leet hax
-        //appletSetHandlesRequestToDisplay(false);
-        //appletSetHandlesRequestToDisplay(true);
-        appletRequestForeground();
-        appletUnlockForeground();
     }
     else {
         rc = appRequestForApplicationToGetForeground(&App::currentApplication);

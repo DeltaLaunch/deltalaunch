@@ -24,7 +24,8 @@
 
 enum SelectType{
 	SELECT_OUTLINE,
-	SELECT_SIZEDIFF
+	SELECT_SIZEDIFF,
+    SELECT_PSSTYLE
 };
 
 enum GameAreaType{

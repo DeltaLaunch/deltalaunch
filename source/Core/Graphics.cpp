@@ -21,29 +21,23 @@
 SDL_Renderer *Graphics::Rend;
 SDL_Window *Graphics::Window;
 u32 Graphics::defaultSelCol;
-u32 Graphics::winWidth;
-u32 Graphics::winHeight;
+SDL_Rect Graphics::Screen;
 Context Graphics::ctxt;
 
-void Graphics::Init(std::string name, u32 width, u32 height, std::string font) {
+void Graphics::Init(SDL_Rect pos) {
     //Basic SDL init
+    Screen = pos;
     SDL_Init(SDL_INIT_VIDEO);
-    Window = SDL_CreateWindow(name.c_str(), 0, 0, width, height, 0);
+    Window = SDL_CreateWindow("", Screen.x, Screen.y, Screen.w, Screen.h, 0);
     Rend = SDL_CreateRenderer(Window, -1, SDL_RENDERER_ACCELERATED);
     SDL_SetRenderDrawBlendMode(Rend, SDL_BLENDMODE_BLEND);
     IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG);
     TTF_Init();
     SDL_SetRenderDrawColor(Rend, 0xFF, 0xFF, 0xFF, 0xFF);
-    Graphics::winWidth = width;
-    Graphics::winHeight = height;
     Graphics::ctxt = Context();
-
-    if(font != "") {
-        ctxt.font = TTF_OpenFont(font.c_str(), 14);
-    }
     
     appletRequestForeground();
-    appletSetHandlesRequestToDisplay(true);
+    //appletSetHandlesRequestToDisplay(true);
 }
 
 void Graphics::Exit() {
@@ -56,7 +50,7 @@ void Graphics::Exit() {
 }
 
 void Graphics::ClearScreen() {
-	Rectangle(0, 0, winWidth, winHeight, 0xFFFFFFFF);
+	Rectangle(Screen.x, Screen.y, Screen.w, Screen.h, 0xFFFFFFFF);
 }
 
 void Graphics::BorderedRectangle(SDL_Rect pos, u32 foreCol, u32 bordCol, u8 bordThick) {

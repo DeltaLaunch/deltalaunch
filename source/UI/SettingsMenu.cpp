@@ -89,11 +89,11 @@ void SettingsMenu::Initialize() {
     Panel *look = new Panel(panX, panY);
     look->AddString(0, 0, std::string("Change look and feel."));
     optY=20;
-    std::vector<std::string> gamesel {"Outline", "Diffsize"};
+    std::vector<std::string> gamesel {"Outline", "Diffsize", "Ps4 style"};
     look->AddElement(new Option("Game select:", gamesel, 0, optY+=space, optW, butH, butCol, Settings::gameSelType, 
     []()->Result{
         Result rc = 0;
-        Settings::gameSelType = (Settings::gameSelType == SELECT_OUTLINE) ? SELECT_SIZEDIFF : SELECT_OUTLINE; 
+        Settings::gameSelType = ((int)(Settings::gameSelType + 1) > 2) ? (SelectType)0 : (SelectType)(Settings::gameSelType + 1); 
         return rc;
     }));
     std::vector<std::string> vrmode {"Disable", "Enable"};

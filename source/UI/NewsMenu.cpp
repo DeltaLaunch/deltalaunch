@@ -27,25 +27,20 @@ NewsMenu::~NewsMenu() {
     //
 }
 
-void NewsMenu::Initialize() {
-    u32 imgW = 128, imgH = 128, Y = 60;
+void NewsMenu::AddStory(std::string title, std::string body, SDL_Texture *img) {
+    u32 imgW = 256, imgH = 128, Y = 60;
     u32 space = 15+(imgH/2);
     u32 butCol = Graphics::GetDefaultSelCol();
     
-    Pics.push_back(Account::GetProfileImage(Account::GetFirstAccount()));
-    Pics.push_back(Account::GetProfileImage(Account::GetFirstAccount()));
-    Pics.push_back(Account::GetProfileImage(Account::GetFirstAccount()));
-    
-    for(int i = 0; i < Pics.size(); i++) {
-        Panel *articles = new Panel(panX, panY);
-        MenuElements.push_back(new Image(20, Y+(i*space), imgW, imgH, Pics[i], 
-        [&]()->Result{
-            msgBox->Show("Test", "hello "+std::to_string(i), MSGBOX_OK);
-            return 0;
-        }));
-        articles->AddString(10, 0, std::string("Fake news ") + std::to_string(i) + std::string("!"));
-        Panels.push_back(articles);
-    }
+    Panel *articles = new Panel(panX, panY);
+    MenuElements.push_back(new Image(20, Y+(MenuElements.size()*space), imgW, imgH, img, 
+    [&]()->Result{
+        msgBox->Show("Test", "hello ", MSGBOX_OK);
+        return 0;
+    }));
+    articles->AddString(10, 0, title);
+    articles->AddString(10, 20, body);
+    Panels.push_back(articles);
 }
 
 void NewsMenu::DrawButtons() {
