@@ -36,6 +36,7 @@
 #include "../Services/App.hpp"
 #include "../Services/Power.hpp"
 #include "../Services/Settings.hpp"
+#include "../Services/Network.hpp"
 
 enum EngineState {
 	STATE_LOCKSCREEN,

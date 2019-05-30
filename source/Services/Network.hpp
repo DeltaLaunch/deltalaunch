@@ -28,5 +28,23 @@ class Network
             HTTP_GET,
             HTTP_POST
         };
-        static std::string Request(std::string url, RequestMethod method, std::string postdata = "");
+        
+        static Network* getInstance() {
+            if (instance == nullptr)
+                instance = new Network();
+            return instance;
+        };
+        
+        std::string Request(std::string url, RequestMethod method, std::string postdata = "");
+        
+    private:
+        static Network* instance;
+        
+        Network() {
+            curl_global_init(CURL_GLOBAL_ALL);
+        };
+        
+        Network(const Network&);
+        Network& operator=(const Network&);
+        
 };

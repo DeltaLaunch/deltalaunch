@@ -18,7 +18,7 @@
 
 #include "Time.hpp"
 
-std::string Time::GetClock() {
+std::string Time::GetClock(ClockType type) {
     u64 time = 0;
     TimeCalendarTime calTime;
     TimeCalendarAdditionalInfo info;
@@ -30,6 +30,24 @@ std::string Time::GetClock() {
     calTime.minute = 0;
     #endif
     char buff[10];
-    snprintf(buff, sizeof(buff), "%02d:%02d", calTime.hour, calTime.minute);
+    std::string ampm[] = {"AM", "PM"};
+    snprintf(buff, sizeof(buff), "%02d:%02d %s", type == CLOCK_12HR ? calTime.hour % 12 : calTime.hour, calTime.minute, (type == CLOCK_12HR) ? ampm[calTime.hour > 12 ? 1 : 0].c_str() : "");
+    return std::string(buff);
+}
+
+std::string Time::GetDate() {
+    u64 time = 0;
+    TimeCalendarTime calTime;
+    TimeCalendarAdditionalInfo info;
+    std::string months[12] = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
+    #ifdef __SWITCH__
+    timeGetCurrentTime(TimeType_Default, &time);
+    timeToCalendarTimeWithMyRule(time, &calTime, &info);
+    #else
+    calTime.month = 0;
+    calTime.year = 2019;
+    #endif
+    char buff[100];
+    snprintf(buff, sizeof(buff), "%s %d, %d", months[calTime.month-1].c_str(), calTime.day, calTime.year);
     return std::string(buff);
 }

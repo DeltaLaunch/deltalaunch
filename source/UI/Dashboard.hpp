@@ -81,6 +81,7 @@ class Dashboard
 		SettingsMenu *settings;
         NewsMenu *news;
         MessageBox *msgBox;
+        Network *net;
     private:
         u32 Width, Height;
         u32 lastPosX;

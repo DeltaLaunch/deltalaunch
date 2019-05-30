@@ -18,6 +18,7 @@
 
 #include "Network.hpp"
 
+Network* Network::instance = NULL;
 static std::string readBuffer;
 
 static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp) {
@@ -25,7 +26,7 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *use
     readBuffer.append((char*)contents, realsize);
     return realsize;
 }
-
+        
 std::string Network::Request(std::string url, RequestMethod method, std::string postdata) {
     CURL *curl = curl_easy_init();
     CURLcode res;
@@ -34,6 +35,8 @@ std::string Network::Request(std::string url, RequestMethod method, std::string 
     if(curl) {
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
         if(method == HTTP_POST)
             curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postdata.c_str());
         res = curl_easy_perform(curl);

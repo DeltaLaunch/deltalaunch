@@ -23,5 +23,10 @@
 class Time
 {
     public:
-        static std::string GetClock();
+        enum ClockType {
+            CLOCK_12HR,
+            CLOCK_24HR
+        };
+        static std::string GetClock(ClockType type);
+        static std::string GetDate();
 };

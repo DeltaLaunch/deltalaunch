@@ -34,6 +34,7 @@ Dashboard::Dashboard(u32 width, u32 height) {
     Wallpaper = SDL_CreateTexture(Graphics::GetRenderer(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, Width, Height);
     LockScreen = SDL_CreateTexture(Graphics::GetRenderer(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, Width, Height);
     msgBox = MessageBox::getInstance();
+    net = Network::getInstance();
 	SetPos.x=SetPos.y=0; SetPos.w=Width; SetPos.h=Height;
 	settings = new SettingsMenu(SetPos);
     settings->Initialize();
@@ -131,7 +132,7 @@ void Dashboard::UpdateDash() {
     if(Hid::Input & KEY_A) ActivateDash();
 	if(Hid::Input & KEY_LSTICK)  debugInfo = !debugInfo;
 	if(Hid::Input & KEY_MINUS) ;
-    if(Hid::Input & KEY_PLUS) msgBox->Show("Test 2", Network::Request("http://reinx.guide/api/news?_format=json", Network::HTTP_GET), MSGBOX_YESNO);
+    if(Hid::Input & KEY_PLUS) msgBox->Show("Test 2", net->Request("http://reinx.guide/api/news?_format=json", Network::HTTP_GET), MSGBOX_YESNO);
 	if((Hid::Input & KEY_DLEFT) || (Hid::Input & KEY_LSTICK_LEFT)) DecrementDashSel();
 	if((Hid::Input & KEY_DRIGHT) || (Hid::Input & KEY_LSTICK_RIGHT)) IncrementDashSel();
 	if((Hid::Input & KEY_DUP) || (Hid::Input & KEY_LSTICK_UP)) App::dashLayer = 0;
@@ -211,6 +212,8 @@ void Dashboard::DrawLockScreen() {
     pos.x = 0; pos.y = 0;
     pos.w = Width; pos.h = Height;
 	Graphics::RenderTexture(LockScreen, pos);
+    Graphics::DrawText(Fonts::FONT_MEDIUM, 25, 570, Time::GetDate());
+    Graphics::DrawText(Fonts::FONT_HUGE, 25, 600, Time::GetClock(Time::CLOCK_12HR));
 }
 
 void Dashboard::SetLockScreen(std::string image) {
@@ -369,7 +372,7 @@ void Dashboard::DrawOverlay() {
     spritePos.y = 0;
     
 	Graphics::RenderTexture(Battery, BatPos, &spritePos);
-    Graphics::DrawText(Fonts::FONT_SMALL, ClkPos.x, ClkPos.y, Time::GetClock());
+    Graphics::DrawText(Fonts::FONT_SMALL, ClkPos.x, ClkPos.y, Time::GetClock(Time::CLOCK_12HR));
 }
 
 void Dashboard::DrawDebugText() {
