@@ -57,7 +57,7 @@ class TouchInfo {
 class Hid {
     public:
         static u64 Input;
-        static u64 GetInput();
+        static void KeyProcess();
         static void TouchInit();
         static void TouchProcess();
         static touchPosition GetTouchPos() { return touchInfo.prevTouch; };

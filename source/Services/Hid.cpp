@@ -21,9 +21,9 @@
 u64 Hid::Input;
 TouchInfo Hid::touchInfo;
 
-u64 Hid::GetInput() {
+void Hid::KeyProcess() {
     hidScanInput();
-    return hidKeysDown(CONTROLLER_P1_AUTO);
+    Input = hidKeysDown(CONTROLLER_P1_AUTO);
 }
 
 void Hid::TouchInit() {

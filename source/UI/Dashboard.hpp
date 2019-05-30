@@ -85,6 +85,8 @@ class Dashboard
     private:
         u32 Width, Height;
         u32 lastPosX;
+        u32 gamePicSize, gameSpacing;
+        SelectType lastMode;
         bool debugInfo;
         bool GcState;
 		Result lastErr;

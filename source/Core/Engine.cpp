@@ -31,7 +31,9 @@ Engine::Engine(u32 width, u32 height) {
     
     //Detect reinx
     if(!Rnx::IsUsingReiNX()) {
-        romfsMountFromFsdev("/atmosphere/titles/0100000000001000/romfs.bin", 0, "romfs");
+        if(R_SUCCEEDED(romfsMountFromFsdev("/atmosphere/titles/0100000000001000/romfs.bin", 0, "romfs"))) goto err;
+        if(R_SUCCEEDED(romfsMountFromFsdev("/sxos/titles/0100000000001000/romfs.bin", 0, "romfs"))) goto err;
+        err:
         Graphics::Init(screenPos);
         SDL_Surface *surf = IMG_Load("romfs:/Graphics/BSOD.png");
         SDL_Texture *tex = Graphics::CreateTexFromSurf(surf);
@@ -39,7 +41,7 @@ Engine::Engine(u32 width, u32 height) {
         SDL_FreeSurface(surf);
         SDL_DestroyTexture(tex);
         Graphics::Render();
-        while(!Hid::GetInput());
+        do { Hid::KeyProcess(); } while(!Hid::Input);
         Power::Shutdown();
     }
     
@@ -65,6 +67,7 @@ void Engine::Initialize() {
     cfg.SetBasePath(std::string(thmPath+"/"));
     Graphics::Init(screenPos);
     Graphics::SetDefaultSelCol(cfg.GetInteger("Config", "defaultSelCol", 0xFFCEFF));
+    Hid::TouchInit();
 
     //Init dashboard
     dash = new Dashboard(screenPos.w, screenPos.h);
@@ -72,7 +75,7 @@ void Engine::Initialize() {
     
     State = (Settings::GetLockScreenFlag() ? STATE_LOCKSCREEN : STATE_DASHBOARD);
     
-    //appletLoadAndApplyIdlePolicySettings();
+    appletLoadAndApplyIdlePolicySettings();
     appletAllowToEnterSleep();
 
 	//Start threads
@@ -95,13 +98,13 @@ void Engine::Clear() {
 }
 
 void Engine::Update() {
-    Hid::Input = Hid::GetInput();
+    Hid::KeyProcess();
+    Hid::TouchProcess();
+    
     switch(State) {
         case STATE_LOCKSCREEN:
         {
-            Clear();
             dash->DrawLockScreen();
-            Render();
             if((Hid::Input & KEY_A) || Hid::IsTouched()) 
                 State = STATE_DASHBOARD;
             break;

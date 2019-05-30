@@ -31,6 +31,7 @@ Dashboard::Dashboard(u32 width, u32 height) {
 	gameRows = 1;
     debugInfo = false;
 	MaxColumns = 12;
+    gamePicSize = 0, gameSpacing = 0;
     Wallpaper = SDL_CreateTexture(Graphics::GetRenderer(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, Width, Height);
     LockScreen = SDL_CreateTexture(Graphics::GetRenderer(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, Width, Height);
     msgBox = MessageBox::getInstance();
@@ -39,7 +40,6 @@ Dashboard::Dashboard(u32 width, u32 height) {
 	settings = new SettingsMenu(SetPos);
     settings->Initialize();
     news = new NewsMenu(SetPos);
-    Hid::TouchInit();
 }
 
 Dashboard::~Dashboard() {
@@ -95,6 +95,7 @@ void Dashboard::Initialize() {
         else 
             GameEntries.push_back(new GameFolder(folderIcon, fold++));
 	}
+    
     SetGames();
     
     //News
@@ -112,8 +113,8 @@ void Dashboard::Initialize() {
 		if(tmp == "") continue;
 		layers.push_back(tmp);
 	}
-    BatPos.x = cfg.GetInteger("BatteryOverlay", "x", 1190); BatPos.y = cfg.GetInteger("BatteryOverlay", "y", 14);
-    ClkPos.x = cfg.GetInteger("ClockOverlay", "x", 1110); ClkPos.y = cfg.GetInteger("ClockOverlay", "y", 14);
+    BatPos.x = cfg.GetInteger("BatteryOverlay", "x", 1080); BatPos.y = cfg.GetInteger("BatteryOverlay", "y", 14);
+    ClkPos.x = cfg.GetInteger("ClockOverlay", "x", 1150); ClkPos.y = cfg.GetInteger("ClockOverlay", "y", 14);
     SetWallpaper(layers);
     SetLockScreen(cfg.Get("Config", "lockscreen_image", "romfs:/Graphics/Lock.png"));
 	settings->SetBackground(cfg.Get("Config", "menus", "romfs:/Graphics/Menu.png"));
@@ -128,7 +129,12 @@ void Dashboard::Initialize() {
 *   Draw/Set Graphics
 */
 void Dashboard::UpdateDash() {
-    Hid::TouchProcess();
+    //Update as needed
+    if(lastMode != Settings::gameSelType) {
+        lastMode = Settings::gameSelType;
+        SetGames();
+    }
+    
     if(Hid::Input & KEY_A) ActivateDash();
 	if(Hid::Input & KEY_LSTICK)  debugInfo = !debugInfo;
 	if(Hid::Input & KEY_MINUS) ;
@@ -288,29 +294,26 @@ void Dashboard::DrawGames() {
             //PS4 style
             case SELECT_PSSTYLE:
             {
-                SDL_Rect p;
-                p.w = p.h = 128;
-                p.x = GameEntries[0]->Pos.x + (ind*128);
-                p.y = GameEntries[0]->Pos.y;
-                    
                 //Draw selection outline
                 if(ind == App::gameSelectInd && App::dashLayer == 0) {
-                    SDL_Rect pos = p; 
-                    pos.h = entry->Pos.h + 40; pos.w = entry->Pos.w;
+                    SDL_Rect pos = entry->Pos; 
+                    pos.h = ((entry->Pos.h * 2) + 40);
+                    pos.w = (entry->Pos.w * 2);
                     Graphics::Rectangle(pos, 0x666666FF);
-                    pos.h = entry->Pos.h;
+                    pos.h = (entry->Pos.h * 2);
                     Graphics::RenderTexture(entry->Icon, pos);
                     Graphics::DrawText(Fonts::FONT_SMALL, pos.x + 105, pos.y + pos.h + 8, "Start", 0xFFFFFFFF);
                     if(gameRows == 1) Graphics::DrawText(Fonts::FONT_SMALL, pos.x + pos.w + 20, pos.y + pos.h + 8, entry->GetName(), Graphics::GetDefaultSelCol());
                 }
                 else {
+                    SDL_Rect pos = entry->Pos; 
                     //Draw either game icon or backer
-                    if(ind >= App::gameSelectInd && App::dashLayer == 0) p.x += 128;
+                    if(ind >= App::gameSelectInd && App::dashLayer == 0) pos.x += 128;
                     if(entry->Icon != nullptr) {
-                        Graphics::RenderTexture(entry->Icon, p);
+                        Graphics::RenderTexture(entry->Icon, pos);
                     } 
                     else {
-                        Graphics::Rectangle(p, 0x70);
+                        Graphics::Rectangle(pos, 0x70);
                     }
                 }
                 break;
@@ -322,7 +325,13 @@ void Dashboard::DrawGames() {
 
 void Dashboard::SetGames() {
     
-    u32 normalPortraitSize = 256;
+    switch(Settings::gameSelType) {
+        case SELECT_OUTLINE: { gamePicSize = 256; gameSpacing = 14; break; }
+        case SELECT_SIZEDIFF: { gamePicSize = 256; gameSpacing = 0; break; }
+        case SELECT_PSSTYLE: { gamePicSize = 128; gameSpacing = 0; break; }
+    }
+    
+    u32 normalPortraitSize = gamePicSize;
     GameIconArea.x = 120; GameIconArea.y = 110;
     GameIconArea.w = 1080; GameIconArea.h = normalPortraitSize;
     
@@ -335,10 +344,10 @@ void Dashboard::SetGames() {
 		u64 tid = i < (int)total ? recs[i].titleID : 0;
         game->Pos.w = normalPortraitSize/gameRows; 
         game->Pos.h = normalPortraitSize/gameRows;
-        game->Pos.x = /*(1280/2)-((game->Pos.w*(MaxColumns/gameRows))/2)*/100+((i%(MaxColumns/gameRows))*(game->Pos.w+(14/gameRows))); 
-        game->Pos.y = 200+((i/(MaxColumns/gameRows))*(game->Pos.h+(14/gameRows)));
+        game->Pos.x = /*(1280/2)-((game->Pos.w*(MaxColumns/gameRows))/2)*/100+((i%(MaxColumns/gameRows))*(game->Pos.w+gameSpacing)); 
+        game->Pos.y = 200+((i/(MaxColumns/gameRows))*(game->Pos.h+gameSpacing));
         SDL_Surface *img;
-        if(tid != 0) { //assume game entry doesnt need to be updated if tids are the same
+        if(tid != game->GetTitleId()) { //assume game entry doesnt need to be updated if tids are the same
             game->SetTitleId(tid);
             NsApplicationControlData data = App::GetGameControlData(tid, 0);
             img = IMG_Load_RW(SDL_RWFromMem(data.icon, 0x20000), 1);

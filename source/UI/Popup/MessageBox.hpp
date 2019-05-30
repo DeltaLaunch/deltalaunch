@@ -85,7 +85,8 @@ class MessageBox
         
         int Update() {
             
-            Hid::Input = Hid::GetInput();
+            Hid::KeyProcess();
+            Hid::TouchProcess();
             
             Graphics::RenderTexture(bgTex, pos);
             Graphics::DrawText(Fonts::FONT_SMALL, pos.x+25, pos.y+18, Title, 0xFFFFFFFF, pos.w);
